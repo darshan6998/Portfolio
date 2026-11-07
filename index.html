@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Darshan Shah, Controls Engineer</title>
+<meta name="description" content="Darshan Shah is a controls and automation engineer at Onsemi, building PLC, HMI and safety interlock systems for silicon carbide crystal growth furnaces. Open to relocation.">
+<link rel="canonical" href="https://darshanhshah.com/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2210%22%20fill%3D%22%231d2422%22/%3E%3Crect%20x%3D%228%22%20y%3D%2250%22%20width%3D%2248%22%20height%3D%225%22%20fill%3D%22%23d4520f%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2241%22%20font-family%3D%22Arial%2CHelvetica%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EDS%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#1d2422">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Darshan Shah">
+<meta property="og:title" content="Darshan Shah, Controls Engineer">
+<meta property="og:description" content="PLC, HMI and safety interlocks for silicon carbide crystal growth furnaces. Open to controls and automation roles.">
+<meta property="og:url" content="https://darshanhshah.com/">
+<meta property="og:image" content="https://darshanhshah.com/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Darshan Shah, Controls Engineer">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Darshan Shah, Controls Engineer">
+<meta name="twitter:description" content="PLC, HMI and safety interlocks for silicon carbide crystal growth furnaces.">
+<meta name="twitter:image" content="https://darshanhshah.com/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a friendly story told in the visual language of an industrial HMI.
+   ISA-101-style greys, a furnace mimic with instrument bubbles, faceplate readouts,
+   and status lamps. Furnace-glow orange marks heat; green marks "in service". */
+:root {
+  --bg: #f6f7f5;
+  --card: #ffffff;
+  --ink: #1d2422;
+  --muted: #5d6763;
+  --line: #e1e5e2;
+  --glow: #d4520f;
+  --glow-soft: #fbe9de;
+  --hmi: #dfe3e3;
+  --hmi-face: #eef0f0;
+  --hmi-line: #5f6a6a;
+  --ok: #2f8a4c;
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131716; --card: #1b201f; --ink: #ecf0ee; --muted: #a2ada8;
+    --line: #2c3331; --glow: #ff8a4c; --glow-soft: #3a2519; --hmi: #23292a; --hmi-face: #1a1f20; --hmi-line: #8d9a99; --ok: #4cc074;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131716; --card: #1b201f; --ink: #ecf0ee; --muted: #a2ada8;
+  --line: #2c3331; --glow: #ff8a4c; --glow-soft: #3a2519; --hmi: #23292a; --hmi-face: #1a1f20; --hmi-line: #8d9a99; --ok: #4cc074;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1.08rem; line-height: 1.65; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+
+/* Nav */
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px 0; }
+.logo { font-family: var(--display); font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: -0.01em; }
+.logo span { color: var(--glow); }
+.nav nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav nav a { text-decoration: none; color: var(--muted); font-weight: 500; padding: 6px 12px; border-radius: 4px; }
+.nav nav a:hover { color: var(--ink); background: var(--card); }
+
+/* Hero */
+.hero { padding: clamp(36px, 7vw, 76px) 0 clamp(28px, 4vw, 44px); display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(24px, 5vw, 48px); align-items: end; }
+.hi { color: var(--glow); font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.6rem, 6.6vw, 4.6rem); line-height: 0.98; letter-spacing: -0.01em; margin: 0 0 20px; text-wrap: balance; }
+.lede { font-size: 1.18rem; color: var(--muted); max-width: 32em; margin: 0 0 26px; }
+.lede strong { color: var(--ink); font-weight: 600; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { font: 600 0.95rem var(--body); letter-spacing: 0.01em; padding: 12px 20px; border-radius: 4px; text-decoration: none; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--glow); border-color: var(--glow); color: #fff; }
+
+.now { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 22px 22px 18px; }
+.now h2 { font: 500 0.72rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 12px; }
+.now dl { margin: 0; display: grid; gap: 12px; }
+.now dt { font-size: 0.85rem; color: var(--muted); }
+.now dd { margin: 0; font-weight: 600; line-height: 1.35; }
+.pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 6px 12px; border-radius: 3px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; background: var(--glow-soft); color: var(--glow); font-weight: 600; font-size: 0.9rem; }
+.pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+
+/* Numbers */
+.numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.num { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.num b { display: block; font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem, 3.2vw, 2.2rem); line-height: 1.05; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.num span { display: block; margin-top: 6px; color: var(--muted); font-size: 0.95rem; line-height: 1.4; }
+
+.hmi { background: var(--hmi); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.hmi-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 16px; background: var(--hmi-face); border-bottom: 1px solid var(--line); font: 500 0.72rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.hmi-body { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; padding: 16px; align-items: center; }
+.mimic { width: 100%; height: auto; display: block; }
+.faces { display: grid; gap: 8px; }
+.face { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "l v" "s v"; align-items: center; gap: 0 12px; background: var(--hmi-face); border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 3px; padding: 8px 12px; }
+.f-label { grid-area: l; font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.f-sub { grid-area: s; font-size: 0.88rem; color: var(--muted); }
+.face b { grid-area: v; font: 600 1.6rem var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); letter-spacing: -0.02em; }
+.hmi-note { margin: 0; padding: 0 16px 12px; font: 400 0.66rem var(--mono); color: var(--muted); }
+.coil { animation: heat 2.6s ease-in-out infinite; }
+.flow { animation: flow 1.6s linear infinite; }
+.boule { transform-box: fill-box; transform-origin: 50% 0%; animation: grow 9s ease-out infinite; }
+@keyframes grow { 0% { transform: scale(0.55, 0.12); opacity: 0.5; } 75% { transform: scale(1, 1); opacity: 0.9; } 92% { transform: scale(1, 1); opacity: 0.9; } 100% { transform: scale(0.55, 0.12); opacity: 0.5; } }
+@keyframes heat { 0%,100% { opacity: 0.65; } 50% { opacity: 1; } }
+@keyframes flow { to { stroke-dashoffset: -32; } }
+@media (max-width: 820px) { .hmi-body { grid-template-columns: 1fr; } }
+
+/* Sections */
+section { padding-top: clamp(56px, 8vw, 88px); }
+h2.title { font-family: var(--display); font-weight: 800; font-size: clamp(1.8rem, 3.6vw, 2.5rem); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 8px; text-wrap: balance; }
+.intro { color: var(--muted); max-width: 36em; margin: 0 0 28px; }
+
+/* Projects */
+.projects { display: grid; gap: 16px; }
+.project { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--hmi-line); border-radius: 6px; padding: clamp(20px, 3vw, 30px); }
+.project-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.project h3 { font-family: var(--display); font-weight: 700; font-size: 1.45rem; letter-spacing: -0.01em; line-height: 1.2; margin: 0; text-wrap: balance; }
+.where { color: var(--muted); font-size: 0.92rem; }
+.lamp { display: inline-flex; align-items: center; gap: 7px; font: 500 0.68rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ok); }
+.lamp::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
+.project-top .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.story { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.story h4 { margin: 0 0 4px; font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--glow); }
+.story p { margin: 0; font-size: 1rem; line-height: 1.55; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.duo > div { background: var(--bg); border-radius: 4px; padding: 16px 18px; }
+.duo h4 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; color: var(--glow); }
+.duo p { margin: 0; font-size: 1rem; line-height: 1.55; }
+.solo { margin: 0; max-width: 40em; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+.tag { font-family: var(--mono); font-size: 0.72rem; padding: 4px 8px; border-radius: 3px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+
+.more-title { font-family: var(--display); font-weight: 700; font-size: 1.3rem; margin: 40px 0 12px; }
+.more { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.more li { display: grid; grid-template-columns: 200px 1fr auto; gap: 8px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.more b { font-weight: 600; }
+.more span { color: var(--muted); font-size: 1rem; }
+.more em { font-style: normal; font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.headshot { display: block; width: 180px; height: 180px; object-fit: cover; border-radius: 6px; margin: 0 auto 18px; border: 4px solid var(--card); box-shadow: 0 0 0 3px var(--glow); }
+@media (max-width: 820px) { .more li { grid-template-columns: 1fr; gap: 2px; } .headshot { width: 140px; height: 140px; } }
+
+.timeline { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.timeline li { position: relative; display: grid; grid-template-columns: 170px 1fr; gap: 6px 20px; padding: 0 0 22px 22px; }
+.timeline li::before { content: ""; position: absolute; left: -7px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--glow); }
+.timeline li:first-child::before { background: var(--glow); }
+.when { color: var(--muted); font-size: 0.92rem; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.timeline b { display: block; font-weight: 600; }
+.timeline div span { color: var(--muted); font-size: 1rem; }
+.certs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.cert-label { font-weight: 600; margin-right: 6px; }
+@media (max-width: 820px) { .timeline li { grid-template-columns: 1fr; } }
+
+/* Skills */
+.skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.skill { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 20px; }
+.skill h3 { margin: 0 0 10px; font-size: 1rem; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--mono); font-size: 0.78rem; padding: 5px 9px; border-radius: 3px; background: var(--glow-soft); color: var(--ink); }
+.skill.light .chip { background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+
+/* About */
+.about { display: grid; grid-template-columns: 1fr 1.6fr; gap: clamp(20px, 5vw, 48px); align-items: start; }
+.about p { margin: 0 0 1em; max-width: 36em; }
+.quote { font-family: var(--display); font-weight: 700; font-size: clamp(1.4rem, 2.6vw, 1.8rem); line-height: 1.2; letter-spacing: -0.01em; margin: 0; color: var(--glow); text-wrap: balance; }
+
+/* Contact */
+.contact { background: var(--ink); color: var(--bg); border-radius: 6px; padding: clamp(28px, 5vw, 48px); margin-top: clamp(56px, 8vw, 88px); }
+.contact h2 { font-family: var(--display); font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 10px; }
+.contact p { margin: 0 0 22px; opacity: 0.8; max-width: 32em; }
+.mail { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.mail .addr { font-weight: 600; font-size: 1.1rem; word-break: break-all; }
+.contact .btn { border-color: var(--bg); color: var(--bg); }
+.contact .btn.primary { background: var(--glow); border-color: var(--glow); color: #fff; }
+.copied { font-weight: 600; color: var(--glow); min-height: 1.2em; }
+
+footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 820px) {
+  .hero, .about { grid-template-columns: 1fr; }
+  .story, .duo { grid-template-columns: 1fr; gap: 14px; }
+  .skills { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="nav">
+    <a class="logo" href="#top">Darshan Shah<span>.</span></a>
+    <nav aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="hero">
+      <div>
+        <p class="hi">Hi, I'm Darshan Shah 👋</p>
+        <h1>I automate the furnaces that grow crystals.</h1>
+        <p class="lede">I'm a <strong>controls engineer at Onsemi</strong>, where I automate the furnaces that grow silicon carbide, the material behind modern power chips. I'm the tier-3 escalation point for furnace and equipment support around the clock, and I also support the building management system (BMS). I like making big, hot, complicated machines run safely and predictably.</p>
+        <div class="actions">
+          <a class="btn primary" href="#work">See what I've built</a>
+          <a class="btn" href="https://www.linkedin.com/in/darshanshah98/" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn" href="https://github.com/darshan6998" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+      <div>
+        <img class="headshot" src="headshot.jpg" alt="Darshan Shah smiling outdoors in front of mountains" width="520" height="520">
+      <aside class="now" aria-label="Right now">
+        <h2>Right now</h2>
+        <dl>
+          <div><dt>Working as</dt><dd>Software Controls Engineer II, Onsemi</dd></div>
+          <div><dt>Based in</dt><dd>Manchester, New Hampshire</dd></div>
+          <div><dt>Experience</dt><dd>3.5+ years in industrial controls</dd></div>
+          <div><dt>Looking for</dt><dd>Controls and automation engineering roles</dd></div>
+        </dl>
+        <span class="pill">Open to relocation</span>
+      </aside>
+      </div>
+    </div>
+
+    <div class="hmi" aria-label="Career overview styled as a control screen">
+      <div class="hmi-bar">
+        <span>Furnace overview · career summary</span>
+        <span class="lamp">Running</span>
+      </div>
+      <div class="hmi-body">
+        <svg class="mimic" viewBox="0 0 520 330" role="img" aria-label="Illustrated furnace mimic: induction coil, crucible, rotating pedestal, gas inlet with flow transmitter, exhaust line">
+          <g fill="none" stroke="var(--hmi-line)" stroke-width="2">
+            <!-- gas inlet -->
+            <path d="M14 92 H190"/>
+            <path class="flow" d="M14 92 H190" stroke="var(--glow)" stroke-width="2" stroke-dasharray="6 10"/>
+            <path d="M58 82 L78 102 L78 82 L58 102 Z" fill="var(--hmi-face)"/>
+            <line x1="68" y1="92" x2="68" y2="70"/><rect x="58" y="60" width="20" height="10" fill="var(--hmi-face)"/>
+            <!-- exhaust -->
+            <path d="M290 52 V34 H506"/>
+            <path class="flow" d="M290 52 V34 H506" stroke="var(--glow)" stroke-width="2" stroke-dasharray="6 10"/>
+            <!-- vessel -->
+            <rect x="190" y="52" width="140" height="222" rx="10" fill="var(--hmi-face)"/>
+            <!-- crucible -->
+            <rect x="222" y="104" width="76" height="104" rx="3"/>
+            <line x1="260" y1="52" x2="260" y2="112"/>
+            <!-- pedestal + shaft -->
+            <rect x="236" y="208" width="48" height="16" fill="var(--hmi)"/>
+            <line x1="260" y1="224" x2="260" y2="290"/>
+            <circle cx="260" cy="302" r="13" fill="var(--hmi-face)"/>
+            <path d="M232 238 a28 9 0 1 0 56 0" stroke-dasharray="3 3"/>
+            <path d="M286 234 l3 5 l-6 1" />
+          </g>
+          <!-- crystal (boule) on seed -->
+          <polygon class="boule" points="246,112 274,112 280,124 274,148 246,148 240,124" fill="var(--glow)" opacity="0.85"/>
+          <!-- source powder -->
+          <g fill="var(--hmi-line)" opacity="0.55">
+            <circle cx="232" cy="200" r="2"/><circle cx="242" cy="196" r="2"/><circle cx="252" cy="201" r="2"/><circle cx="262" cy="196" r="2"/><circle cx="272" cy="201" r="2"/><circle cx="282" cy="196" r="2"/><circle cx="290" cy="201" r="2"/>
+          </g>
+          <!-- induction coil -->
+          <g class="coil" stroke="var(--glow)" stroke-width="5" stroke-linecap="round">
+            <line x1="176" y1="122" x2="344" y2="122"/><line x1="176" y1="142" x2="344" y2="142"/><line x1="176" y1="162" x2="344" y2="162"/><line x1="176" y1="182" x2="344" y2="182"/>
+          </g>
+          <!-- instrument bubbles (ISA) -->
+          <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="var(--ink)">
+            <g><line x1="128" y1="92" x2="128" y2="74" stroke="var(--hmi-line)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="128" cy="56" r="18" fill="var(--hmi-face)" stroke="var(--hmi-line)" stroke-width="2"/><text x="128" y="54">FT</text><text x="128" y="66">101</text></g>
+            <g><line x1="330" y1="150" x2="380" y2="150" stroke="var(--hmi-line)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="398" cy="150" r="18" fill="var(--hmi-face)" stroke="var(--hmi-line)" stroke-width="2"/><text x="398" y="148">TT</text><text x="398" y="160">102</text></g>
+            <g><line x1="330" y1="240" x2="380" y2="240" stroke="var(--hmi-line)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="398" cy="240" r="18" fill="var(--hmi-face)" stroke="var(--hmi-line)" stroke-width="2"/><text x="398" y="238">PT</text><text x="398" y="250">103</text></g>
+            <text x="260" y="306" font-size="11">M</text>
+            <text x="68" y="120" fill="var(--muted)">GAS IN</text>
+            <text x="480" y="22" fill="var(--muted)">EXHAUST</text>
+            <text x="168" y="156" fill="var(--muted)" text-anchor="end">COIL</text>
+            <text x="300" y="322" fill="var(--muted)" text-anchor="start">PEDESTAL</text>
+          </g>
+        </svg>
+        <div class="faces"><div class="face"><span class="f-label">Furnace fleet</span><b>100s</b><span class="f-sub">of furnaces supported</span></div><div class="face"><span class="f-label">Equipment support</span><b>24/7</b><span class="f-sub">tier-3 escalation point</span></div><div class="face"><span class="f-label">Unplanned shutdowns</span><b>15%</b><span class="f-sub">reduced</span></div><div class="face"><span class="f-label">Machine incidents</span><b>25%</b><span class="f-sub">reduced</span></div><div class="face"><span class="f-label">Escalations</span><b>~90%</b><span class="f-sub">closed same day</span></div></div>
+      </div>
+      <p class="hmi-note">Illustration only.</p>
+    </div>
+
+    <section id="work">
+      <h2 class="title">What I've built</h2>
+      <p class="intro">A few projects I've worked on, each told the simple way: what was wrong, what I did, and how it turned out.</p>
+
+      <div class="projects">
+        <article class="project">
+          <div class="project-top">
+            <h3>Controls for a hydrogen-process R&amp;D furnace</h3>
+            <span class="meta"><span class="where">Onsemi · R&amp;D · Controls Engineer</span><span class="lamp">In service</span></span>
+          </div>
+          <div class="story">
+            <div><h4>The problem</h4><p>The team needed a new R&amp;D furnace that uses hydrogen to study crystal quality. With a flammable process gas, safety had to come first.</p></div>
+            <div><h4>What I did</h4><p>I owned the controls work. I built the PLC logic and HMI, built closed-loop PID gas control, designed gas-detection safety interlocks and fail-safes, and helped the team commission the furnace. I also worked with the fire department. Gas safety limits for the area came from an independent third-party assessment.</p></div>
+            <div><h4>How it went</h4><p>No control defects found in commissioning or production runs. The $100K+ project came in on time and under budget.</p></div>
+          </div>
+          <div class="tags"><span class="tag">Studio 5000</span><span class="tag">PID control</span><span class="tag">Gas safety</span><span class="tag">Commissioning</span></div>
+        </article>
+        <article class="project">
+          <div class="project-top">
+            <h3>Recipe safeguards that stopped aborted runs</h3>
+            <span class="meta"><span class="where">Onsemi · Process Reliability</span><span class="lamp">In service</span></span>
+          </div>
+          <div class="story">
+            <div><h4>The problem</h4><p>Hardware limits could be changed without the matching recipe settings being updated. When the two disagreed, a motion axis could stall mid-run and the run had to be aborted.</p></div>
+            <div><h4>What I did</h4><p>I added a check that validates each recipe step against the machine's limits before it runs, and an automatic return to a home position after every run.</p></div>
+            <div><h4>How it went</h4><p>That cause of aborted runs went away, saving a five-figure sum on every run it would have hit.</p></div>
+          </div>
+          <div class="tags"><span class="tag">Recipe logic</span><span class="tag">Motion control</span><span class="tag">Validation</span></div>
+        </article>
+        <article class="project">
+          <div class="project-top">
+            <h3>Centralized recipe management</h3>
+            <span class="meta"><span class="where">Onsemi · Corporate Initiative · With MOS, MES and Process Engineering</span><span class="lamp">In service</span></span>
+          </div>
+          <div class="story">
+            <div><h4>The problem</h4><p>Recipes were moved onto each machine by hand, and several versions existed, so the wrong one could get loaded.</p></div>
+            <div><h4>What I did</h4><p>I built the controls side with the MOS team and process engineering. MES tells the PLC which recipe a run needs, and the operator screen pulls the approved version from a central server.</p></div>
+            <div><h4>How it went</h4><p>It runs on every furnace in the fleet, with one source of truth for recipes.</p></div>
+          </div>
+          <div class="tags"><span class="tag">MES integration</span><span class="tag">PLC</span><span class="tag">HMI</span><span class="tag">Cross-team</span></div>
+        </article>
+        <article class="project">
+          <div class="project-top">
+            <h3>Replacing shared logins with role-based access</h3>
+            <span class="meta"><span class="where">Onsemi · Security</span><span class="lamp">In service</span></span>
+          </div>
+          <div class="story">
+            <div><h4>The problem</h4><p>Machine screens used a shared login with full access for everyone.</p></div>
+            <div><h4>What I did</h4><p>I built role-based access tied to each person's own work account, with automated credential rotation.</p></div>
+            <div><h4>How it went</h4><p>It's deployed across the fleet, and each person gets only the access their role needs.</p></div>
+          </div>
+          <div class="tags"><span class="tag">Role-based access</span><span class="tag">HMI</span><span class="tag">Automation</span></div>
+        </article>
+      </div>
+
+      <h3 class="more-title">More work</h3>
+      <ul class="more">
+        <li><b>Fleet control upgrades</b><span>Led two control system upgrades across the fleet, standardizing PLC logic and adding safety interlocks and automated recipe validation. Unplanned shutdowns fell 15% and recurring production faults 10%.</span><em>Onsemi</em></li>
+        <li><b>Alarm redesign</b><span>Reworked alarm classification, escalation and trending, cutting machine-related incidents 25%. Built SQL tools for thermocouple and OEE analysis.</span><em>Onsemi</em></li>
+        <li><b>Duplicate run ID fix</b><span>Solved recurring duplicate run ID issues by automating the correction with the MOS team, removing 4 hours of manual rework per incident.</span><em>Onsemi</em></li>
+        <li><b>X-ray imaging furnace</b><span>Programmed the safety interlocks around an in-situ X-ray system that images the crystal while it grows.</span><em>Onsemi R&amp;D</em></li>
+        <li><b>Moving-coil furnace</b><span>Worked on the controls for a moving heating coil and a rotating pedestal.</span><em>Onsemi R&amp;D</em></li>
+        <li><b>Production waste sensor</b><span>Sourced, installed and commissioned a sensor to measure gypsum board waste, put live readings on a WinCC HMI, and delivered it in 9 weeks.</span><em>CertainTeed</em></li>
+      </ul>
+    </section>
+
+    <section id="experience">
+      <h2 class="title">Where I've worked</h2>
+      <p class="intro">From production lines to crystal growth furnaces.</p>
+      <ol class="timeline">
+        <li><span class="when">Jun 2023 – Present</span><div><b>Software Controls Engineer II, Onsemi</b><span>Hudson, New Hampshire. PLC, HMI and safety systems for silicon carbide crystal growth furnaces, 24/7 furnace and equipment support, and building management system (BMS) support. Technical lead for four technicians and an equipment engineer.</span></div></li>
+        <li><span class="when">May 2022 – Aug 2022</span><div><b>Controls Engineer Intern, CertainTeed (Saint-Gobain)</b><span>North Carolina. Sensor projects, PLC integration and MES work on a gypsum board line.</span></div></li>
+        <li><span class="when">Jan 2021 – Dec 2022</span><div><b>MS, Robotics and Autonomous Systems (Electrical Engineering)</b><span>Arizona State University, Tempe.</span></div></li>
+        <li><span class="when">Jan 2020 – Oct 2020</span><div><b>Volunteer, Make-A-Wish India</b><span>India.</span></div></li>
+        <li><span class="when">Jul 2019 – Nov 2019</span><div><b>R&amp;D Intern, J.C. Bamford Excavators Limited (JCB)</b><span>Pune, India.</span></div></li>
+        <li><span class="when">Jul 2015 – May 2019</span><div><b>BTech, Mechatronics Engineering</b><span>NMIMS, Mumbai.</span></div></li>
+      </ol>
+      <div class="certs">
+        <span class="cert-label">Certifications</span>
+        <span class="chip">Rockwell CCP251 · Advanced Logix5000 Programmer</span>
+        <span class="chip">Rockwell CCP299 · Studio 5000 Logix Designer Level 1</span>
+      </div>
+    </section>
+
+    <section id="skills">
+      <h2 class="title">What I work with</h2>
+      <p class="intro">The tools I use every day, plus the ones I've used on other jobs.</p>
+      <div class="skills">
+        <div class="skill">
+          <h3>Every day</h3>
+          <div class="chips"><span class="chip">Studio 5000 / RSLogix 5000</span><span class="chip">Ladder Logic</span><span class="chip">Structured Text</span><span class="chip">VBScript (HMI scripting)</span><span class="chip">Wonderware / AVEVA InTouch</span><span class="chip">SQL</span><span class="chip">PID tuning</span><span class="chip">Safety interlocks</span><span class="chip">Commissioning</span><span class="chip">Building management systems (BMS)</span><span class="chip">AutoCAD Electrical</span></div>
+        </div>
+        <div class="skill">
+          <h3>Signals and networks</h3>
+          <div class="chips"><span class="chip">EtherNet/IP</span><span class="chip">Modbus</span><span class="chip">RS-232</span><span class="chip">RS-485</span><span class="chip">EtherCAT</span><span class="chip">DeviceNet</span><span class="chip">ControlNet</span><span class="chip">4–20 mA (HART)</span><span class="chip">0–5 V</span><span class="chip">0–10 V</span><span class="chip">I2C</span></div>
+        </div>
+        <div class="skill light">
+          <h3>Also used</h3>
+          <div class="chips"><span class="chip">WinCC</span><span class="chip">Historian</span><span class="chip">MATLAB / Simulink</span><span class="chip">Python</span><span class="chip">C / C++</span><span class="chip">OpenCV</span><span class="chip">SolidWorks PDM</span><span class="chip">Power Automate</span><span class="chip">Yaskawa and SCARA robots</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="about">
+        <p class="quote">Half my job is PLCs and interlocks. The other half is translating between people and machines.</p>
+        <div>
+          <h2 class="title">A bit about me</h2>
+          <p>Process engineers come to me with questions like "what happens if we change this?" I help them answer that before they commit to a run. Then I build the control logic that makes the answer happen.</p>
+          <p>I have an MS in Robotics and Autonomous Systems from Arizona State University and a BTech in Mechatronics from NMIMS in Mumbai. When I'm not at work, you'll find me out hiking or color-grading video.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="contact" id="contact">
+      <h2>Let's talk.</h2>
+      <p>Hiring for a controls or automation role, or just curious about crystal growth? I'd love to hear from you. Email is the quickest way to reach me.</p>
+      <div class="mail">
+        <span class="addr" id="email">darshanshah6972@gmail.com</span>
+        <button class="btn primary" id="copy" type="button">Copy email</button>
+        <span class="copied" id="copied" role="status" aria-live="polite"></span>
+      </div>
+      <div class="mail" style="margin-top:14px">
+        <a class="btn" href="https://www.linkedin.com/in/darshanshah98/" target="_blank" rel="noopener">LinkedIn: darshanshah98</a>
+        <a class="btn" href="https://github.com/darshan6998" target="_blank" rel="noopener">GitHub: darshan6998</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>Darshan Shah · Controls Engineer</span>
+    <span>Manchester, NH</span>
+  </footer>
+</div>
+
+<script>
+document.getElementById("copy").addEventListener("click", function () {
+  var out = document.getElementById("copied");
+  var text = document.getElementById("email").textContent;
+  try {
+    navigator.clipboard.writeText(text).then(
+      function () { out.textContent = "Copied!"; },
+      function () { out.textContent = "Select the address to copy it"; });
+  } catch (e) { out.textContent = "Select the address to copy it"; }
+});
+</script>
+</body>
+</html>
