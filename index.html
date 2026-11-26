@@ -203,6 +203,30 @@ h2.title { font-family: var(--display); font-weight: 800; font-size: clamp(1.8re
   .contact { padding: 24px; }
 }
 
+/* Certifications */
+a.chip { text-decoration: none; }
+a.chip:hover { text-decoration: underline; }
+.cert-more { font-size: 0.92rem; color: var(--glow); font-weight: 600; text-decoration: none; margin-left: 4px; }
+.cert-more:hover { text-decoration: underline; }
+.cert-group { font: 500 0.72rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 26px 0 12px; }
+.cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.cert-grid-main { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+.cert { background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; scroll-margin-top: 90px; }
+.cert-grid-main .cert { border-left: 4px solid var(--glow); }
+.cert-img { display: block; background: var(--hmi-face); border-bottom: 1px solid var(--line); }
+.cert-img img { display: block; width: 100%; height: auto; transition: transform .2s ease; }
+.cert-img:hover img { transform: scale(1.02); }
+.cert-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.cert h4 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1.25; }
+.cert-sub { margin: 0; font-size: 0.95rem; }
+.cert-meta { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
+.cert-verify { margin-top: auto; padding-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--glow); text-decoration: none; align-self: flex-start; }
+.cert-verify:hover { text-decoration: underline; }
+.cert-dlg { border: 0; padding: 0; border-radius: 8px; max-width: min(1100px, 94vw); width: 100%; background: var(--card); color: var(--ink); }
+.cert-dlg::backdrop { background: rgba(10, 14, 13, .72); }
+.cert-dlg-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-weight: 600; }
+.cert-dlg img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; background: #fff; }
+
 /* Skills */
 .skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 .skill-note { margin: 10px 0 0; font-size: 0.88rem; color: var(--muted); }
@@ -432,10 +456,93 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
       </ol>
       <div class="certs">
         <span class="cert-label">Certifications</span>
-        <span class="chip">Rockwell CCP251 · Advanced Logix5000 Programmer</span>
-        <span class="chip">Rockwell CCP299 · Studio 5000 Logix Designer Level 1</span>
+        <a class="chip" href="#cert-ccp251">Rockwell CCP251 · Advanced Logix5000 Programmer</a>
+        <a class="chip" href="#cert-ccp299">Rockwell CCP299 · Studio 5000 Logix Designer Level 1</a>
+        <a class="cert-more" href="#certifications">See all certificates ↓</a>
       </div>
     </section>
+
+    <section id="certifications">
+      <h2 class="title">Certifications and training</h2>
+      <p class="intro">Rockwell training behind the PLC work I do every day, plus the robotics and machine-learning coursework around my master's. Click a certificate to see it full size.</p>
+
+      <h3 class="cert-group">Industrial automation</h3>
+      <div class="cert-grid cert-grid-main">
+        <article class="cert" id="cert-ccp299">
+          <a class="cert-img" href="certs/ccp299.jpg" data-title="CCP299 · Studio 5000 Logix Designer Level 1"><img src="certs/ccp299-thumb.jpg" alt="Rockwell Automation certificate: CCP299 Studio 5000 Logix Designer Level 1, ControlLogix Fundamentals and Troubleshooting" width="640" height="495" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>CCP299 · Studio 5000 Logix Designer Level 1</h4>
+            <p class="cert-sub">ControlLogix fundamentals and troubleshooting</p>
+            <p class="cert-meta">Rockwell Automation · Sep 2025 · Manchester, NH</p>
+          </div>
+        </article>
+        <article class="cert" id="cert-ccp251">
+          <a class="cert-img" href="certs/ccp251.jpg" data-title="CCP251 · Advanced Logix5000 Programmer"><img src="certs/ccp251-thumb.jpg" alt="Rockwell Automation certificate: CCP251 Advanced Logix5000 Programmer" width="640" height="494" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>CCP251 · Advanced Logix5000 Programmer</h4>
+            <p class="cert-sub">4-day instructor-led course</p>
+            <p class="cert-meta">Rockwell Automation · Jun 2025 · Rochester, NY</p>
+          </div>
+        </article>
+      </div>
+
+      <h3 class="cert-group">Robotics, machine learning and software</h3>
+      <div class="cert-grid">
+        <article class="cert">
+          <a class="cert-img" href="certs/udacity-robotics-software-engineer.jpg" data-title="Robotics Software Engineer Nanodegree"><img src="certs/udacity-robotics-software-engineer-thumb.jpg" alt="Udacity certificate: Robotics Software Engineer Nanodegree" width="640" height="496" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>Robotics Software Engineer Nanodegree</h4>
+            <p class="cert-meta">Udacity · Jun 2020</p>
+            <a class="cert-verify" href="https://confirm.udacity.com/KKGTVDA2" target="_blank" rel="noopener">Verify on Udacity ↗</a>
+          </div>
+        </article>
+        <article class="cert">
+          <a class="cert-img" href="certs/udacity-deep-learning.jpg" data-title="Deep Learning Nanodegree"><img src="certs/udacity-deep-learning-thumb.jpg" alt="Udacity certificate: Deep Learning Nanodegree" width="640" height="495" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>Deep Learning Nanodegree</h4>
+            <p class="cert-meta">Udacity · Mar 2022</p>
+            <a class="cert-verify" href="https://confirm.udacity.com/MTQAPLSE" target="_blank" rel="noopener">Verify on Udacity ↗</a>
+          </div>
+        </article>
+        <article class="cert">
+          <a class="cert-img" href="certs/coursera-modern-robotics.jpg" data-title="Modern Robotics: Foundations of Robot Motion"><img src="certs/coursera-modern-robotics-thumb.jpg" alt="Coursera certificate: Modern Robotics, Course 1: Foundations of Robot Motion, Northwestern University" width="640" height="494" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>Modern Robotics: Foundations of Robot Motion</h4>
+            <p class="cert-meta">Northwestern University on Coursera · Aug 2019</p>
+            <a class="cert-verify" href="https://coursera.org/verify/W2XLN5VBFPCQ" target="_blank" rel="noopener">Verify on Coursera ↗</a>
+          </div>
+        </article>
+        <article class="cert">
+          <a class="cert-img" href="certs/coursera-neural-networks-deep-learning.jpg" data-title="Neural Networks and Deep Learning"><img src="certs/coursera-neural-networks-deep-learning-thumb.jpg" alt="Coursera certificate: Neural Networks and Deep Learning, deeplearning.ai" width="640" height="496" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>Neural Networks and Deep Learning</h4>
+            <p class="cert-meta">DeepLearning.AI on Coursera · Sep 2019</p>
+            <a class="cert-verify" href="https://coursera.org/verify/DB8C394TZVWY" target="_blank" rel="noopener">Verify on Coursera ↗</a>
+          </div>
+        </article>
+        <article class="cert">
+          <a class="cert-img" href="certs/coursera-python-data-structures.jpg" data-title="Python Data Structures"><img src="certs/coursera-python-data-structures-thumb.jpg" alt="Coursera certificate: Python Data Structures, University of Michigan" width="640" height="493" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>Python Data Structures</h4>
+            <p class="cert-meta">University of Michigan on Coursera · Aug 2019</p>
+            <a class="cert-verify" href="https://coursera.org/verify/R3CB4QFZHG55" target="_blank" rel="noopener">Verify on Coursera ↗</a>
+          </div>
+        </article>
+        <article class="cert">
+          <a class="cert-img" href="certs/coursera-programming-for-everybody.jpg" data-title="Programming for Everybody (Getting Started with Python)"><img src="certs/coursera-programming-for-everybody-thumb.jpg" alt="Coursera certificate: Programming for Everybody (Getting Started with Python), University of Michigan" width="640" height="496" loading="lazy"></a>
+          <div class="cert-body">
+            <h4>Programming for Everybody (Python)</h4>
+            <p class="cert-meta">University of Michigan on Coursera · Jul 2019</p>
+            <a class="cert-verify" href="https://coursera.org/verify/9HK7CFZHSCGK" target="_blank" rel="noopener">Verify on Coursera ↗</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <dialog class="cert-dlg" id="certDlg" aria-label="Certificate">
+      <div class="cert-dlg-bar"><span id="certDlgTitle"></span><button type="button" class="btn" id="certDlgClose">Close</button></div>
+      <img id="certDlgImg" alt="">
+    </dialog>
 
     <section id="skills">
       <h2 class="title">Engineering capabilities</h2>
@@ -519,6 +626,22 @@ document.getElementById("copy").addEventListener("click", function () {
   } catch (e) { out.textContent = "Select the address to copy it"; }
 });
 
+
+// Certificates open full size in a dialog (links still work without JS)
+(function () {
+  var dlg = document.getElementById("certDlg");
+  if (!dlg || typeof dlg.showModal !== "function") return;
+  var img = document.getElementById("certDlgImg"), title = document.getElementById("certDlgTitle");
+  document.querySelectorAll(".cert-img").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      img.src = a.getAttribute("href"); img.alt = a.querySelector("img").alt; title.textContent = a.dataset.title || "";
+      dlg.showModal();
+    });
+  });
+  document.getElementById("certDlgClose").addEventListener("click", function () { dlg.close(); });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+})();
 
 // On phones, start project "Engineering approach" sections collapsed
 (function () {
