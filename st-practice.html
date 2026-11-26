@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Structured Text Practice · Darshan Shah</title>
-<meta name="description" content="A free, in-browser coding judge for Logix-style Structured Text (IEC 61131-3): 40 PLC problems graded scan by scan, from seal-in circuits to PI control.">
+<meta name="description" content="A free, in-browser coding judge for Allen-Bradley Logix Structured Text and ladder logic: PLC problems graded scan by scan.">
 <link rel="canonical" href="https://darshanhshah.com/st-practice.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2210%22%20fill%3D%22%231d2422%22/%3E%3Crect%20x%3D%228%22%20y%3D%2250%22%20width%3D%2248%22%20height%3D%225%22%20fill%3D%22%23d4520f%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2241%22%20font-family%3D%22Arial%2CHelvetica%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EDS%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Structured Text Practice">
-<meta property="og:description" content="40 PLC programming problems in Logix-style Structured Text, graded scan by scan in your browser.">
+<meta property="og:description" content="PLC programming problems in Logix Structured Text and ladder, graded scan by scan in your browser.">
 <meta property="og:url" content="https://darshanhshah.com/st-practice.html">
 <meta property="og:image" content="https://darshanhshah.com/og.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1109,7 +1109,8 @@ if (typeof module !== 'undefined') module.exports = STEngine;
   solution: `IF NOT Enable THEN\n  Step := 0;\nEND_IF;\n\nCASE Step OF\n  0:\n    IF Enable THEN Step := 10; END_IF;\n  10: // red\n    Step_Tmr.PRE := 4000;\n    IF Step_Tmr.DN THEN Step := 20; END_IF;\n  20: // green\n    Step_Tmr.PRE := 5000;\n    IF Step_Tmr.DN THEN Step := 30; END_IF;\n  30: // yellow\n    Step_Tmr.PRE := 2000;\n    IF Step_Tmr.DN THEN Step := 10; END_IF;\nEND_CASE;\n\n// restart the timer on every step change\nStep_Tmr.TimerEnable := (Step <> 0) AND (Step = Last_Step);\nLast_Step := Step;\nTONR(Step_Tmr);\n\nRed_Lamp    := Step = 10;\nGreen_Lamp  := Step = 20;\nYellow_Lamp := Step = 30;\n`,
   tests: [
     { name: 'One full cycle', dt: 100, steps: [[3, {}], [20, { Enable: true }], [45, {}], [35, {}], [30, {}], [45, {}]] },
-    { name: 'Disable mid-green, restart', dt: 100, steps: [[60, { Enable: true }], [5, { Enable: false }], [3, { Enable: true }], [17, {}], [45, {}]] }]
+    { name: 'Disable mid-green, restart', dt: 100, steps: [[60, { Enable: true }], [5, { Enable: false }], [3, { Enable: true }], [17, {}], [45, {}]] },
+    { name: 'Disable during yellow', hidden: true, dt: 100, steps: [[100, { Enable: true }], [3, { Enable: false }], [3, { Enable: true }], [55, {}], [40, {}]] }]
 },
 {
   id: 'ramp-soak', title: 'Furnace setpoint ramp', diff: 'Hard', topics: ['REAL math', 'Rate limiting', 'Process'],
@@ -1442,7 +1443,7 @@ const MORE = [
   solution: `Xor_Check := 0;\nSum_Check := 0;\nFOR i := 0 TO 7 DO\n  Xor_Check := Xor_Check XOR Msg[i];\n  Sum_Check := Sum_Check + Msg[i];\nEND_FOR;\nSum_Check := Sum_Check MOD 256;\nValid := Sum_Check = Rx_Check;\n`,
   tests: [
     { name: 'Good frame', steps: [[1, { Msg: [1, 2, 3, 4, 5, 6, 7, 8], Rx_Check: 36 }], [1, { Msg: [255, 255, 255, 255, 0, 0, 0, 1], Rx_Check: 253 }]] },
-    { name: 'Corrupt frame', hidden: true, steps: [[1, { Msg: [16, 32, 64, 128, 170, 85, 0, 255], Rx_Check: 0 }], [1, { Rx_Check: 198 }]] }]
+    { name: 'Corrupt frame, then fixed', hidden: true, steps: [[1, { Msg: [16, 32, 64, 128, 170, 85, 0, 255], Rx_Check: 0 }], [1, { Rx_Check: 238 }], [1, { Msg: [16, 32, 64, 128, 170, 85, 1, 255] }]] }]
 },
 {
   id: 'tank-batch', title: 'Fill-mix-drain sequence', diff: 'Medium', topics: ['CASE', 'State machines', 'Timers'],
