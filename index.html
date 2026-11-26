@@ -23,7 +23,7 @@
 <meta name="twitter:image" content="https://darshanhshah.com/og.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=optional" rel="stylesheet">
 <style>
 /* Layout idea: a friendly story told in the visual language of an industrial HMI.
    ISA-101-style greys, a furnace mimic with instrument bubbles, faceplate readouts,
@@ -40,6 +40,7 @@
   --hmi-face: #eef0f0;
   --hmi-line: #5f6a6a;
   --ok: #2f8a4c;
+  --alarm: #c0262d;
   --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -48,13 +49,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #131716; --card: #1b201f; --ink: #ecf0ee; --muted: #a2ada8;
-    --line: #2c3331; --glow: #ff8a4c; --glow-soft: #3a2519; --hmi: #23292a; --hmi-face: #1a1f20; --hmi-line: #8d9a99; --ok: #4cc074;
+    --line: #2c3331; --glow: #ff8a4c; --glow-soft: #3a2519; --hmi: #23292a; --hmi-face: #1a1f20; --hmi-line: #8d9a99; --ok: #4cc074; --alarm: #ff5a5f;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #131716; --card: #1b201f; --ink: #ecf0ee; --muted: #a2ada8;
-  --line: #2c3331; --glow: #ff8a4c; --glow-soft: #3a2519; --hmi: #23292a; --hmi-face: #1a1f20; --hmi-line: #8d9a99; --ok: #4cc074;
+  --line: #2c3331; --glow: #ff8a4c; --glow-soft: #3a2519; --hmi: #23292a; --hmi-face: #1a1f20; --hmi-line: #8d9a99; --ok: #4cc074; --alarm: #ff5a5f;
   color-scheme: dark;
 }
 
@@ -67,10 +68,11 @@ a { color: inherit; }
 .wrap { max-width: 980px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
 
 /* Nav */
-.nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px 0; }
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; min-height: 64px; padding: 14px 0; position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+section, .contact { scroll-margin-top: 80px; }
 .logo { font-family: var(--display); font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: -0.01em; }
 .logo span { color: var(--glow); }
-.nav nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav nav { display: flex; gap: 6px; flex-wrap: nowrap; }
 .nav nav a { text-decoration: none; color: var(--muted); font-weight: 500; padding: 6px 12px; border-radius: 4px; }
 .nav nav a:hover { color: var(--ink); background: var(--card); }
 
@@ -78,7 +80,9 @@ a { color: inherit; }
 .hero { padding: clamp(36px, 7vw, 76px) 0 clamp(28px, 4vw, 44px); display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(24px, 5vw, 48px); align-items: end; }
 .hi { color: var(--glow); font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
 h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.6rem, 6.6vw, 4.6rem); line-height: 0.98; letter-spacing: -0.01em; margin: 0 0 20px; text-wrap: balance; }
-.lede { font-size: 1.18rem; color: var(--muted); max-width: 32em; margin: 0 0 26px; }
+.lede { font-size: 1.12rem; color: var(--muted); max-width: 34em; margin: 0 0 26px; }
+.lede p { margin: 0 0 0.8em; }
+.lede p:last-child { margin-bottom: 0; }
 .lede strong { color: var(--ink); font-weight: 600; }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn { font: 600 0.95rem var(--body); letter-spacing: 0.01em; padding: 12px 20px; border-radius: 4px; text-decoration: none; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; transition: transform .15s ease, background .15s ease; }
@@ -126,14 +130,15 @@ h2.title { font-family: var(--display); font-weight: 800; font-size: clamp(1.8re
 .projects { display: grid; gap: 16px; }
 .project { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--hmi-line); border-radius: 6px; padding: clamp(20px, 3vw, 30px); }
 .project-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
-.project h3 { font-family: var(--display); font-weight: 700; font-size: 1.45rem; letter-spacing: -0.01em; line-height: 1.2; margin: 0; text-wrap: balance; }
+.project h3 { font-family: var(--display); font-weight: 700; font-size: 1.6rem; letter-spacing: -0.01em; line-height: 1.2; margin: 0; text-wrap: balance; }
 .where { color: var(--muted); font-size: 0.92rem; }
 .lamp { display: inline-flex; align-items: center; gap: 7px; font: 500 0.68rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ok); }
 .lamp::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
 .project-top .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .story { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .story h4 { margin: 0 0 4px; font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--glow); }
-.story p { margin: 0; font-size: 1rem; line-height: 1.55; }
+.story p { margin: 0; font-size: 1rem; line-height: 1.6; color: var(--ink); }
+.story > div:last-child p { font-weight: 600; }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .duo > div { background: var(--bg); border-radius: 4px; padding: 16px 18px; }
 .duo h4 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; color: var(--glow); }
@@ -162,8 +167,45 @@ h2.title { font-family: var(--display); font-weight: 800; font-size: clamp(1.8re
 .cert-label { font-weight: 600; margin-right: 6px; }
 @media (max-width: 820px) { .timeline li { grid-template-columns: 1fr; } }
 
+
+.pnum { font: 600 0.8rem var(--mono); color: var(--glow); margin-right: 10px; vertical-align: 0.25em; }
+.tags-label { font: 500 0.66rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); align-self: center; margin-right: 4px; }
+
+.approach summary { list-style: none; cursor: default; }
+.approach summary::-webkit-details-marker { display: none; }
+.approach summary h4 { display: inline; }
+.approach p { margin: 4px 0 0; }
+
+/* Phone */
+@media (max-width: 600px) {
+  body { font-size: 1rem; }
+  .nav { padding: 10px 0; gap: 6px; }
+  .logo { font-size: 1.1rem; }
+  .nav nav { width: 100%; display: flex; justify-content: space-between; gap: 0; }
+  .nav nav a.nav-extra { display: none; }
+  .nav nav a { padding: 10px 6px; min-height: 44px; display: inline-flex; align-items: center; font-size: 0.92rem; }
+  .hero { padding-top: 28px; }
+  h1 { font-size: 2.4rem; }
+  .lede { font-size: 1rem; }
+  .btn { min-height: 44px; display: inline-flex; align-items: center; }
+  section { padding-top: 48px; }
+  .project { padding: 18px; }
+  .project h3 { font-size: 1.35rem; }
+  .story { gap: 12px; }
+  .approach summary { cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; margin: 0 -4px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); min-height: 44px; }
+  .approach summary::after { content: "Show"; font: 500 0.68rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .approach[open] summary::after { content: "Hide"; }
+  .approach p { margin-top: 10px; }
+  .tags-label { width: 100%; }
+  .hmi-body { padding: 12px; }
+  .face b { font-size: 1.35rem; }
+  .more li { padding: 14px 0; }
+  .contact { padding: 24px; }
+}
+
 /* Skills */
-.skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.skill-note { margin: 10px 0 0; font-size: 0.88rem; color: var(--muted); }
 .skill { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 20px; }
 .skill h3 { margin: 0 0 10px; font-size: 1rem; font-weight: 600; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -191,6 +233,9 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
   .hero, .about { grid-template-columns: 1fr; }
   .story, .duo { grid-template-columns: 1fr; gap: 14px; }
   .skills { grid-template-columns: 1fr; }
+  .project-top .meta { align-items: flex-start; }
+  .nav nav a { padding: 6px 8px; font-size: 0.95rem; }
+  .nav nav { gap: 2px; }
 }
 </style>
 </head>
@@ -204,7 +249,7 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
       <a href="#experience">Experience</a>
       <a href="#skills">Skills</a>
       <a href="#about">About</a>
-      <a href="st-practice.html">ST Practice</a>
+      <a class="nav-extra" href="st-practice.html">ST Practice</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
@@ -214,7 +259,11 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
       <div>
         <p class="hi">Hi, I'm Darshan Shah 👋</p>
         <h1>I automate the furnaces that grow crystals.</h1>
-        <p class="lede">I'm a <strong>controls engineer at Onsemi</strong>, where I automate the furnaces that grow silicon carbide, the material behind modern power chips. I'm the tier-3 escalation point for furnace and equipment support around the clock, and I also support the building management system (BMS). I like making big, hot, complicated machines run safely and predictably.</p>
+        <div class="lede">
+          <p>I'm a <strong>Controls and Automation Engineer</strong> specializing in industrial equipment reliability, PLC/HMI development, safety systems, and manufacturing automation.</p>
+          <p>At Onsemi, I support and improve complex semiconductor manufacturing equipment, taking ownership of controls development, troubleshooting, commissioning, and production reliability. My work spans hundreds of industrial systems, from resolving critical equipment failures to delivering automation upgrades and cross-functional engineering projects.</p>
+          <p>I enjoy solving difficult equipment problems and building reliable, safe, and maintainable manufacturing systems.</p>
+        </div>
         <div class="actions">
           <a class="btn primary" href="#work">See what I've built</a>
           <a class="btn" href="https://www.linkedin.com/in/darshanshah98/" target="_blank" rel="noopener">LinkedIn</a>
@@ -229,7 +278,7 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
           <div><dt>Working as</dt><dd>Software Controls Engineer II, Onsemi</dd></div>
           <div><dt>Based in</dt><dd>Manchester, New Hampshire</dd></div>
           <div><dt>Experience</dt><dd>3.5+ years in industrial controls</dd></div>
-          <div><dt>Looking for</dt><dd>Controls and automation engineering roles</dd></div>
+          <div><dt>Looking for</dt><dd>Automation Equipment Engineering · Controls Engineering · Manufacturing Engineering</dd></div>
         </dl>
         <span class="pill">Open to relocation</span>
       </aside>
@@ -293,68 +342,80 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
 
     <section id="work">
       <h2 class="title">What I've built</h2>
-      <p class="intro">A few projects I've worked on, each told the simple way: what was wrong, what I did, and how it turned out.</p>
+      <p class="intro">Selected projects: the challenge, my engineering approach, and the outcome.</p>
 
       <div class="projects">
         <article class="project">
           <div class="project-top">
-            <h3>Controls for a hydrogen-process R&amp;D furnace</h3>
-            <span class="meta"><span class="where">Onsemi · R&amp;D · Controls Engineer</span><span class="lamp">In service</span></span>
+            <h3><span class="pnum">01</span>Fleet-wide controls and reliability upgrades</h3>
+            <span class="meta"><span class="where">Onsemi · Role: Led · Scope: Fleet-wide</span><span class="lamp">In service</span></span>
           </div>
           <div class="story">
-            <div><h4>The problem</h4><p>The team needed a new R&amp;D furnace that uses hydrogen to study crystal quality. With a flammable process gas, safety had to come first.</p></div>
-            <div><h4>What I did</h4><p>I owned the controls work. I built the PLC logic and HMI, built closed-loop PID gas control, designed gas-detection safety interlocks and fail-safes, and helped the team commission the furnace. I also worked with the fire department. Gas safety limits for the area came from an independent third-party assessment.</p></div>
-            <div><h4>How it went</h4><p>No control defects found in commissioning or production runs. The $100K+ project came in on time and under budget.</p></div>
+            <div><h4>Challenge</h4><p>Keeping hundreds of production furnaces running consistently, with recurring faults causing unplanned shutdowns.</p></div>
+            <details class="approach" open><summary><h4>Engineering approach</h4></summary><p>Led two control system upgrades across the fleet, standardizing PLC logic and adding safety interlocks and automated recipe validation. I give day-to-day technical direction to four technicians and an equipment engineer.</p></details>
+            <div><h4>Outcome</h4><p>Unplanned shutdowns fell 15% and recurring production faults fell 10% across the fleet.</p></div>
           </div>
-          <div class="tags"><span class="tag">Studio 5000</span><span class="tag">PID control</span><span class="tag">Gas safety</span><span class="tag">Commissioning</span></div>
+          <div class="tags"><span class="tags-label">Core competencies</span><span class="tag">PLC Programming</span><span class="tag">Equipment Upgrades</span><span class="tag">Safety Interlocks</span><span class="tag">Standardization</span></div>
         </article>
         <article class="project">
           <div class="project-top">
-            <h3>Recipe safeguards that stopped aborted runs</h3>
-            <span class="meta"><span class="where">Onsemi · Process Reliability</span><span class="lamp">In service</span></span>
+            <h3><span class="pnum">02</span>Automated equipment safeguards and failure prevention</h3>
+            <span class="meta"><span class="where">Onsemi · Role: Designed and built · Scope: Fleet-wide</span><span class="lamp">In service</span></span>
           </div>
           <div class="story">
-            <div><h4>The problem</h4><p>Hardware limits could be changed without the matching recipe settings being updated. When the two disagreed, a motion axis could stall mid-run and the run had to be aborted.</p></div>
-            <div><h4>What I did</h4><p>I added a check that validates each recipe step against the machine's limits before it runs, and an automatic return to a home position after every run.</p></div>
-            <div><h4>How it went</h4><p>That cause of aborted runs went away, saving a five-figure sum on every run it would have hit.</p></div>
+            <div><h4>Challenge</h4><p>Production equipment experienced interrupted runs when machine operating limits and process configurations became inconsistent, resulting in avoidable downtime and manufacturing losses.</p></div>
+            <details class="approach" open><summary><h4>Engineering approach</h4></summary><p>Developed PLC-based validation logic to identify configuration mismatches before equipment operation. Implemented automated motion recovery and return-to-home functionality to improve operational consistency and reduce the risk of interrupted production cycles.</p></details>
+            <div><h4>Outcome</h4><p>Eliminated a recurring source of process interruptions, improving equipment reliability and reducing avoidable production losses.</p></div>
           </div>
-          <div class="tags"><span class="tag">Recipe logic</span><span class="tag">Motion control</span><span class="tag">Validation</span></div>
+          <div class="tags"><span class="tags-label">Core competencies</span><span class="tag">PLC Programming</span><span class="tag">Equipment Reliability</span><span class="tag">Motion Control</span><span class="tag">Failure Prevention</span><span class="tag">Root-Cause Analysis</span></div>
         </article>
         <article class="project">
           <div class="project-top">
-            <h3>Centralized recipe management</h3>
-            <span class="meta"><span class="where">Onsemi · Corporate Initiative · With MOS, MES and Process Engineering</span><span class="lamp">In service</span></span>
+            <h3><span class="pnum">03</span>R&amp;D equipment controls and commissioning</h3>
+            <span class="meta"><span class="where">Onsemi R&amp;D · Role: Owned controls · Scope: One new furnace</span><span class="lamp">In service</span></span>
           </div>
           <div class="story">
-            <div><h4>The problem</h4><p>Recipes were moved onto each machine by hand, and several versions existed, so the wrong one could get loaded.</p></div>
-            <div><h4>What I did</h4><p>I built the controls side with the MOS team and process engineering. MES tells the PLC which recipe a run needs, and the operator screen pulls the approved version from a central server.</p></div>
-            <div><h4>How it went</h4><p>It runs on every furnace in the fleet, with one source of truth for recipes.</p></div>
+            <div><h4>Challenge</h4><p>The R&amp;D team needed a new experimental furnace that runs a flammable process gas. Safety had to come first.</p></div>
+            <details class="approach" open><summary><h4>Engineering approach</h4></summary><p>I owned the controls work. I built the PLC logic and HMI, built closed-loop PID gas control, designed gas-detection safety interlocks and fail-safes, and helped the team commission the furnace. I also worked with the fire department. Gas safety limits for the area came from an independent third-party assessment.</p></details>
+            <div><h4>Outcome</h4><p>No control defects found in commissioning or production runs, and the project came in on time and under budget.</p></div>
           </div>
-          <div class="tags"><span class="tag">MES integration</span><span class="tag">PLC</span><span class="tag">HMI</span><span class="tag">Cross-team</span></div>
+          <div class="tags"><span class="tags-label">Core competencies</span><span class="tag">PLC/HMI Development</span><span class="tag">PID Control</span><span class="tag">Gas Safety</span><span class="tag">Commissioning</span></div>
         </article>
         <article class="project">
           <div class="project-top">
-            <h3>Replacing shared logins with role-based access</h3>
-            <span class="meta"><span class="where">Onsemi · Security</span><span class="lamp">In service</span></span>
+            <h3><span class="pnum">04</span>Manufacturing execution system integration</h3>
+            <span class="meta"><span class="where">Onsemi · Corporate initiative · Role: Controls lead on a cross-team project · Scope: Every furnace</span><span class="lamp">In service</span></span>
           </div>
           <div class="story">
-            <div><h4>The problem</h4><p>Machine screens used a shared login with full access for everyone.</p></div>
-            <div><h4>What I did</h4><p>I built role-based access tied to each person's own work account, with automated credential rotation.</p></div>
-            <div><h4>How it went</h4><p>It's deployed across the fleet, and each person gets only the access their role needs.</p></div>
+            <div><h4>Challenge</h4><p>Recipes were moved onto each machine by hand, and several versions existed, so the wrong one could get loaded. Corporate asked for a fix.</p></div>
+            <details class="approach" open><summary><h4>Engineering approach</h4></summary><p>I built the controls side with the MOS team and process engineering, integrating the PLC and HMI with MES so each run automatically gets the approved recipe from a single controlled source.</p></details>
+            <div><h4>Outcome</h4><p>It runs on every furnace in the fleet, with one source of truth for recipes.</p></div>
           </div>
-          <div class="tags"><span class="tag">Role-based access</span><span class="tag">HMI</span><span class="tag">Automation</span></div>
+          <div class="tags"><span class="tags-label">Core competencies</span><span class="tag">PLC/MES Integration</span><span class="tag">HMI</span><span class="tag">Standardization</span><span class="tag">Cross-Team Delivery</span></div>
+        </article>
+        <article class="project">
+          <div class="project-top">
+            <h3><span class="pnum">05</span>Alarm management and fault diagnostics</h3>
+            <span class="meta"><span class="where">Onsemi · Role: Designed and built · Scope: Fleet-wide</span><span class="lamp">In service</span></span>
+          </div>
+          <div class="story">
+            <div><h4>Challenge</h4><p>Production support depends on alarms that point people to the right problem quickly, and on data that shows why equipment faults keep coming back.</p></div>
+            <details class="approach" open><summary><h4>Engineering approach</h4></summary><p>Reworked alarm classification, escalation and trending, and built SQL tools for thermocouple and OEE analysis to support data-driven troubleshooting.</p></details>
+            <div><h4>Outcome</h4><p>Machine-related incidents fell 25%, and about 90% of escalated issues are resolved the same day.</p></div>
+          </div>
+          <div class="tags"><span class="tags-label">Core competencies</span><span class="tag">Alarm Management</span><span class="tag">Fault Diagnostics</span><span class="tag">SQL</span><span class="tag">OEE</span></div>
         </article>
       </div>
 
       <h3 class="more-title">More work</h3>
       <ul class="more">
         <li><b><a href="st-practice.html">Structured Text Practice</a></b><span>A LeetCode-style judge for PLC code that runs in the browser. It has 40 Logix-style ST problems, from seal-in circuits to PI control and shift registers, each graded scan by scan against simulated I/O with timers and fault detection.</span><em><a href="st-practice.html">Try it →</a></em></li>
-        <li><b>Fleet control upgrades</b><span>Led two control system upgrades across the fleet, standardizing PLC logic and adding safety interlocks and automated recipe validation. Unplanned shutdowns fell 15% and recurring production faults 10%.</span><em>Onsemi</em></li>
-        <li><b>Alarm redesign</b><span>Reworked alarm classification, escalation and trending, cutting machine-related incidents 25%. Built SQL tools for thermocouple and OEE analysis.</span><em>Onsemi</em></li>
+        <li><b>Role-based HMI access</b><span>Replaced shared machine logins with individual, role-based access across the fleet.</span><em>Onsemi</em></li>
         <li><b>Duplicate run ID fix</b><span>Solved recurring duplicate run ID issues by automating the correction with the MOS team, removing 4 hours of manual rework per incident.</span><em>Onsemi</em></li>
         <li><b>X-ray imaging furnace</b><span>Programmed the safety interlocks around an in-situ X-ray system that images the crystal while it grows.</span><em>Onsemi R&amp;D</em></li>
         <li><b>Moving-coil furnace</b><span>Worked on the controls for a moving heating coil and a rotating pedestal.</span><em>Onsemi R&amp;D</em></li>
-        <li><b>Production waste sensor</b><span>Sourced, installed and commissioned a sensor to measure gypsum board waste, put live readings on a WinCC HMI, and delivered it in 9 weeks.</span><em>CertainTeed</em></li>
+        <li><b>Production waste sensor</b><span>Sourced, installed and commissioned a sensor to measure gypsum board length and edge thickness, put live readings on a WinCC HMI, and delivered it end to end in 9 weeks.</span><em>CertainTeed</em></li>
+        <li><b>Sensor spares inventory</b><span>Built a site-wide inventory of Endress+Hauser instruments so failed sensors could be identified and replaced quickly, cutting time to restore equipment.</span><em>CertainTeed</em></li>
       </ul>
     </section>
 
@@ -377,20 +438,40 @@ footer { padding: 28px 0 36px; color: var(--muted); font-size: 0.9rem; display: 
     </section>
 
     <section id="skills">
-      <h2 class="title">What I work with</h2>
-      <p class="intro">The tools I use every day, plus the ones I've used on other jobs.</p>
+      <h2 class="title">Engineering capabilities</h2>
+      <p class="intro">What I bring to an equipment team, with the tools behind each.</p>
       <div class="skills">
         <div class="skill">
-          <h3>Every day</h3>
-          <div class="chips"><span class="chip">Studio 5000 / RSLogix 5000</span><span class="chip">Ladder Logic</span><span class="chip">Structured Text</span><span class="chip">VBScript (HMI scripting)</span><span class="chip">Wonderware / AVEVA InTouch</span><span class="chip">SQL</span><span class="chip">PID tuning</span><span class="chip">Safety interlocks</span><span class="chip">Commissioning</span><span class="chip">Building management systems (BMS)</span><span class="chip">AutoCAD Electrical</span></div>
+          <h3>Industrial automation</h3>
+          <div class="chips"><span class="chip">Allen-Bradley / Rockwell PLCs</span><span class="chip">Studio 5000 / RSLogix 5000</span><span class="chip">Ladder Logic</span><span class="chip">Structured Text</span><span class="chip">PID tuning</span><span class="chip">Building management systems (BMS)</span></div>
         </div>
         <div class="skill">
-          <h3>Signals and networks</h3>
-          <div class="chips"><span class="chip">EtherNet/IP</span><span class="chip">Modbus</span><span class="chip">RS-232</span><span class="chip">RS-485</span><span class="chip">EtherCAT</span><span class="chip">DeviceNet</span><span class="chip">ControlNet</span><span class="chip">4–20 mA (HART)</span><span class="chip">0–5 V</span><span class="chip">0–10 V</span><span class="chip">I2C</span></div>
+          <h3>Equipment commissioning</h3>
+          <div class="chips"><span class="chip">Controls integration</span><span class="chip">Startup</span><span class="chip">Troubleshooting</span><span class="chip">Validation</span><span class="chip">I/O checkout</span></div>
+        </div>
+        <div class="skill">
+          <h3>Equipment reliability</h3>
+          <div class="chips"><span class="chip">Root-cause analysis</span><span class="chip">Fault diagnostics</span><span class="chip">Downtime reduction</span><span class="chip">Alarm management</span><span class="chip">OEE analysis</span></div>
+        </div>
+        <div class="skill">
+          <h3>Industrial safety</h3>
+          <div class="chips"><span class="chip">Safety interlocks</span><span class="chip">Fail-safe logic</span><span class="chip">Gas detection</span><span class="chip">Equipment risk reduction</span></div>
+        </div>
+        <div class="skill">
+          <h3>HMI and manufacturing data</h3>
+          <div class="chips"><span class="chip">AVEVA InTouch ME</span><span class="chip">Wonderware</span><span class="chip">WinCC</span><span class="chip">VBScript (HMI scripting)</span><span class="chip">SQL</span><span class="chip">Historian</span><span class="chip">MES integration</span></div>
+        </div>
+        <div class="skill">
+          <h3>Electrical and instrumentation</h3>
+          <div class="chips"><span class="chip">AutoCAD Electrical</span><span class="chip">4–20 mA (HART)</span><span class="chip">0–5 V / 0–10 V</span><span class="chip">EtherNet/IP</span><span class="chip">Modbus</span><span class="chip">RS-232 / RS-485</span><span class="chip">EtherCAT</span><span class="chip">DeviceNet</span><span class="chip">ControlNet</span><span class="chip">I2C</span></div>
+        </div>
+        <div class="skill">
+          <h3>Robotics and motion</h3>
+          <div class="chips"><span class="chip">Motion control (AMCI, lift axes)</span><span class="chip">Yaskawa robot programming (academic)</span><span class="chip">SCARA robot programming (academic)</span></div>
         </div>
         <div class="skill light">
           <h3>Also used</h3>
-          <div class="chips"><span class="chip">WinCC</span><span class="chip">Historian</span><span class="chip">MATLAB / Simulink</span><span class="chip">Python</span><span class="chip">C / C++</span><span class="chip">OpenCV</span><span class="chip">SolidWorks PDM</span><span class="chip">Power Automate</span><span class="chip">Yaskawa and SCARA robots</span></div>
+          <div class="chips"><span class="chip">Python</span><span class="chip">C / C++</span><span class="chip">MATLAB / Simulink</span><span class="chip">OpenCV</span><span class="chip">SolidWorks PDM</span><span class="chip">Power Automate</span></div>
         </div>
       </div>
     </section>
@@ -437,6 +518,19 @@ document.getElementById("copy").addEventListener("click", function () {
       function () { out.textContent = "Select the address to copy it"; });
   } catch (e) { out.textContent = "Select the address to copy it"; }
 });
+
+
+// On phones, start project "Engineering approach" sections collapsed
+(function () {
+  if (window.matchMedia && window.matchMedia("(max-width: 600px)").matches) {
+    document.querySelectorAll("details.approach").forEach(function (d) { d.removeAttribute("open"); });
+  }
+  document.querySelectorAll("details.approach summary").forEach(function (sm) {
+    sm.addEventListener("click", function (e) {
+      if (!(window.matchMedia && window.matchMedia("(max-width: 600px)").matches)) e.preventDefault();
+    });
+  });
+})();
 </script>
 </body>
 </html>
