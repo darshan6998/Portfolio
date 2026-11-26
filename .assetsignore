@@ -1,4 +1,8 @@
+# Files that should never be served on the site
 wrangler.jsonc
 .assetsignore
-.git
 README.md
+.git
+.github
+.wrangler
+node_modules

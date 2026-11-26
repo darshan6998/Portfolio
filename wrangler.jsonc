@@ -5,5 +5,7 @@
   // Serve every file in this repo as a static site
   "assets": {
     "directory": "./"
-  }
+  },
+  // Lets non-main branches build a preview link (npx wrangler preview)
+  "previews": {}
 }
