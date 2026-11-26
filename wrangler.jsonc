@@ -1,0 +1,9 @@
+{
+  // Must match the Worker's name in the Cloudflare dashboard
+  "name": "portfolio",
+  "compatibility_date": "2026-11-01",
+  // Serve every file in this repo as a static site
+  "assets": {
+    "directory": "./"
+  }
+}
