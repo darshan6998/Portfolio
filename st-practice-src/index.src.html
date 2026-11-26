@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ST Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a quiet bench instrument — precise, terse, test results read like a scope trace.
+   IDEA: a PLC programming terminal crossed with a judge: write a routine, scan it, read the verdict.
+   PICTURE: the working editor + scan-by-scan result table; on the list, the problem table and a 14-tick progress scale.
+   COLOUR and TYPE: aluminium ground, black ink, one orange pointer; green/red only for pass/fail. Geist + Geist Mono.
+   LAYOUT: list view = scale, then table, then reference. Problem view = statement left, editor and console right; stacks under 1000px. */
+:root{color-scheme:light dark;
+--bg:light-dark(#e9eaec,#141517);--panel:light-dark(#f7f7f8,#1b1c1f);--code:light-dark(#ffffff,#0f1012);
+--ink:light-dark(#121314,#ecedef);--mute:light-dark(#585c63,#9da1a8);--line:light-dark(#cdd0d4,#2d2f34);
+--acc:#ff4f00;--accink:light-dark(#c23c00,#ff7a3d);
+--ok:light-dark(#11743f,#45d185);--okbg:light-dark(#e3f3ea,#14281d);--bad:light-dark(#b8242a,#ff6f6f);--badbg:light-dark(#fbe7e7,#2e1617);
+--med:light-dark(#9a6400,#f2b53a);
+--kw:light-dark(#b03600,#ff8b52);--ty:light-dark(#5233b8,#b9a7ff);--nu:light-dark(#0a6f6b,#5ed2ca);
+--mono:"Geist Mono",ui-monospace,Menlo,Consolas,monospace}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Geist,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+code,pre,textarea{font-family:var(--mono)}
+code{font-size:.92em;background:light-dark(#e2e4e7,#25272b);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:12px max(4vw,16px);border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+.brand{font-weight:600;text-decoration:none;font-size:17px;display:flex;align-items:center;gap:10px}
+.home{font-size:14px;color:var(--mute);text-decoration:none;padding:8px 0}.home:hover{color:var(--ink)}
+.brand i{width:12px;height:12px;background:var(--acc);border-radius:2px;display:inline-block}
+.scale{display:flex;align-items:center;gap:12px;margin-left:auto;font-size:14px;color:var(--mute)}
+.ticks{display:flex;gap:3px}.ticks span{width:10px;height:18px;border-radius:2px;background:var(--line)}
+.ticks span.on{background:var(--acc)}
+.wrap{max-width:1360px;margin:0 auto;padding:clamp(20px,3vw,40px) max(4vw,16px) 60px}
+h1{font-size:clamp(30px,4vw,44px);line-height:1.05;margin:0 0 8px;font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 10px;font-weight:600}
+.lede{color:var(--mute);max-width:68ch;margin:0 0 22px}
+.filt{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.chips{display:flex;gap:8px;flex-wrap:wrap}
+#q{flex:1 1 260px;min-height:42px;font:16px Geist,system-ui,sans-serif;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink)}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 16px;min-height:40px;font-size:15px}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--mute);font-size:14px}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.list tr.row{cursor:pointer}.list tr.row:hover td{background:light-dark(#eef0f2,#222428)}
+.list td a{text-decoration:none;font-weight:500}
+.st{width:44px}.st svg{display:block}
+.Easy{color:var(--ok)}.Medium{color:var(--med)}.Hard{color:var(--bad)}
+.topics{color:var(--mute);font-size:14px}
+.ref{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px;margin-top:44px}
+.ref section{border-top:2px solid var(--ink);padding-top:14px}
+.ref ul{padding-left:18px;margin:0}.ref li{margin:4px 0}
+.ref pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13.5px;margin:8px 0 0}
+/* problem view */
+.pv{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media(min-width:1000px){.pv{grid-template-columns:minmax(0,.95fr) minmax(0,1.15fr);align-items:start}.left{position:sticky;top:74px;max-height:calc(100vh - 90px);overflow:auto}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.left{padding:22px 24px}
+.ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;margin-bottom:6px}
+.ph .num{color:var(--mute)}
+.ph h1{font-size:clamp(24px,3vw,32px);width:100%;margin:2px 0 6px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:14px 0 16px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;min-height:44px;color:var(--mute);flex:none}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc)}
+.desc p,.desc ul{margin:0 0 12px}.desc li{margin:4px 0}
+.note{color:var(--mute);font-size:15px}
+h3{font-size:15px;margin:22px 0 8px;font-weight:600}
+.tt td,.tt th{padding:7px 10px;font-size:14px}
+.tt td:first-child{font-family:var(--mono);white-space:nowrap}.tt code{white-space:nowrap;overflow-wrap:normal}
+.dir{font-size:12px;padding:2px 7px;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+.dir.in{color:var(--nu)}.dir.out{color:var(--accink)}
+.scroll{overflow-x:auto}
+.trace td,.trace th{padding:7px 10px;font-size:13.5px;font-family:var(--mono)}
+.trace th{font-family:Geist,sans-serif;white-space:nowrap}
+.trace td.t{white-space:nowrap;color:var(--mute)}
+.trace td.ok{color:var(--ok)}
+.trace td.bad{background:var(--badbg);color:var(--bad);font-weight:500}
+.trace td small{display:block;font-weight:400;color:var(--bad)}
+.trace td.na{color:var(--mute)}.trace td.t small{color:var(--mute)}
+.trace .set{min-width:160px}
+.right{display:flex;flex-direction:column;gap:14px}
+.bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:14px;color:var(--mute)}
+.bar .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:9px 16px;min-height:44px;font-size:15px}
+.btn:hover{border-color:var(--mute)}
+.btn.go{background:var(--acc);border-color:var(--acc);color:#111;font-weight:600}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:500}
+.btn.sm{min-height:36px;padding:5px 12px;font-size:14px}
+.ed{display:grid;grid-template-columns:auto minmax(0,1fr);height:min(460px,62vh);min-height:300px;background:var(--code);border-radius:0 0 10px 10px;overflow:hidden}
+.gut{overflow:hidden;padding:14px 0;text-align:right;color:var(--mute);font:14px/22px var(--mono);user-select:none;border-right:1px solid var(--line)}
+.gut div{padding:0 10px 0 14px}.gut div.err{background:var(--badbg);color:var(--bad);font-weight:600}
+.code{position:relative}
+.code pre,.code textarea{position:absolute;inset:0;margin:0;padding:14px 16px;font:15px/22px var(--mono);white-space:pre;tab-size:2;border:0;overflow:auto}
+.code pre{pointer-events:none;overflow:hidden;color:var(--ink)}
+.code textarea{background:transparent;color:transparent;caret-color:var(--acc);resize:none;outline:none}
+.code textarea::selection{background:light-dark(#ffd6c2,#5a2a14);color:transparent}
+.k{color:var(--kw);font-weight:500}.y{color:var(--ty)}.n{color:var(--nu)}.c{color:var(--mute);font-style:italic}
+.console{padding:16px 18px;min-height:160px}
+.verdict{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.verdict b{font-size:22px;font-weight:600}
+.verdict.pass b{color:var(--ok)}.verdict.fail b{color:var(--bad)}
+.tchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tchip{border:1px solid var(--line);background:transparent;border-radius:6px;padding:6px 12px;min-height:38px;font-size:14px;display:flex;align-items:center;gap:7px}
+.tchip i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.tchip.f i{background:var(--bad)}
+.tchip[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.errbox{border-left:3px solid var(--bad);background:var(--badbg);padding:12px 14px;border-radius:0 6px 6px 0;margin-bottom:12px}
+.errbox b{color:var(--bad)}
+.errbox p{margin:4px 0 8px;font-family:var(--mono);font-size:14px}
+details{margin-top:14px}summary{cursor:pointer;color:var(--mute);font-size:14px;min-height:32px}
+.mon{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 18px;font:13px/1.6 var(--mono);margin-top:8px}
+.mon span{color:var(--mute)}
+.hint{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.solpre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14px;line-height:22px;overflow-x:auto;margin:10px 0}
+.muted{color:var(--mute)}
+.navp{display:flex;gap:8px;margin-left:auto}
+.how{padding-left:20px;margin:0 0 6px}.how li{margin:6px 0}
+.linkbtn{background:none;border:0;padding:6px 0;color:var(--accink);text-decoration:underline;font-size:15px;margin-left:auto;min-height:36px}
+.langs{white-space:nowrap}.lb{display:inline-block;font:500 12px var(--mono);padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--mute);margin-right:4px}.lb.done{border-color:var(--ok);color:var(--ok)}
+.segs{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}.seg{border:0;background:transparent;padding:6px 12px;min-height:36px;font-size:14px;color:var(--mute)}.seg[aria-pressed=true]{background:var(--ink);color:var(--bg)}.seg:disabled{opacity:.4;cursor:not-allowed}
+.palette{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line)}.palette button{font:500 12.5px var(--mono);border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:4px 8px;min-height:32px}.palette button:hover{border-color:var(--mute)}.palette .pk{font-family:inherit;font-weight:600}
+.ldv{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:6px}.ldlive .ldv{border:0;border-radius:0 0 6px 6px;max-height:420px;overflow:auto}.ldv.stale,#ldDraw.stale{opacity:.45}
+.ldsvg{display:block}.ldsvg text{font-family:var(--mono);fill:var(--ink)}.ld-tag{font-size:11px}.ld-sym{font-size:11px;font-weight:600}.ld-mn{font-size:12px;font-weight:600}.ld-nm{font-size:10px;fill:var(--mute)!important}.ld-arg{font-size:11px}.ld-flag{font-size:10px;fill:var(--ok)!important;font-weight:600}.ld-rn{font-size:11px;fill:var(--mute)!important}
+.lderr{color:var(--bad);font-family:var(--mono);font-size:12.5px}
+.ldnote{background:light-dark(#eef2f7,#1d2329);border-radius:6px;padding:10px 12px;font-size:15px}
+.b{color:var(--ty);font-weight:600}
+.solved-badge{color:var(--ok);font-weight:500}
+@media(max-width:600px){table{font-size:13px}.topics{display:none}.left{padding:18px 16px}.scale .lbl{display:none}}
+@media(prefers-reduced-motion:no-preference){.verdict{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(4px)}}}
+</style>
+</head>
+<body>
+<header class="top">
+  <!--HOME--><a class="brand" href="#problems"><i></i>ST Practice</a>
+  <div class="scale" aria-live="polite"><div class="ticks" id="ticks"></div><span id="prog"></span></div>
+</header>
+
+<main class="wrap" id="listView">
+  <h1>Structured Text and ladder problems</h1>
+  <p class="lede">Practise Allen-Bradley Logix code, in Structured Text and ladder logic, the way you would on a coding judge. Write a routine, run it against simulated PLC scans, and get graded output by output.</p>
+  <div class="filt"><div class="chips" id="filters" role="group" aria-label="Filter by difficulty"></div><div class="chips" id="lfilters" role="group" aria-label="Filter by language"></div><input id="q" type="search" placeholder="Search title or topic — e.g. timers, arrays" aria-label="Search problems"></div>
+  <div class="list scroll"><table><thead><tr><th class="st">Status</th><th>Problem</th><th>Language</th><th class="topics">Topics</th><th>Difficulty</th></tr></thead><tbody id="rows"></tbody></table><p id="none" class="muted" style="padding:16px;margin:0" hidden>No problems match that search.</p></div>
+
+  <div class="ref">
+    <section><h2>How grading works</h2><ul>
+      <li>Each test is a sequence of <b>scans</b>. Before every scan the inputs are written, then your whole routine runs once, top to bottom.</li>
+      <li>Every tag keeps its value between scans, just like controller tags. Internal tags start at 0 or FALSE.</li>
+      <li>Outputs are compared at each checkpoint row. REAL values must match within 0.001.</li>
+      <li><b>Run</b> grades the example tests. <b>Submit</b> adds hidden tests, and a problem counts as solved only when they all pass.</li>
+      <li>Timers run on a simulated clock: ACC starts at 0 on the first enabled scan and adds the scan time on each scan after that.</li>
+      <li>Faults are simulated too: an array index out of range or a runaway loop stops the run, as a major fault would.</li></ul></section>
+    <section><h2>Supported syntax</h2><ul>
+      <li><code>:=</code>, <code>IF/ELSIF/ELSE</code>, <code>CASE … OF</code> (ranges <code>1..5:</code>), <code>FOR … BY</code>, <code>WHILE</code>, <code>REPEAT</code>, <code>EXIT</code>, <code>RETURN</code></li>
+      <li><code>AND OR XOR NOT &amp;</code> (bitwise on integers), <code>= &lt;&gt; &lt; &lt;= &gt; &gt;=</code>, <code>+ - * / MOD **</code></li>
+      <li>Types: BOOL, SINT, INT, DINT, REAL, ARRAY, FBD_TIMER, FBD_ONESHOT, TIMER, COUNTER</li>
+      <li>Instructions: <code>TONR</code>, <code>TOFR</code>, <code>OSRI</code>, <code>OSFI</code>. Functions: ABS, SQRT/SQR, TRN, SIN, COS, TAN, LN, LOG. Like Studio 5000, there is no MIN, MAX or LIMIT, so clamp with IF</li>
+      <li>Bits: <code>Word.5</code>, <code>Word.[i]</code>. Literals: <code>16#FF</code>, <code>2#1010</code>, <code>1.5e3</code>. Comments: <code>//</code>, <code>(* *)</code>, <code>/* */</code></li>
+      <li>Optional local tags at the top of a routine. This is a simulator convenience: in Studio 5000 you create tags in the tag editor.</li></ul>
+      <pre>VAR
+  Count : DINT := 0;
+  Buf   : ARRAY[0..4] OF REAL;
+END_VAR</pre></section>
+    <section><h2>Ladder logic</h2><ul>
+      <li>Written as Studio 5000 rung text, one rung per line ending in <code>;</code>. This is the same format as "Edit rung as text" and L5X exports. The diagram draws itself as you type.</li>
+      <li>Branches: <code>BST XIC(A) NXB XIC(B) BND</code> puts A and B in parallel.</li>
+      <li>Bits: <code>XIC XIO OTE OTL OTU ONS OSR OSF</code>. Timers and counters: <code>TON TOF RTO CTU CTD RES</code>, for example <code>TON(T1,5000,0)</code></li>
+      <li>Compare: <code>EQU NEQ GRT GEQ LES LEQ LIM CMP</code>. Math and move: <code>MOV ADD SUB MUL DIV MOD CPT CLR ABS</code></li>
+      <li>After a run, the power-flow view shows which contacts were energized on the last scan.</li></ul>
+      <pre>BST XIC(Start) NXB XIC(Motor) BND XIO(Stop) OTE(Motor);
+XIC(Motor) TON(Run_Tmr,5000,0);</pre></section>
+    <section><h2>Editor keys</h2><ul>
+      <li><b>Ctrl/⌘ + Enter</b> runs the examples. <b>Ctrl/⌘ + Shift + Enter</b> submits.</li>
+      <li><b>Tab</b> indents by two spaces and <b>Enter</b> keeps the current indent. Press <b>Esc</b>, then Tab, to move focus out of the editor.</li>
+      <li>Your code and solved problems are kept in this browser.</li></ul>
+      <p class="muted" style="font-size:14px;margin-top:12px">This is a simulator for the common subset of Logix ST and ladder, not Studio 5000 itself. Use it to build fluency, then verify on real hardware.</p></section>
+  </div>
+</main>
+
+<main class="wrap" id="probView" hidden>
+  <div class="pv">
+    <article class="card left" id="left"></article>
+    <div class="right">
+      <div class="card">
+        <div class="bar"><div class="segs" id="langSw" role="group" aria-label="Language"></div><span class="sp"></span>
+          <button class="btn sm" id="resetBtn">Reset code</button></div>
+        <div class="palette" id="palette" hidden role="toolbar" aria-label="Insert ladder instruction">
+          <button data-ins="RUNG" class="pk">New rung ;</button><button data-ins="BR" class="pk">Branch</button><button data-ins="XIC">XIC</button><button data-ins="XIO">XIO</button><button data-ins="OTE">OTE</button><button data-ins="OTL">OTL</button><button data-ins="OTU">OTU</button><button data-ins="ONS">ONS</button><button data-ins="TON">TON</button><button data-ins="TOF">TOF</button><button data-ins="RTO">RTO</button><button data-ins="CTU">CTU</button><button data-ins="CTD">CTD</button><button data-ins="RES">RES</button><button data-ins="EQU">EQU</button><button data-ins="NEQ">NEQ</button><button data-ins="GRT">GRT</button><button data-ins="GEQ">GEQ</button><button data-ins="LES">LES</button><button data-ins="LEQ">LEQ</button><button data-ins="LIM">LIM</button><button data-ins="CMP">CMP</button><button data-ins="MOV">MOV</button><button data-ins="ADD">ADD</button><button data-ins="SUB">SUB</button><button data-ins="MUL">MUL</button><button data-ins="DIV">DIV</button><button data-ins="CPT">CPT</button><button data-ins="ABS">ABS</button>
+        </div>
+        <div class="ed"><div class="gut" id="gut"></div><div class="code"><pre id="hl" aria-hidden="true"></pre><textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Structured Text editor"></textarea></div></div>
+      </div>
+      <section class="card ldlive" id="ldLive" hidden><div class="bar"><span>Live ladder diagram</span><span class="sp"></span><span id="ldErr" class="lderr"></span></div><div class="ldv scroll" id="ldDraw"></div></section>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn dark" id="runBtn">Run examples</button>
+        <button class="btn go" id="subBtn">Submit</button>
+        <span class="muted" style="font-size:14px">Ctrl+Enter to run</span>
+      </div>
+      <section class="card console" id="console" aria-live="polite"></section>
+    </div>
+  </div>
+</main>
+
+<script>/*ENGINE*/</script>
+<script>/*PROBLEMS*/</script>
+<script>/*PROBLEMS2*/</script>
+<script>/*EXPLAIN*/</script>
+<script>/*LADDER*/</script>
+<script>
+{
+const E = STEngine, P = PROBLEMS;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let store = { code: {}, solved: {}, tried: {} };
+try { const s = JSON.parse(localStorage.getItem('st-practice-v1') || 'null'); if (s) store = Object.assign(store, s); } catch (e) {}
+const save = () => { try { localStorage.setItem('st-practice-v1', JSON.stringify(store)); } catch (e) {} };
+const expCache = {};
+let lang = store.lang || 'st';
+const ref = p => p.solution ? [p.solution, 'st'] : [p.ld, 'ld'];
+const expected = (p, i) => expCache[p.id + i] || (expCache[p.id + i] = E.simulate(ref(p)[0], p, p.tests[i], ref(p)[1]));
+const typeOf = (p, n) => (p.tags.find(t => t.name === n) || {}).type;
+const key = (id, l) => l === 'ld' ? id + '@ld' : id;
+const langOf = p => p.langs.includes(lang) ? lang : p.langs[0];
+const starterOf = (p, l) => l === 'ld' ? (p.ldStarter || '// One rung per line, ending with ;\n// Example: XIC(Input) OTE(Output);\n') : p.starter;
+const tagsOf = (p, l) => l === 'ld' ? E.ldTags(p) : p.tags;
+function fmt(v, type) {
+  if (Array.isArray(v)) return '[' + v.map(x => fmt(x, type)).join(', ') + ']';
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  if (type === 'REAL') { const r = Number(v.toFixed(4)); return Number.isInteger(r) ? r + '.0' : String(r); }
+  return String(v);
+}
+const ICON = {
+  solved: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Solved"><circle cx="10" cy="10" r="9" fill="var(--ok)"/><path d="M6 10.5l2.6 2.6L14.5 7" stroke="var(--panel)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  tried: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Attempted"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--med)" stroke-width="2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="var(--med)"/></svg>',
+  none: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Not started"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--line)" stroke-width="2"/></svg>'
+};
+const solvedAny = id => store.solved[id] || store.solved[id + '@ld'];
+const status = id => solvedAny(id) ? 'solved' : (store.tried[id] || store.tried[id + '@ld']) ? 'tried' : 'none';
+
+// ---------- highlighter ----------
+const KW = new Set('IF THEN ELSIF ELSE END_IF CASE OF END_CASE FOR TO BY DO END_FOR WHILE END_WHILE REPEAT UNTIL END_REPEAT EXIT RETURN AND OR XOR NOT MOD VAR END_VAR ARRAY'.split(' '));
+const TY = new Set('BOOL SINT INT DINT REAL FBD_TIMER FBD_ONESHOT TIMER COUNTER TONR TOFR OSRI OSFI ABS SQRT SQR TRN SIN COS TAN LN LOG'.split(' '));
+const RX = /(\/\/[^\n]*|\(\*[\s\S]*?(?:\*\)|$)|\/\*[\s\S]*?(?:\*\/|$))|(\b\d[\d_]*(?:#[0-9A-Fa-f_]+)?(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_]\w*)/g;
+function hilite(src) {
+  let out = '', last = 0;
+  src.replace(RX, (m, com, nm, id, off) => {
+    out += esc(src.slice(last, off)); last = off + m.length;
+    if (com) out += `<span class="c">${esc(m)}</span>`;
+    else if (nm) out += `<span class="n">${m}</span>`;
+    else { const u = m.toUpperCase(); out += KW.has(u) ? `<span class="k">${m}</span>` : TY.has(u) ? `<span class="y">${m}</span>` : (u === 'TRUE' || u === 'FALSE') ? `<span class="n">${m}</span>` : esc(m); }
+    return m;
+  });
+  return out + esc(src.slice(last));
+}
+function hiliteLD(src) {
+  return src.split('\n').map(line => {
+    const ci = line.indexOf('//'); const code = ci >= 0 ? line.slice(0, ci) : line, com = ci >= 0 ? line.slice(ci) : '';
+    let out = esc(code).replace(/\b(BST|NXB|BND)\b/g, '<span class="b">$1</span>').replace(/\b([A-Za-z]{2,4})(?=\()/g, '<span class="k">$1</span>').replace(/(?<![\w.])(-?\d+(?:\.\d+)?)(?![\w])/g, '<span class="n">$1</span>').replace(/;/g, '<span class="y">;</span>');
+    return out + (com ? `<span class="c">${esc(com)}</span>` : '');
+  }).join('\n');
+}
+const hl2 = (src, l) => l === 'ld' ? hiliteLD(src) : hilite(src);
+
+// ---------- ladder diagram ----------
+const CONTACT = { XIC: 1, XIO: 1, OTE: 1, OTL: 1, OTU: 1 };
+const LBL = { TON: ['Timer', 'Preset', 'Accum'], TOF: ['Timer', 'Preset', 'Accum'], RTO: ['Timer', 'Preset', 'Accum'], CTU: ['Counter', 'Preset', 'Accum'], CTD: ['Counter', 'Preset', 'Accum'], RES: [''], ONS: [''], OSR: ['Storage', 'Output'], OSF: ['Storage', 'Output'], MOV: ['Source', 'Dest'], ADD: ['Source A', 'Source B', 'Dest'], SUB: ['Source A', 'Source B', 'Dest'], MUL: ['Source A', 'Source B', 'Dest'], DIV: ['Source A', 'Source B', 'Dest'], MOD: ['Source A', 'Source B', 'Dest'], EQU: ['A', 'B'], NEQ: ['A', 'B'], GRT: ['A', 'B'], GEQ: ['A', 'B'], LES: ['A', 'B'], LEQ: ['A', 'B'], LIM: ['Low', 'Test', 'High'], CPT: ['Dest', 'Expr'], CMP: ['Expr'], CLR: ['Dest'], ABS: ['Source', 'Dest'] };
+const NAMES = { TON: 'Timer On Delay', TOF: 'Timer Off Delay', RTO: 'Retentive Timer', CTU: 'Count Up', CTD: 'Count Down', MOV: 'Move', ADD: 'Add', SUB: 'Subtract', MUL: 'Multiply', DIV: 'Divide', MOD: 'Modulo', EQU: 'Equal', NEQ: 'Not Equal', GRT: 'Greater Than', GEQ: 'Greater/Equal', LES: 'Less Than', LEQ: 'Less/Equal', LIM: 'Limit Test', CPT: 'Compute', CMP: 'Compare', CLR: 'Clear', ABS: 'Absolute', RES: 'Reset', ONS: 'One Shot', OSR: 'One Shot Rising', OSF: 'One Shot Falling' };
+function drawLadder(rungs, trace, prog) {
+  const CW = 132, WY = 30, PAD = 14, X0 = 40;
+  const short = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
+  const lay = e => {
+    if (e.k === 'br') { const ch = e.branches.map(laySeries); return { e, ch, w: Math.max(60, ...ch.map(c => c.w)) + 2 * PAD, h: ch.reduce((a, c) => a + c.h, 0) }; }
+    return { e, w: CW, h: CONTACT[e.u] ? 62 : Math.max(62, 44 + Math.max(1, e.args.length) * 17) };
+  };
+  const laySeries = list => { const items = list.map(lay); return { items, w: Math.max(40, items.reduce((a, b) => a + b.w, 0)), h: Math.max(62, ...items.map(i => i.h)) }; };
+  const T = id => trace && trace[id] ? trace[id] : null;
+  const col = on => on == null ? 'var(--ink)' : on ? 'var(--ok)' : 'var(--mute)';
+  const sw = on => on ? 3 : 1.6;
+  let svg = '';
+  const line = (x1, y1, x2, y2, on) => { if (x2 !== x1 || y2 !== y1) svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col(on)}" stroke-width="${sw(on)}"/>`; };
+  const text = (x, y, t, cls, anchor) => { svg += `<text x="${x}" y="${y}" class="${cls || ''}" text-anchor="${anchor || 'middle'}">${esc(t)}</text>`; };
+  const live = (e, k) => { if (!prog || !['TON', 'TOF', 'RTO', 'CTU', 'CTD'].includes(e.u) || k !== 2) return null; try { const c = prog.tags.get(e.args[0].s.toUpperCase()); return c && c.m ? String(c.m.ACC.v) : null; } catch (x) { return null; } };
+  const drawEl = (L, x, y, pin) => {
+    const e = L.e, tr = T(e.id), pout = tr ? tr[1] : (pin == null ? null : null), on = tr ? tr[1] : null, inOn = tr ? tr[0] : pin;
+    if (e.k === 'br') {
+      let yy = y; const last = L.ch.length - 1; let yLast = y;
+      L.ch.forEach((c, k) => {
+        line(x, yy + WY, x + PAD, yy + WY, inOn);
+        const o = drawSeries(c, x + PAD, yy, L.w - 2 * PAD, inOn);
+        line(x + L.w - PAD, yy + WY, x + L.w, yy + WY, o);
+        if (k === last) yLast = yy; yy += c.h;
+      });
+      line(x, y + WY, x, yLast + WY, inOn); line(x + L.w, y + WY, x + L.w, yLast + WY, on);
+      return on;
+    }
+    const cx = x + CW / 2, wy = y + WY;
+    if (CONTACT[e.u]) {
+      const tag = short(e.args[0] ? e.args[0].s : '?', 18);
+      line(x, wy, cx - 12, wy, inOn); line(cx + 12, wy, x + CW, wy, e.u.startsWith('OT') ? inOn : on);
+      const c2 = e.u.startsWith('OT') ? col(inOn) : col(on), w2 = e.u.startsWith('OT') ? sw(inOn) : sw(on);
+      if (e.u === 'XIC' || e.u === 'XIO') {
+        svg += `<path d="M${cx - 12} ${wy - 13}v26M${cx + 12} ${wy - 13}v26" stroke="${c2}" stroke-width="${w2 + .6}" fill="none"/>`;
+        if (e.u === 'XIO') svg += `<path d="M${cx - 9} ${wy + 11}L${cx + 9} ${wy - 11}" stroke="${c2}" stroke-width="${w2}"/>`;
+      } else {
+        svg += `<path d="M${cx - 8} ${wy - 13}a16 16 0 0 0 0 26M${cx + 8} ${wy - 13}a16 16 0 0 1 0 26" stroke="${c2}" stroke-width="${w2 + .6}" fill="none"/>`;
+        if (e.u !== 'OTE') text(cx, wy + 4, e.u === 'OTL' ? 'L' : 'U', 'ld-sym');
+      }
+      text(cx, y + 12, tag, 'ld-tag');
+      return e.u.startsWith('OT') ? inOn : on;
+    }
+    const bx = x + 8, bw = CW - 16, labels = LBL[e.u] || e.args.map(() => '');
+    line(x, wy, bx, wy, inOn); line(bx + bw, wy, x + CW, wy, on);
+    svg += `<rect x="${bx}" y="${y + 6}" width="${bw}" height="${L.h - 12}" rx="3" fill="var(--code)" stroke="${col(on == null ? null : (inOn || on))}" stroke-width="${on ? 2.4 : 1.3}"/>`;
+    text(bx + 6, y + 20, e.u, 'ld-mn', 'start'); text(bx + bw - 6, y + 20, short(NAMES[e.u] || '', 15), 'ld-nm', 'end');
+    e.args.forEach((a, k) => { const v = live(e, k); const lab = labels[k] ? labels[k] + ' ' : ''; text(bx + 6, y + 38 + k * 17, short(lab + (v != null ? v : a.s), 21), 'ld-arg', 'start'); });
+    if (prog && ['TON', 'TOF', 'RTO'].includes(e.u)) { try { const c = prog.tags.get(e.args[0].s.toUpperCase()); text(bx + bw - 6, y + 38, (c.m.EN.v ? 'EN ' : '') + (c.m.DN.v ? 'DN' : ''), 'ld-flag', 'end'); } catch (x) {} }
+    if (prog && ['CTU', 'CTD'].includes(e.u)) { try { const c = prog.tags.get(e.args[0].s.toUpperCase()); text(bx + bw - 6, y + 38, c.m.DN.v ? 'DN' : '', 'ld-flag', 'end'); } catch (x) {} }
+    return on;
+  };
+  const drawSeries = (S, x, y, allocW, pin) => {
+    let cx = x, p = pin;
+    for (const it of S.items) { const o = drawEl(it, cx, y, p); cx += it.w; p = trace ? o : null; }
+    line(cx, y + WY, x + allocW, y + WY, p);
+    return p;
+  };
+  const L = rungs.map(r => laySeries(r.elems));
+  const W = Math.max(320, ...L.map(l => l.w)) + 24;
+  let y = 8; const parts = [];
+  L.forEach((l, k) => {
+    svg = '';
+    text(16, y + WY + 4, String(k), 'ld-rn');
+    drawSeries(l, X0 + 12, y, W - 24, trace ? true : null);
+    line(X0, y + 6, X0, y + l.h - 6, trace ? true : null); line(X0 + 12, y + WY, X0, y + WY, trace ? true : null);
+    svg += `<line x1="${X0 + W}" y1="${y + 6}" x2="${X0 + W}" y2="${y + l.h - 6}" stroke="var(--ink)" stroke-width="1.6"/>`;
+    parts.push(svg); y += l.h + 10;
+  });
+  if (!rungs.length) return '<p class="muted" style="margin:8px 0">No rungs yet. Each rung ends with ;</p>';
+  return `<svg class="ldsvg" width="${X0 + W + 12}" height="${y}" viewBox="0 0 ${X0 + W + 12} ${y}" role="img" aria-label="Ladder diagram">${parts.join('')}</svg>`;
+}
+
+// ---------- list view ----------
+let filter = 'All', query = '', lfilter = 'any';
+function renderTicks() {
+  const n = P.filter(p => solvedAny(p.id)).length;
+  $('#ticks').innerHTML = P.map(p => `<span class="${solvedAny(p.id) ? 'on' : ''}" title="${esc(p.title)}"></span>`).join('');
+  $('#prog').innerHTML = `<span class="lbl">${n} of ${P.length} solved</span>`;
+}
+const badges = p => p.langs.map(l => `<span class="lb ${l}${store.solved[key(p.id, l)] ? ' done' : ''}" title="${l === 'ld' ? 'Ladder' : 'Structured Text'}${store.solved[key(p.id, l)] ? ' – solved' : ''}">${l === 'ld' ? 'LD' : 'ST'}</span>`).join('');
+function renderList() {
+  $('#filters').innerHTML = ['All', 'Easy', 'Medium', 'Hard'].map(f => `<button class="chip" aria-pressed="${f === filter}" data-f="${f}">${f}${f === 'All' ? '' : ' · ' + P.filter(p => p.diff === f).length}</button>`).join('');
+  $('#lfilters').innerHTML = [['any', 'Any language'], ['st', 'Structured Text · ' + P.filter(p => p.langs.includes('st')).length], ['ld', 'Ladder · ' + P.filter(p => p.langs.includes('ld')).length]].map(([k, l]) => `<button class="chip" aria-pressed="${k === lfilter}" data-l="${k}">${l}</button>`).join('');
+  const list = P.map((p, i) => ({ p, i })).filter(({ p }) => (filter === 'All' || p.diff === filter) && (lfilter === 'any' || p.langs.includes(lfilter)) && (!query || (p.title + ' ' + p.topics.join(' ')).toLowerCase().includes(query))).map(({ p, i }) =>
+    `<tr class="row" data-id="${p.id}"><td class="st">${ICON[status(p.id)]}</td><td><a href="#${p.id}">${i + 1}. ${esc(p.title)}</a></td><td class="langs">${badges(p)}</td><td class="topics">${p.topics.join(' · ')}</td><td class="${p.diff}">${p.diff}</td></tr>`);
+  $('#rows').innerHTML = list.join(''); $('#none').hidden = list.length > 0;
+}
+$('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; renderList(); } });
+$('#lfilters').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (b) { lfilter = b.dataset.l; if (lfilter !== 'any') { lang = lfilter; store.lang = lang; save(); } renderList(); } });
+$('#q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); renderList(); });
+$('#rows').addEventListener('click', e => { const r = e.target.closest('tr[data-id]'); if (r && !e.target.closest('a')) location.hash = r.dataset.id; });
+
+// ---------- trace table ----------
+function trace(p, test, exp, got, fail) {
+  const outs = p.tags.filter(t => t.dir === 'out');
+  const head = `<tr><th>Time</th><th class="set">Inputs written</th>${outs.map(o => `<th>${o.name}</th>`).join('')}</tr>`;
+  const rows = exp.map((c, k) => {
+    const n = test.steps[k][0], keys = Object.keys(c.set);
+    const set = keys.length ? keys.map(nm => `${nm} := ${fmt(c.set[nm], typeOf(p, nm))}`).join('<br>') : '<span class="muted">(no change)</span>';
+    const g = got && got[k];
+    const cells = outs.map(o => {
+      const e = c.out[o.name], f = fmt(e, o.type);
+      if (!got) return `<td>${f}</td>`;
+      if (!g) return `<td class="na">${f}<small>${fail ? 'not reached' : ''}</small></td>`;
+      return E.same(g.out[o.name], e) ? `<td class="ok">${f}</td>` : `<td class="bad">${f}<small>yours: ${fmt(g.out[o.name], o.type)}</small></td>`;
+    }).join('');
+    return `<tr><td class="t">${c.t} ms${n > 1 ? `<br><small>${n} scans</small>` : ''}</td><td class="set">${set}</td>${cells}</tr>`;
+  }).join('');
+  return `<div class="scroll"><table class="trace">${head}${rows}</table></div>`;
+}
+
+// ---------- problem view ----------
+let loadArm = null;
+let cur = null, tab = 'desc', hintsShown = 0, solShown = false, lastRes = null, sel = 0;
+function renderLeft() {
+  const p = cur, i = P.indexOf(p), L = langOf(p), K = key(p.id, L);
+  const nav = `<div class="navp"><button class="btn sm" data-go="${i - 1}" ${i === 0 ? 'disabled' : ''} aria-label="Previous problem">‹ Prev</button><button class="btn sm" data-go="${i + 1}" ${i === P.length - 1 ? 'disabled' : ''} aria-label="Next problem">Next ›</button></div>`;
+  let body = '';
+  if (tab === 'desc') {
+    const tt = tagsOf(p, L).map(t => `<tr><td>${t.name}</td><td><code>${t.dim ? `ARRAY[0..${t.dim - 1}] OF ${t.type}` : t.type}</code></td><td><span class="dir ${t.dir}">${{ in: 'Input', out: 'Output', int: 'Internal' }[t.dir]}</span></td><td class="muted">${esc(t.d || '')}</td></tr>`).join('');
+    const exIdx = p.tests.findIndex(t => !t.hidden);
+    const note = L === 'ld' && p.langs.includes('st') ? `<p class="ldnote"><b>Ladder version.</b> Same task and tests. Timer tags are TIMER here, so use TON / TOF / RTO in place of TONR / TOFR.</p>` : '';
+    body = `<div class="desc">${p.desc}</div>${note}<h3>Tags</h3><div class="scroll"><table class="tt"><tr><th>Name</th><th>Type</th><th>Usage</th><th>Notes</th></tr>${tt}</table></div>
+      <h3>Example — ${esc(p.tests[exIdx].name)} <span class="muted" style="font-weight:400">(${p.tests[exIdx].dt || 100} ms scan)</span></h3>${trace(p, p.tests[exIdx], expected(p, exIdx), null)}
+      <p class="note" style="margin-top:10px">${p.tests.filter(t => !t.hidden).length} example test${p.tests.filter(t => !t.hidden).length > 1 ? 's' : ''} + ${p.tests.filter(t => t.hidden).length} hidden.</p>`;
+  } else if (tab === 'hints') {
+    body = p.hints.slice(0, hintsShown).map((h, k) => `<div class="hint"><b>Hint ${k + 1}.</b> ${esc(h)}</div>`).join('') +
+      (hintsShown < p.hints.length ? `<button class="btn" id="moreHint">Show hint ${hintsShown + 1} of ${p.hints.length}</button>` : '<p class="muted">That\'s every hint.</p>');
+  } else {
+    const X = L === 'ld' ? (p.ldHow ? { how: p.ldHow, pitfalls: [] } : null) : ((typeof EXPLAIN !== 'undefined' && EXPLAIN[p.id]) || null);
+    const solSrc = L === 'ld' ? p.ld : p.solution;
+    let diag = ''; if (L === 'ld') { try { diag = `<div class="ldv scroll">${drawLadder(E.parseLadder(solSrc))}</div>`; } catch (x) {} }
+    body = solShown ? `${X ? `<h3 style="margin-top:0">How it works</h3><ol class="how">${X.how.map(h => `<li>${h}</li>`).join('')}</ol>` : ''}
+      <h3>Reference solution${L === 'ld' ? ' (ladder)' : ''}</h3>${diag}<pre class="solpre">${hl2(solSrc, L)}</pre>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="loadSol">Load into editor</button><button class="btn sm" id="copySol">Copy</button></div>
+      ${X && X.pitfalls.length ? `<h3>Common mistakes</h3><ul class="how">${X.pitfalls.map(h => `<li>${h}</li>`).join('')}</ul>` : ''}
+      <p class="note" style="margin-top:14px">This is one way to solve it. Any code that produces the same outputs passes.</p>`
+      : `<p>Give it a real try first: even ten minutes of being stuck teaches more than reading the answer. If you're still stuck, check the hints, then come back here.</p><button class="btn" id="showSol">Reveal solution and explanation</button>`;
+  }
+  $('#left').innerHTML = `<div class="ph"><span class="num">${i + 1} / ${P.length}</span><span class="${p.diff}">${p.diff}</span>${store.solved[K] ? `<span class="solved-badge">Solved in ${L === 'ld' ? 'ladder' : 'ST'}</span>` : ''}${nav}<h1>${esc(p.title)}</h1><span class="topics">${p.topics.join(' · ')}</span></div>
+    <div class="tabs" role="tablist">${[['desc', 'Description'], ['hints', 'Hints'], ['sol', 'Solution']].map(([k, l]) => `<button class="tab" role="tab" aria-selected="${tab === k}" data-tab="${k}">${l}</button>`).join('')}</div>${body}`;
+}
+$('#left').addEventListener('click', e => {
+  const t = e.target;
+  if (t.dataset.tab) { tab = t.dataset.tab; renderLeft(); }
+  else if (t.dataset.go != null) location.hash = P[+t.dataset.go].id;
+  else if (t.id === 'moreHint') { hintsShown++; renderLeft(); }
+  else if (t.id === 'showSol') { solShown = true; renderLeft(); }
+  else if (t.id === 'loadSol') {
+    if (!loadArm) { t.textContent = 'Replace your code? Click again'; loadArm = setTimeout(() => { t.textContent = 'Load into editor'; loadArm = null; }, 3000); return; }
+    const L = langOf(cur); clearTimeout(loadArm); loadArm = null; ta.value = L === 'ld' ? cur.ld : cur.solution; store.code[key(cur.id, L)] = ta.value; save(); errLine = 0; paint(); t.textContent = 'Loaded. Press Run';
+  }
+  else if (t.id === 'copySol') { navigator.clipboard.writeText(langOf(cur) === 'ld' ? cur.ld : cur.solution).then(() => { t.textContent = 'Copied'; }, () => { t.textContent = 'Copy blocked — select the text instead'; }); }
+});
+
+// ---------- editor ----------
+const ta = $('#src'), hl = $('#hl'), gut = $('#gut');
+let errLine = 0;
+function paint() {
+  hl.innerHTML = hl2(ta.value, cur ? langOf(cur) : 'st') + '\n ';
+  liveDiagram();
+  const n = ta.value.split('\n').length;
+  gut.innerHTML = Array.from({ length: n }, (_, k) => `<div class="${k + 1 === errLine ? 'err' : ''}">${k + 1}</div>`).join('');
+  sync();
+}
+function sync() { hl.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft; gut.scrollTop = ta.scrollTop; }
+function insert(s) { if (!document.execCommand || !document.execCommand('insertText', false, s)) { ta.setRangeText(s, ta.selectionStart, ta.selectionEnd, 'end'); paint(); } }
+let escaped = false;
+ta.addEventListener('input', () => { if (cur) { store.code[key(cur.id, langOf(cur))] = ta.value; save(); } paint(); });
+let ldTimer = null;
+function liveDiagram() {
+  const box = $('#ldLive'); if (!cur || langOf(cur) !== 'ld') { box.hidden = true; return; }
+  box.hidden = false; clearTimeout(ldTimer);
+  ldTimer = setTimeout(() => {
+    try { $('#ldDraw').innerHTML = drawLadder(E.parseLadder(ta.value)); $('#ldDraw').classList.remove('stale'); $('#ldErr').textContent = ''; }
+    catch (x) { $('#ldDraw').classList.add('stale'); $('#ldErr').textContent = `Line ${x.line}: ${x.message}`; }
+  }, 120);
+}
+$('#palette').addEventListener('click', e => {
+  const b = e.target.closest('[data-ins]'); if (!b) return;
+  const t = b.dataset.ins; ta.focus();
+  if (t === 'RUNG') { const v = ta.value, at = ta.selectionStart, endsLine = v.slice(0, at).trimEnd(); insert((endsLine && !endsLine.endsWith(';') ? ';' : '') + '\n'); return; }
+  if (t === 'BR') { insert('BST  NXB  BND '); const p = ta.selectionStart - 'NXB  BND '.length - 1; ta.setSelectionRange(p, p); return; }
+  const n = (E.LD[t] || []).length;
+  insert(t + '(' + ','.repeat(Math.max(0, n - 1)) + ') ');
+  const p = ta.selectionStart - (n ? n + 1 : 2); ta.setSelectionRange(p, p);
+});
+$('#langSw').addEventListener('click', e => {
+  const b = e.target.closest('[data-lang]'); if (!b || b.disabled) return;
+  lang = b.dataset.lang; store.lang = lang; save();
+  const p = cur; cur = null; route(); });
+ta.addEventListener('scroll', sync);
+ta.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { escaped = true; return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(e.shiftKey); return; }
+  if (e.key === 'Tab' && !escaped) { e.preventDefault(); insert('  '); return; }
+  escaped = false;
+  if (e.key === 'Enter') { e.preventDefault(); const s = ta.value.slice(0, ta.selectionStart), line = s.slice(s.lastIndexOf('\n') + 1); let ind = line.match(/^\s*/)[0]; if (langOf(cur) === 'st' && (/\b(THEN|DO|OF|ELSE|REPEAT|VAR)\s*$/i.test(line) || /^\s*-?\d+(\.\.\d+)?\s*:\s*$/.test(line))) ind += '  '; insert('\n' + ind); }
+});
+function gotoLine(l) {
+  const lines = ta.value.split('\n'); let off = 0; for (let k = 0; k < l - 1 && k < lines.length; k++) off += lines[k].length + 1;
+  ta.focus(); ta.setSelectionRange(off, off + (lines[l - 1] || '').length); ta.scrollTop = Math.max(0, (l - 4) * 22); sync();
+}
+let resetArm = null;
+$('#resetBtn').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!resetArm) { b.textContent = 'Click again to reset'; resetArm = setTimeout(() => { b.textContent = 'Reset code'; resetArm = null; }, 3000); return; }
+  clearTimeout(resetArm); resetArm = null; b.textContent = 'Reset code';
+  const L = langOf(cur); ta.value = starterOf(cur, L); store.code[key(cur.id, L)] = ta.value; save(); errLine = 0; paint();
+});
+
+// ---------- running ----------
+function run(all) {
+  const p = cur, src = ta.value, L = langOf(p), K = key(p.id, L);
+  store.code[K] = src; if (!store.solved[K]) store.tried[K] = true;
+  const res = [], idx = p.tests.map((_, i) => i).filter(i => all || !p.tests[i].hidden);
+  let compile = null;
+  for (const i of idx) {
+    const t = p.tests[i], exp = expected(p, i); let got, err = null, prog = null;
+    try { got = E.simulate(src, p, t, L); prog = got.prog; }
+    catch (x) {
+      const e = x instanceof E.STError ? x : new E.STError('Simulator error: ' + x.message, 0, 'Internal error');
+      if (e.kind !== 'Runtime fault') { compile = e; break; }
+      err = e; got = e.partial; prog = e.prog;
+    }
+    const pass = !err && exp.every((c, k) => Object.keys(c.out).every(nm => E.same(got[k].out[nm], c.out[nm])));
+    res.push({ i, t, exp, got, err, pass, prog });
+  }
+  errLine = compile ? compile.line : (res.find(r => r.err) || {}).err?.line || 0;
+  const ok = !compile && res.every(r => r.pass);
+  if (all && ok) { store.solved[K] = true; delete store.tried[K]; }
+  save(); paint(); renderTicks();
+  lastRes = { all, compile, res, ok }; sel = Math.max(0, res.findIndex(r => !r.pass));
+  renderConsole(); if (all && ok) renderLeft();
+}
+function monitor(prog) {
+  if (!prog) return '';
+  const items = [];
+  for (const [, c] of prog.tags) {
+    if (c.kind === 'struct') items.push(`<div>${esc(c.name)}<br><span>${Object.values(c.m).map(m => `${m.name}=${fmt(m.v, m.type)}`).join(' ')}</span></div>`);
+    else items.push(`<div>${esc(c.name)} <span>${esc(c.kind === 'array' ? fmt(c.data, c.type) : fmt(c.v, c.type))}</span></div>`);
+  }
+  return `<details><summary>Tag monitor — values after the last scan of this test</summary><div class="mon">${items.join('')}</div></details>`;
+}
+function renderConsole() {
+  const R = lastRes, el = $('#console');
+  if (!R) { el.innerHTML = '<p class="muted" style="margin:0">Run your routine to see the scan-by-scan results here.</p>'; return; }
+  if (R.compile) {
+    const e = R.compile;
+    el.innerHTML = `<div class="verdict fail"><b>${esc(e.kind)}</b><span class="muted">Fix it, then run again</span><button class="linkbtn" id="stuck">Stuck? See the solution</button></div><div class="errbox"><b>Line ${e.line}</b><p>${esc(e.message)}</p><button class="btn sm" id="goLine">Go to line ${e.line}</button></div>`;
+    return;
+  }
+  const passed = R.res.filter(r => r.pass).length, first = R.res.find(r => !r.pass);
+  const title = R.ok ? (R.all ? 'Accepted' : 'Examples pass') : first.err ? 'Runtime fault' : 'Wrong answer';
+  const sub = R.ok ? (R.all ? 'All tests passed, hidden ones included. Problem solved.' : 'Now submit to run the hidden tests.') : `${passed} / ${R.res.length} tests passed`;
+  const r = R.res[sel];
+  const detail = `${r.err ? `<div class="errbox"><b>Line ${r.err.line} · at t = ${r.err.at} ms</b><p>${esc(r.err.message)}</p><button class="btn sm" id="goLine">Go to line ${r.err.line}</button></div>` : ''}
+    <p class="muted" style="margin:0 0 8px;font-size:14px">${esc(r.t.name)}${r.t.hidden ? ' (hidden test)' : ''} · ${r.t.dt || 100} ms scan</p>${trace(cur, r.t, r.exp, r.got || [], !!r.err)}${r.prog && r.prog.rungs ? `<h3>Power flow after the last scan</h3><p class="note" style="margin:0 0 8px">Green means energized. Timer and counter boxes show their live accumulator.</p><div class="ldv scroll">${drawLadder(r.prog.rungs, r.prog.trace, r.prog)}</div>` : ''}${monitor(r.prog)}`;
+  el.innerHTML = `<div class="verdict ${R.ok ? 'pass' : 'fail'}"><b>${title}</b><span class="muted">${sub}</span>${R.ok ? '' : '<button class="linkbtn" id="stuck">Stuck? See the solution</button>'}</div>
+    <div class="tchips" role="group" aria-label="Tests">${R.res.map((x, k) => `<button class="tchip ${x.pass ? '' : 'f'}" aria-pressed="${k === sel}" data-sel="${k}"><i></i>${x.t.hidden ? 'Hidden: ' : ''}${esc(x.t.name)}</button>`).join('')}</div>${detail}`;
+}
+$('#console').addEventListener('click', e => {
+  const b = e.target.closest('[data-sel]'); if (b) { sel = +b.dataset.sel; renderConsole(); return; }
+  if (e.target.id === 'goLine') gotoLine(errLine);
+  if (e.target.id === 'stuck') { tab = 'sol'; renderLeft(); document.getElementById('left').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+});
+$('#runBtn').addEventListener('click', () => run(false));
+$('#subBtn').addEventListener('click', () => run(true));
+
+// ---------- routing ----------
+function route() {
+  const id = location.hash.slice(1), p = P.find(x => x.id === id);
+  renderTicks();
+  if (!p) { $('#probView').hidden = true; $('#listView').hidden = false; cur = null; renderList(); document.title = 'ST Practice'; return; }
+  $('#listView').hidden = true; $('#probView').hidden = false;
+  if (cur !== p) { cur = p; tab = 'desc'; hintsShown = 0; solShown = false; lastRes = null; errLine = 0; const L = langOf(p); ta.value = store.code[key(p.id, L)] ?? starterOf(p, L); ta.scrollTop = 0; }
+  const L = langOf(p);
+  $('#langSw').innerHTML = [['st', 'Structured Text'], ['ld', 'Ladder']].map(([k, l]) => `<button class="seg" data-lang="${k}" aria-pressed="${L === k}" ${p.langs.includes(k) ? '' : `disabled title="${k === 'ld' ? 'No ladder version: this one needs loops or arrays, which suit ST' : 'Ladder-only problem'}"`}>${l}</button>`).join('');
+  $('#palette').hidden = L !== 'ld';
+  ta.setAttribute('aria-label', L === 'ld' ? 'Ladder rung text editor' : 'Structured Text editor');
+  document.title = p.title + ' · ST Practice';
+  renderLeft(); renderConsole(); paint(); window.scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+route();
+}
+</script>
+</body>
+</html>
