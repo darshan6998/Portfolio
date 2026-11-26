@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Structured Text Practice · Darshan Shah</title>
+<meta name="description" content="A free, in-browser coding judge for Logix-style Structured Text (IEC 61131-3): 40 PLC problems graded scan by scan, from seal-in circuits to PI control.">
+<link rel="canonical" href="https://darshanhshah.com/st-practice.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2210%22%20fill%3D%22%231d2422%22/%3E%3Crect%20x%3D%228%22%20y%3D%2250%22%20width%3D%2248%22%20height%3D%225%22%20fill%3D%22%23d4520f%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2241%22%20font-family%3D%22Arial%2CHelvetica%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EDS%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Structured Text Practice">
+<meta property="og:description" content="40 PLC programming problems in Logix-style Structured Text, graded scan by scan in your browser.">
+<meta property="og:url" content="https://darshanhshah.com/st-practice.html">
+<meta property="og:image" content="https://darshanhshah.com/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a quiet bench instrument — precise, terse, test results read like a scope trace.
+   IDEA: a PLC programming terminal crossed with a judge: write a routine, scan it, read the verdict.
+   PICTURE: the working editor + scan-by-scan result table; on the list, the problem table and a 14-tick progress scale.
+   COLOUR and TYPE: aluminium ground, black ink, one orange pointer; green/red only for pass/fail. Geist + Geist Mono.
+   LAYOUT: list view = scale, then table, then reference. Problem view = statement left, editor and console right; stacks under 1000px. */
+:root{color-scheme:light dark;
+--bg:light-dark(#e9eaec,#141517);--panel:light-dark(#f7f7f8,#1b1c1f);--code:light-dark(#ffffff,#0f1012);
+--ink:light-dark(#121314,#ecedef);--mute:light-dark(#585c63,#9da1a8);--line:light-dark(#cdd0d4,#2d2f34);
+--acc:#ff4f00;--accink:light-dark(#c23c00,#ff7a3d);
+--ok:light-dark(#11743f,#45d185);--okbg:light-dark(#e3f3ea,#14281d);--bad:light-dark(#b8242a,#ff6f6f);--badbg:light-dark(#fbe7e7,#2e1617);
+--med:light-dark(#9a6400,#f2b53a);
+--kw:light-dark(#b03600,#ff8b52);--ty:light-dark(#5233b8,#b9a7ff);--nu:light-dark(#0a6f6b,#5ed2ca);
+--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Figtree,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+code,pre,textarea{font-family:var(--mono)}
+code{font-size:.92em;background:light-dark(#e2e4e7,#25272b);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:12px max(4vw,16px);border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+.brand{font-weight:600;text-decoration:none;font-size:17px;display:flex;align-items:center;gap:10px}
+.home{font-size:14px;color:var(--mute);text-decoration:none;padding:8px 0}.home:hover{color:var(--ink)}
+.brand i{width:12px;height:12px;background:var(--acc);border-radius:2px;display:inline-block}
+.scale{display:flex;align-items:center;gap:12px;margin-left:auto;font-size:14px;color:var(--mute)}
+.ticks{display:flex;gap:3px}.ticks span{width:10px;height:18px;border-radius:2px;background:var(--line)}
+.ticks span.on{background:var(--acc)}
+.wrap{max-width:1360px;margin:0 auto;padding:clamp(20px,3vw,40px) max(4vw,16px) 60px}
+h1{font-size:clamp(30px,4vw,44px);line-height:1.05;margin:0 0 8px;font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 10px;font-weight:600}
+.lede{color:var(--mute);max-width:68ch;margin:0 0 22px}
+.filt{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.chips{display:flex;gap:8px;flex-wrap:wrap}
+#q{flex:1 1 260px;min-height:42px;font:16px Figtree,system-ui,sans-serif;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink)}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 16px;min-height:40px;font-size:15px}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--mute);font-size:14px}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.list tr.row{cursor:pointer}.list tr.row:hover td{background:light-dark(#eef0f2,#222428)}
+.list td a{text-decoration:none;font-weight:500}
+.st{width:44px}.st svg{display:block}
+.Easy{color:var(--ok)}.Medium{color:var(--med)}.Hard{color:var(--bad)}
+.topics{color:var(--mute);font-size:14px}
+.ref{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px;margin-top:44px}
+.ref section{border-top:2px solid var(--ink);padding-top:14px}
+.ref ul{padding-left:18px;margin:0}.ref li{margin:4px 0}
+.ref pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13.5px;margin:8px 0 0}
+/* problem view */
+.pv{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media(min-width:1000px){.pv{grid-template-columns:minmax(0,.95fr) minmax(0,1.15fr);align-items:start}.left{position:sticky;top:74px;max-height:calc(100vh - 90px);overflow:auto}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.left{padding:22px 24px}
+.ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;margin-bottom:6px}
+.ph .num{color:var(--mute)}
+.ph h1{font-size:clamp(24px,3vw,32px);width:100%;margin:2px 0 6px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:14px 0 16px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;min-height:44px;color:var(--mute);flex:none}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc)}
+.desc p,.desc ul{margin:0 0 12px}.desc li{margin:4px 0}
+.note{color:var(--mute);font-size:15px}
+h3{font-size:15px;margin:22px 0 8px;font-weight:600}
+.tt td,.tt th{padding:7px 10px;font-size:14px}
+.tt td:first-child{font-family:var(--mono);white-space:nowrap}.tt code{white-space:nowrap;overflow-wrap:normal}
+.dir{font-size:12px;padding:2px 7px;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+.dir.in{color:var(--nu)}.dir.out{color:var(--accink)}
+.scroll{overflow-x:auto}
+.trace td,.trace th{padding:7px 10px;font-size:13.5px;font-family:var(--mono)}
+.trace th{font-family:Figtree,sans-serif;white-space:nowrap}
+.trace td.t{white-space:nowrap;color:var(--mute)}
+.trace td.ok{color:var(--ok)}
+.trace td.bad{background:var(--badbg);color:var(--bad);font-weight:500}
+.trace td small{display:block;font-weight:400;color:var(--bad)}
+.trace td.na{color:var(--mute)}.trace td.t small{color:var(--mute)}
+.trace .set{min-width:160px}
+.right{display:flex;flex-direction:column;gap:14px}
+.bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:14px;color:var(--mute)}
+.bar .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:9px 16px;min-height:44px;font-size:15px}
+.btn:hover{border-color:var(--mute)}
+.btn.go{background:var(--acc);border-color:var(--acc);color:#111;font-weight:600}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:500}
+.btn.sm{min-height:36px;padding:5px 12px;font-size:14px}
+.ed{display:grid;grid-template-columns:auto minmax(0,1fr);height:min(460px,62vh);min-height:300px;background:var(--code);border-radius:0 0 10px 10px;overflow:hidden}
+.gut{overflow:hidden;padding:14px 0;text-align:right;color:var(--mute);font:14px/22px var(--mono);user-select:none;border-right:1px solid var(--line)}
+.gut div{padding:0 10px 0 14px}.gut div.err{background:var(--badbg);color:var(--bad);font-weight:600}
+.code{position:relative}
+.code pre,.code textarea{position:absolute;inset:0;margin:0;padding:14px 16px;font:15px/22px var(--mono);white-space:pre;tab-size:2;border:0;overflow:auto}
+.code pre{pointer-events:none;overflow:hidden;color:var(--ink)}
+.code textarea{background:transparent;color:transparent;caret-color:var(--acc);resize:none;outline:none}
+.code textarea::selection{background:light-dark(#ffd6c2,#5a2a14);color:transparent}
+.k{color:var(--kw);font-weight:500}.y{color:var(--ty)}.n{color:var(--nu)}.c{color:var(--mute);font-style:italic}
+.console{padding:16px 18px;min-height:160px}
+.verdict{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.verdict b{font-size:22px;font-weight:600}
+.verdict.pass b{color:var(--ok)}.verdict.fail b{color:var(--bad)}
+.tchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tchip{border:1px solid var(--line);background:transparent;border-radius:6px;padding:6px 12px;min-height:38px;font-size:14px;display:flex;align-items:center;gap:7px}
+.tchip i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.tchip.f i{background:var(--bad)}
+.tchip[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.errbox{border-left:3px solid var(--bad);background:var(--badbg);padding:12px 14px;border-radius:0 6px 6px 0;margin-bottom:12px}
+.errbox b{color:var(--bad)}
+.errbox p{margin:4px 0 8px;font-family:var(--mono);font-size:14px}
+details{margin-top:14px}summary{cursor:pointer;color:var(--mute);font-size:14px;min-height:32px}
+.mon{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 18px;font:13px/1.6 var(--mono);margin-top:8px}
+.mon span{color:var(--mute)}
+.hint{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.solpre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14px;line-height:22px;overflow-x:auto;margin:10px 0}
+.muted{color:var(--mute)}
+.navp{display:flex;gap:8px;margin-left:auto}
+.solved-badge{color:var(--ok);font-weight:500}
+@media(max-width:600px){table{font-size:13px}.topics{display:none}.left{padding:18px 16px}.scale .lbl{display:none}}
+@media(prefers-reduced-motion:no-preference){.verdict{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(4px)}}}
+</style>
+<style>
+/* Site theme: matches darshanhshah.com (HMI greys, furnace-glow orange) */
+:root{--bg:light-dark(#f6f7f5,#131716);--panel:light-dark(#ffffff,#1b201f);--code:light-dark(#ffffff,#101413);
+--ink:light-dark(#1d2422,#ecf0ee);--mute:light-dark(#5d6763,#a2ada8);--line:light-dark(#e1e5e2,#2c3331);
+--acc:light-dark(#d4520f,#ff8a4c);--accink:light-dark(#b8460c,#ff8a4c);--ok:light-dark(#2f8a4c,#4cc074);--okbg:light-dark(#e6f3ea,#16271c)}
+h1,h2,.brand{font-family:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;font-weight:800;letter-spacing:-.01em}
+.brand{font-size:1.25rem}.ph h1{font-weight:700}
+.btn{border-radius:4px}.btn.go{color:#fff}.list,.card{border-radius:6px}
+.ticks span.on{background:var(--acc)}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="home" href="/">← Portfolio</a><a class="brand" href="#problems"><i></i>ST Practice</a>
+  <div class="scale" aria-live="polite"><div class="ticks" id="ticks"></div><span id="prog"></span></div>
+</header>
+
+<main class="wrap" id="listView">
+  <h1>Structured Text problems</h1>
+  <p class="lede">Practise Logix-style ST (the Studio 5000 dialect) the way you would on a coding judge. Write a routine, run it against simulated PLC scans, and get graded output by output.</p>
+  <div class="filt"><div class="chips" id="filters" role="group" aria-label="Filter by difficulty"></div><input id="q" type="search" placeholder="Search title or topic — e.g. timers, arrays" aria-label="Search problems"></div>
+  <div class="list scroll"><table><thead><tr><th class="st">Status</th><th>Problem</th><th class="topics">Topics</th><th>Difficulty</th></tr></thead><tbody id="rows"></tbody></table><p id="none" class="muted" style="padding:16px;margin:0" hidden>No problems match that search.</p></div>
+
+  <div class="ref">
+    <section><h2>How grading works</h2><ul>
+      <li>Each test is a sequence of <b>scans</b>. Before every scan the inputs are written, then your whole routine runs once, top to bottom.</li>
+      <li>Every tag keeps its value between scans, just like controller tags. Internal tags start at 0 or FALSE.</li>
+      <li>Outputs are compared at each checkpoint row. REAL values must match within 0.001.</li>
+      <li><b>Run</b> grades the example tests. <b>Submit</b> adds hidden tests, and a problem counts as solved only when they all pass.</li>
+      <li>Timers run on a simulated clock: ACC starts at 0 on the first enabled scan and adds the scan time on each scan after that.</li>
+      <li>Faults are simulated too: an array index out of range or a runaway loop stops the run, as a major fault would.</li></ul></section>
+    <section><h2>Supported syntax</h2><ul>
+      <li><code>:=</code>, <code>IF/ELSIF/ELSE</code>, <code>CASE … OF</code> (ranges <code>1..5:</code>), <code>FOR … BY</code>, <code>WHILE</code>, <code>REPEAT</code>, <code>EXIT</code>, <code>RETURN</code></li>
+      <li><code>AND OR XOR NOT &amp;</code> (bitwise on integers), <code>= &lt;&gt; &lt; &lt;= &gt; &gt;=</code>, <code>+ - * / MOD **</code></li>
+      <li>Types: BOOL, SINT, INT, DINT, REAL, ARRAY, FBD_TIMER, FBD_ONESHOT</li>
+      <li>Instructions: <code>TONR</code>, <code>TOFR</code>, <code>OSRI</code>, <code>OSFI</code>. Functions: ABS, SQRT, MIN, MAX, LIMIT, TRUNC, SIN, COS, TAN, LN, LOG</li>
+      <li>Bits: <code>Word.5</code>, <code>Word.[i]</code>. Literals: <code>16#FF</code>, <code>2#1010</code>, <code>1.5e3</code>. Comments: <code>//</code>, <code>(* *)</code>, <code>/* */</code></li>
+      <li>Optional local tags at the top of a routine:</li></ul>
+      <pre>VAR
+  Count : DINT := 0;
+  Buf   : ARRAY[0..4] OF REAL;
+END_VAR</pre></section>
+    <section><h2>Editor keys</h2><ul>
+      <li><b>Ctrl/⌘ + Enter</b> runs the examples. <b>Ctrl/⌘ + Shift + Enter</b> submits.</li>
+      <li><b>Tab</b> indents by two spaces and <b>Enter</b> keeps the current indent. Press <b>Esc</b>, then Tab, to move focus out of the editor.</li>
+      <li>Your code and solved problems are kept in this browser.</li></ul>
+      <p class="muted" style="font-size:14px;margin-top:12px">This is a simulator for the common subset of Logix ST, not Studio 5000 itself. Use it to build fluency, then verify on real hardware.</p></section>
+  </div>
+</main>
+
+<main class="wrap" id="probView" hidden>
+  <div class="pv">
+    <article class="card left" id="left"></article>
+    <div class="right">
+      <div class="card">
+        <div class="bar"><span id="lang">Structured Text · MainRoutine</span><span class="sp"></span>
+          <button class="btn sm" id="resetBtn">Reset code</button></div>
+        <div class="ed"><div class="gut" id="gut"></div><div class="code"><pre id="hl" aria-hidden="true"></pre><textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Structured Text editor"></textarea></div></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn dark" id="runBtn">Run examples</button>
+        <button class="btn go" id="subBtn">Submit</button>
+        <span class="muted" style="font-size:14px">Ctrl+Enter to run</span>
+      </div>
+      <section class="card console" id="console" aria-live="polite"></section>
+    </div>
+  </div>
+</main>
+
+<script>const STEngine = (function () {
+  const KW = new Set(['IF','THEN','ELSIF','ELSE','END_IF','CASE','OF','END_CASE','FOR','TO','BY','DO','END_FOR','WHILE','END_WHILE','REPEAT','UNTIL','END_REPEAT','EXIT','RETURN','AND','OR','XOR','NOT','MOD','VAR','END_VAR','ARRAY','TRUE','FALSE']);
+  const BITS = { SINT: 8, INT: 16, DINT: 32 };
+  const TYPEMAP = { BOOL: 'BOOL', SINT: 'SINT', INT: 'INT', DINT: 'DINT', REAL: 'REAL', FBD_TIMER: 'FBD_TIMER', TIMER: 'FBD_TIMER', FBD_ONESHOT: 'FBD_ONESHOT' };
+  const STRUCTS = {
+    FBD_TIMER: { TIMERENABLE: ['TimerEnable', 'BOOL'], PRE: ['PRE', 'DINT'], RESET: ['Reset', 'BOOL'], ACC: ['ACC', 'DINT'], EN: ['EN', 'BOOL'], TT: ['TT', 'BOOL'], DN: ['DN', 'BOOL'] },
+    FBD_ONESHOT: { INPUTBIT: ['InputBit', 'BOOL'], OUTPUTBIT: ['OutputBit', 'BOOL'] }
+  };
+  const FUNCS = { ABS: 1, SQRT: 1, SQR: 1, TRUNC: 1, TRN: 1, SIN: 1, COS: 1, TAN: 1, LN: 1, LOG: 1, MIN: -2, MAX: -2, LIMIT: 3 };
+  const PROCS = { TONR: 'FBD_TIMER', TOFR: 'FBD_TIMER', OSRI: 'FBD_ONESHOT', OSFI: 'FBD_ONESHOT' };
+  const EXIT = { sig: 'exit' }, RET = { sig: 'ret' };
+
+  class STError extends Error {
+    constructor(msg, line, kind) { super(msg); this.line = line; this.kind = kind || 'Syntax error'; }
+  }
+
+  // ---------- lexer ----------
+  function lex(src) {
+    const toks = []; let i = 0, line = 1; const n = src.length;
+    const adv = (k = 1) => { for (let j = 0; j < k && i < n; j++) { if (src[i] === '\n') line++; i++; } };
+    const D = c => c >= '0' && c <= '9';
+    while (i < n) {
+      const c = src[i];
+      if (c === ' ' || c === '\t' || c === '\r' || c === '\n') { adv(); continue; }
+      if (c === '/' && src[i + 1] === '/') { while (i < n && src[i] !== '\n') adv(); continue; }
+      if ((c === '(' || c === '/') && src[i + 1] === '*') {
+        const close = c === '(' ? '*)' : '*/', L = line; adv(2);
+        while (i < n && src.substr(i, 2) !== close) adv();
+        if (i >= n) throw new STError(`Comment opened with ${c}* is never closed with ${close}`, L);
+        adv(2); continue;
+      }
+      const L = line;
+      if (/[A-Za-z_]/.test(c)) {
+        let s = ''; while (i < n && /[A-Za-z0-9_]/.test(src[i])) { s += src[i]; adv(); }
+        const u = s.toUpperCase(); toks.push({ t: KW.has(u) ? 'kw' : 'id', v: s, u, line: L }); continue;
+      }
+      if (D(c)) {
+        let s = ''; while (i < n && (D(src[i]) || src[i] === '_')) { s += src[i]; adv(); }
+        if (src[i] === '#') {
+          const radix = parseInt(s.replace(/_/g, ''), 10); adv();
+          if (![2, 8, 16].includes(radix)) throw new STError(`Radix ${radix}# is not supported — use 2#, 8# or 16#`, L);
+          let d = ''; while (i < n && /[0-9A-Fa-f_]/.test(src[i])) { d += src[i]; adv(); }
+          const v = parseInt(d.replace(/_/g, ''), radix);
+          if (isNaN(v) || !new RegExp(radix === 16 ? '^[0-9A-Fa-f_]+$' : radix === 8 ? '^[0-7_]+$' : '^[01_]+$').test(d)) throw new STError(`Bad ${radix}# number '${d}'`, L);
+          toks.push({ t: 'num', v: v | 0, real: false, line: L }); continue;
+        }
+        let real = false;
+        if (src[i] === '.' && D(src[i + 1] || '')) { real = true; s += '.'; adv(); while (i < n && (D(src[i]) || src[i] === '_')) { s += src[i]; adv(); } }
+        if ((src[i] === 'e' || src[i] === 'E') && /[0-9+\-]/.test(src[i + 1] || '')) {
+          real = true; s += 'e'; adv(); if (src[i] === '+' || src[i] === '-') { s += src[i]; adv(); }
+          while (i < n && D(src[i])) { s += src[i]; adv(); }
+        }
+        toks.push({ t: 'num', v: Number(s.replace(/_/g, '')), real, line: L }); continue;
+      }
+      const two = src.substr(i, 2);
+      if ([':=', '<=', '>=', '<>', '**', '..'].includes(two)) { toks.push({ t: 'op', v: two, line: L }); adv(2); continue; }
+      if ('=<>+-*/()[],;:.&'.includes(c)) { toks.push({ t: 'op', v: c, line: L }); adv(); continue; }
+      if (c === "'" || c === '"') throw new STError('String literals are not supported in this simulator', L);
+      throw new STError(`Unexpected character '${c}'`, L);
+    }
+    toks.push({ t: 'eof', v: 'end of code', line });
+    return toks;
+  }
+
+  // ---------- parser ----------
+  function parse(src) {
+    const T = lex(src); let p = 0;
+    const pk = (o = 0) => T[Math.min(p + o, T.length - 1)];
+    const isOp = (v, o = 0) => pk(o).t === 'op' && pk(o).v === v;
+    const isKw = (v, o = 0) => pk(o).t === 'kw' && pk(o).u === v;
+    const desc = t => t.t === 'eof' ? 'the end of the code' : `'${t.v}'`;
+    const prevLine = () => (p > 0 ? T[p - 1].line : 1);
+    const expOp = v => { if (!isOp(v)) throw new STError(`Expected '${v}' but found ${desc(pk())}`, pk().line); return T[p++]; };
+    const expKw = v => { if (!isKw(v)) throw new STError(`Expected ${v} but found ${desc(pk())}`, pk().line); return T[p++]; };
+    const semi = what => { if (!isOp(';')) throw new STError(`Missing ';' at the end of ${what}`, prevLine()); p++; };
+    const optSemi = () => { if (isOp(';')) p++; };
+
+    function sInt() {
+      let neg = false; if (isOp('-')) { p++; neg = true; }
+      const t = pk(); if (t.t !== 'num' || t.real) throw new STError(`Expected an integer constant but found ${desc(t)}`, t.line);
+      p++; return neg ? -t.v : t.v;
+    }
+    function parseType() {
+      if (isKw('ARRAY')) {
+        const L = pk().line; p++; expOp('['); const lo = sInt(); expOp('..'); const hi = sInt(); expOp(']'); expKw('OF');
+        const el = parseType(); if (el.dim != null || !['BOOL', 'SINT', 'INT', 'DINT', 'REAL'].includes(el.type)) throw new STError('Arrays must be of BOOL, SINT, INT, DINT or REAL', L);
+        if (hi < lo) throw new STError('Array upper bound is below the lower bound', L);
+        return { type: el.type, lo, dim: hi - lo + 1 };
+      }
+      const t = pk(); if (t.t !== 'id' || !TYPEMAP[t.u]) throw new STError(`Unknown data type ${desc(t)}`, t.line);
+      p++; return { type: TYPEMAP[t.u] };
+    }
+    const decls = [];
+    function varBlock() {
+      expKw('VAR');
+      while (!isKw('END_VAR')) {
+        if (pk().t === 'eof') throw new STError('VAR block is missing END_VAR', pk().line);
+        const names = []; do { const t = pk(); if (t.t !== 'id') throw new STError(`Expected a tag name but found ${desc(t)}`, t.line); names.push(t); p++; } while (isOp(',') && ++p);
+        expOp(':'); const ty = parseType(); let init = null;
+        if (isOp(':=')) {
+          p++; if (ty.dim != null || STRUCTS[ty.type]) throw new STError('Initial values are only supported on simple tags here', pk().line);
+          if (isKw('TRUE') || isKw('FALSE')) { init = pk().u === 'TRUE'; p++; }
+          else { let neg = false; if (isOp('-')) { p++; neg = true; } const t = pk(); if (t.t !== 'num') throw new STError('Initial value must be a constant', t.line); p++; init = neg ? -t.v : t.v; }
+        }
+        semi('the declaration');
+        for (const nm of names) decls.push({ name: nm.v, u: nm.u, line: nm.line, ...ty, init });
+      }
+      p++; optSemi();
+    }
+
+    function stmtList(stop, need) {
+      const out = [];
+      while (!stop()) {
+        if (pk().t === 'eof') throw new STError(`Reached the end of the code — missing ${need}`, pk().line);
+        const s = statement(); if (s) out.push(s);
+      }
+      return out;
+    }
+    const caseLabelStart = () => pk().t === 'num' || (isOp('-') && pk(1).t === 'num');
+
+    function statement() {
+      const t = pk(), L = t.line;
+      if (isOp(';')) { p++; return null; }
+      if (t.t === 'kw') {
+        switch (t.u) {
+          case 'IF': {
+            p++; const arms = []; let cond = expr(); expKw('THEN');
+            let body = stmtList(() => isKw('ELSIF') || isKw('ELSE') || isKw('END_IF'), 'END_IF');
+            arms.push({ cond, body });
+            while (isKw('ELSIF')) { p++; cond = expr(); expKw('THEN'); body = stmtList(() => isKw('ELSIF') || isKw('ELSE') || isKw('END_IF'), 'END_IF'); arms.push({ cond, body }); }
+            let els = null; if (isKw('ELSE')) { p++; els = stmtList(() => isKw('END_IF'), 'END_IF'); }
+            expKw('END_IF'); optSemi(); return { n: 'if', arms, els, line: L };
+          }
+          case 'CASE': {
+            p++; const sel = expr(); expKw('OF'); const branches = []; let els = null;
+            for (;;) {
+              if (isKw('END_CASE')) break;
+              if (isKw('ELSE')) { p++; els = stmtList(() => isKw('END_CASE'), 'END_CASE'); break; }
+              if (!caseLabelStart()) throw new STError(`Expected a case label like '10:' but found ${desc(pk())}`, pk().line);
+              const labels = [];
+              do { const lo = sInt(); let hi = lo; if (isOp('..')) { p++; hi = sInt(); } labels.push([lo, hi]); } while (isOp(',') && ++p);
+              expOp(':');
+              const body = stmtList(() => caseLabelStart() || isKw('ELSE') || isKw('END_CASE'), 'END_CASE');
+              branches.push({ labels, body });
+            }
+            expKw('END_CASE'); optSemi(); return { n: 'case', sel, branches, els, line: L };
+          }
+          case 'FOR': {
+            p++; const v = pk(); if (v.t !== 'id') throw new STError(`Expected a loop variable after FOR but found ${desc(v)}`, v.line); p++;
+            const ref = { n: 'ref', name: v.v, u: v.u, path: [], line: v.line };
+            expOp(':='); const from = expr(); expKw('TO'); const to = expr(); let by = null; if (isKw('BY')) { p++; by = expr(); }
+            expKw('DO'); const body = stmtList(() => isKw('END_FOR'), 'END_FOR'); expKw('END_FOR'); optSemi();
+            return { n: 'for', ref, from, to, by, body, line: L };
+          }
+          case 'WHILE': { p++; const cond = expr(); expKw('DO'); const body = stmtList(() => isKw('END_WHILE'), 'END_WHILE'); expKw('END_WHILE'); optSemi(); return { n: 'while', cond, body, line: L }; }
+          case 'REPEAT': { p++; const body = stmtList(() => isKw('UNTIL'), 'UNTIL ... END_REPEAT'); expKw('UNTIL'); const cond = expr(); expKw('END_REPEAT'); optSemi(); return { n: 'repeat', cond, body, line: L }; }
+          case 'EXIT': p++; semi('EXIT'); return { n: 'exit', line: L };
+          case 'RETURN': p++; semi('RETURN'); return { n: 'return', line: L };
+          case 'VAR': throw new STError('VAR blocks must come before any statements', L);
+          default: throw new STError(`Unexpected ${t.u} — check the structure above this line`, L);
+        }
+      }
+      if (t.t === 'id') {
+        if (isOp('(', 1)) {
+          p += 2; const args = []; if (!isOp(')')) { do { args.push(expr()); } while (isOp(',') && ++p); }
+          expOp(')'); semi('the instruction call'); return { n: 'call', name: t.v, u: t.u, args, line: L };
+        }
+        const target = postfix();
+        if (isOp('=')) throw new STError("Use ':=' to assign a value. '=' is the comparison operator", pk().line);
+        if (!isOp(':=')) throw new STError(`Expected ':=' after ${target.name} but found ${desc(pk())}`, pk().line);
+        p++; const e = expr(); semi('the assignment'); return { n: 'assign', target, e, line: L };
+      }
+      throw new STError(`Unexpected ${desc(t)} at the start of a statement`, L);
+    }
+
+    function postfix() {
+      const t = T[p++]; const node = { n: 'ref', name: t.v, u: t.u, path: [], line: t.line };
+      for (;;) {
+        if (isOp('[')) { p++; node.path.push({ k: 'idx', e: expr() }); expOp(']'); }
+        else if (isOp('.')) {
+          p++; const m = pk();
+          if (m.t === 'id') { p++; node.path.push({ k: 'mem', name: m.v, u: m.u }); }
+          else if (m.t === 'num' && !m.real) { p++; node.path.push({ k: 'bit', b: m.v }); }
+          else if (isOp('[')) { p++; node.path.push({ k: 'ibit', e: expr() }); expOp(']'); }
+          else throw new STError(`Expected a member name or bit number after '.' but found ${desc(m)}`, m.line);
+        } else break;
+      }
+      return node;
+    }
+    const binLevel = (next, ops) => () => {
+      let a = next();
+      for (;;) {
+        const t = pk(); const o = t.t === 'op' ? t.v : t.t === 'kw' ? t.u : null;
+        if (!ops.includes(o)) return a;
+        p++; a = { n: 'bin', op: o === '&' ? 'AND' : o, a, b: next(), line: t.line };
+      }
+    };
+    function unary() {
+      const t = pk();
+      if (isOp('-') || isKw('NOT')) { p++; return { n: 'un', op: t.t === 'op' ? '-' : 'NOT', a: unary(), line: t.line }; }
+      if (isOp('+')) { p++; return unary(); }
+      return primary();
+    }
+    function primary() {
+      const t = pk();
+      if (t.t === 'num') { p++; return { n: 'num', v: t.v, real: t.real, line: t.line }; }
+      if (isKw('TRUE') || isKw('FALSE')) { p++; return { n: 'bool', v: t.u === 'TRUE', line: t.line }; }
+      if (isOp('(')) { p++; const e = expr(); expOp(')'); return e; }
+      if (t.t === 'id') {
+        if (isOp('(', 1)) { p += 2; const args = []; if (!isOp(')')) { do { args.push(expr()); } while (isOp(',') && ++p); } expOp(')'); return { n: 'fn', name: t.v, u: t.u, args, line: t.line }; }
+        return postfix();
+      }
+      throw new STError(`Expected a value or tag but found ${desc(t)}`, t.line);
+    }
+    const pow = binLevel(unary, ['**']);
+    const mul = binLevel(pow, ['*', '/', 'MOD']);
+    const add = binLevel(mul, ['+', '-']);
+    const rel = binLevel(add, ['<', '>', '<=', '>=']);
+    const eq = binLevel(rel, ['=', '<>']);
+    const and = binLevel(eq, ['AND', '&']);
+    const xor = binLevel(and, ['XOR']);
+    const expr = binLevel(xor, ['OR']);
+
+    while (isKw('VAR')) varBlock();
+    const body = stmtList(() => pk().t === 'eof', '');
+    return { decls, body };
+  }
+
+  // ---------- values ----------
+  const kindOf = type => type === 'BOOL' ? 'B' : type === 'REAL' ? 'R' : 'I';
+  const tv = (type, v) => ({ t: kindOf(type), v });
+  const num = x => x.t === 'B' ? (x.v ? 1 : 0) : x.v;
+  const truthy = x => x.t === 'B' ? x.v : x.v !== 0;
+  function roundEven(n) { const f = Math.floor(n), d = n - f; if (d > 0.5) return f + 1; if (d < 0.5) return f; return f % 2 === 0 ? f : f + 1; }
+  function wrap(type, n) { if (type === 'INT') return (n << 16) >> 16; if (type === 'SINT') return (n << 24) >> 24; return n | 0; }
+  function conv(type, x, line) {
+    if (type === 'BOOL') return x.t === 'B' ? x.v : x.v !== 0;
+    let n = num(x);
+    if (type === 'REAL') return Math.fround(n);
+    if (!isFinite(n)) throw new STError(`Can't store ${n} in a ${type} tag`, line, 'Runtime fault');
+    if (x.t === 'R') n = roundEven(n);
+    return wrap(type, n);
+  }
+  const defVal = type => type === 'BOOL' ? false : 0;
+  function makeCell(d) {
+    if (d.dim != null) {
+      const data = new Array(d.dim).fill(defVal(d.type));
+      if (Array.isArray(d.init)) d.init.forEach((v, i) => { data[i] = rawConv(d.type, v); });
+      return { kind: 'array', type: d.type, lo: d.lo || 0, len: d.dim, data, name: d.name };
+    }
+    if (STRUCTS[d.type]) {
+      const m = {}; for (const k in STRUCTS[d.type]) { const [nm, t] = STRUCTS[d.type][k]; m[k] = { kind: 'scalar', type: t, v: defVal(t), name: nm }; }
+      if (d.init) for (const k in d.init) m[k.toUpperCase()].v = rawConv(m[k.toUpperCase()].type, d.init[k]);
+      return { kind: 'struct', type: d.type, m, last: null, prev: false, name: d.name };
+    }
+    return { kind: 'scalar', type: d.type, v: d.init != null ? rawConv(d.type, d.init) : defVal(d.type), name: d.name };
+  }
+  const rawConv = (type, v) => conv(type, typeof v === 'boolean' ? { t: 'B', v } : { t: Number.isInteger(v) ? 'I' : 'R', v }, 0);
+
+  // ---------- program ----------
+  class Program {
+    constructor(src, tagDefs) {
+      this.ast = parse(src);
+      this.tags = new Map(); this.defs = new Map();
+      for (const d of tagDefs) { const u = d.name.toUpperCase(); this.defs.set(u, d); this.tags.set(u, makeCell(d)); }
+      for (const d of this.ast.decls) {
+        if (this.defs.has(d.u)) throw new STError(`Tag '${d.name}' already exists — remove it from the VAR block`, d.line, 'Verify error');
+        this.defs.set(d.u, d); this.tags.set(d.u, makeCell(d));
+      }
+      this.now = 0; this.loop = 0;
+      this.verifyList(this.ast.body);
+    }
+    // static checks
+    sref(r) {
+      const d = this.defs.get(r.u);
+      if (!d) throw new STError(`Tag '${r.name}' is not defined. Check the tag list (names are not case-sensitive) or declare it in a VAR block`, r.line, 'Verify error');
+      let st = d.dim != null ? { arr: d.type } : STRUCTS[d.type] ? { struct: d.type } : { s: d.type };
+      let label = d.name;
+      for (const seg of r.path) {
+        if (seg.k === 'idx') {
+          if (!st.arr) throw new STError(`'${label}' is not an array, so it can't be indexed with [ ]`, r.line, 'Verify error');
+          if (this.sexpr(seg.e) !== 'I') throw new STError(`Array index for '${label}' must be an integer`, r.line, 'Verify error');
+          if (seg.e.n === 'num' && (seg.e.v < d.lo || seg.e.v >= (d.lo || 0) + d.dim)) throw new STError(`Index ${seg.e.v} is outside ${label}[${d.lo || 0}..${(d.lo || 0) + d.dim - 1}]`, r.line, 'Verify error');
+          st = { s: st.arr }; label += '[...]';
+        } else if (seg.k === 'mem') {
+          if (!st.struct) throw new STError(`'${label}' has no member '${seg.name}'`, r.line, 'Verify error');
+          const m = STRUCTS[st.struct][seg.u];
+          if (!m) throw new STError(`${st.struct} has no member '${seg.name}'. Members: ${Object.values(STRUCTS[st.struct]).map(x => x[0]).join(', ')}`, r.line, 'Verify error');
+          st = { s: m[1] }; label += '.' + m[0];
+        } else {
+          if (!st.s || !BITS[st.s]) throw new STError(`Bit access needs an integer tag; '${label}' is ${st.s || st.arr ? 'an array' : 'a structure'}`, r.line, 'Verify error');
+          if (seg.k === 'bit' && seg.b >= BITS[st.s]) throw new STError(`Bit ${seg.b} is out of range for ${st.s} (0..${BITS[st.s] - 1})`, r.line, 'Verify error');
+          if (seg.k === 'ibit' && this.sexpr(seg.e) !== 'I') throw new STError('Bit number must be an integer', r.line, 'Verify error');
+          st = { s: 'BOOL' }; label += '.bit';
+        }
+      }
+      return st;
+    }
+    sexpr(e) {
+      switch (e.n) {
+        case 'num': return e.real ? 'R' : 'I';
+        case 'bool': return 'B';
+        case 'ref': {
+          const st = this.sref(e);
+          if (!st.s) throw new STError(`'${e.name}' is ${st.arr ? 'an array — use an element like ' + e.name + '[0]' : 'a structure — use a member like ' + e.name + '.DN'}`, e.line, 'Verify error');
+          return kindOf(st.s);
+        }
+        case 'un': {
+          const a = this.sexpr(e.a);
+          if (e.op === '-' && a === 'B') throw new STError("Can't negate a BOOL with '-'. Did you mean NOT?", e.line, 'Verify error');
+          if (e.op === 'NOT' && a === 'R') throw new STError('NOT needs a BOOL or integer operand, not REAL', e.line, 'Verify error');
+          return a;
+        }
+        case 'bin': {
+          const a = this.sexpr(e.a), b = this.sexpr(e.b), o = e.op;
+          if (o === 'AND' || o === 'OR' || o === 'XOR') {
+            if (a === 'R' || b === 'R') throw new STError(`${o} works on BOOL (logic) or integers (bitwise), not REAL`, e.line, 'Verify error');
+            return a === 'B' && b === 'B' ? 'B' : 'I';
+          }
+          if (['=', '<>', '<', '>', '<=', '>='].includes(o)) return 'B';
+          if (o === '**') return 'R';
+          return a === 'R' || b === 'R' ? 'R' : 'I';
+        }
+        case 'fn': {
+          if (PROCS[e.u]) throw new STError(`${e.name} is an instruction, not a function — call it on its own line: ${e.name}(MyTag);`, e.line, 'Verify error');
+          const ar = FUNCS[e.u]; if (ar == null) throw new STError(`Unknown function '${e.name}'`, e.line, 'Verify error');
+          if ((ar > 0 && e.args.length !== ar) || (ar < 0 && e.args.length < -ar)) throw new STError(`${e.name} expects ${ar > 0 ? ar : 'at least ' + -ar} argument(s)`, e.line, 'Verify error');
+          const ts = e.args.map(a => this.sexpr(a));
+          if (ts.includes('B')) throw new STError(`${e.name} needs numeric arguments`, e.line, 'Verify error');
+          if (['TRUNC', 'TRN'].includes(e.u)) return 'I';
+          if (['ABS', 'MIN', 'MAX', 'LIMIT'].includes(e.u)) return ts.includes('R') ? 'R' : 'I';
+          return 'R';
+        }
+      }
+    }
+    verifyList(list, depth = 0) {
+      for (const s of list) {
+        switch (s.n) {
+          case 'assign': { const st = this.sref(s.target); if (!st.s) throw new STError(`Can't assign to a whole ${st.arr ? 'array' : 'structure'} '${s.target.name}'`, s.line, 'Verify error'); this.sexpr(s.e); break; }
+          case 'if': s.arms.forEach(a => { this.sexpr(a.cond); this.verifyList(a.body, depth); }); if (s.els) this.verifyList(s.els, depth); break;
+          case 'case': if (this.sexpr(s.sel) !== 'I') throw new STError('CASE selector must be an integer (DINT, INT or SINT)', s.line, 'Verify error');
+            s.branches.forEach(b => this.verifyList(b.body, depth)); if (s.els) this.verifyList(s.els, depth); break;
+          case 'for': { const st = this.sref(s.ref); if (!st.s || !BITS[st.s]) throw new STError(`FOR loop variable '${s.ref.name}' must be an integer tag (DINT)`, s.line, 'Verify error');
+            [s.from, s.to, s.by].forEach(x => { if (x && this.sexpr(x) !== 'I') throw new STError('FOR bounds and BY step must be integers', s.line, 'Verify error'); });
+            this.verifyList(s.body, depth + 1); break; }
+          case 'while': case 'repeat': this.sexpr(s.cond); this.verifyList(s.body, depth + 1); break;
+          case 'exit': if (!depth) throw new STError('EXIT can only be used inside a FOR, WHILE or REPEAT loop', s.line, 'Verify error'); break;
+          case 'call': {
+            if (FUNCS[s.u] != null) throw new STError(`${s.name} returns a value — use it in an expression, e.g. X := ${s.name}(...);`, s.line, 'Verify error');
+            const need = PROCS[s.u]; if (!need) throw new STError(`Unknown instruction '${s.name}'. Supported: TONR, TOFR, OSRI, OSFI`, s.line, 'Verify error');
+            if (s.args.length !== 1 || s.args[0].n !== 'ref') throw new STError(`${s.name} takes one ${need} tag, e.g. ${s.name}(My_Tag);`, s.line, 'Verify error');
+            const st = this.sref(s.args[0]); if (st.struct !== need) throw new STError(`${s.name} needs a ${need} tag; '${s.args[0].name}' is not one`, s.line, 'Verify error');
+            break;
+          }
+        }
+      }
+    }
+    // runtime
+    fault(msg, line) { return new STError(msg, line, 'Runtime fault'); }
+    tick(line) { if (++this.loop > 100000) throw this.fault('Watchdog timeout: more than 100,000 loop passes in one scan — probably an infinite loop (a WHILE/REPEAT condition that never changes, or FOR with BY 0). A real controller would major-fault (Type 6, Code 1).', line); }
+    resolve(r) {
+      let cell = this.tags.get(r.u), lv = null;
+      const asLv = () => { if (lv) return lv; const c = cell; return { type: c.type, get: () => c.v, set: v => { c.v = v; } }; };
+      for (const seg of r.path) {
+        if (seg.k === 'idx') {
+          const arr = cell, i = this.ev(seg.e).v, k = i - arr.lo;
+          if (k < 0 || k >= arr.len) throw this.fault(`Array subscript out of range: ${arr.name}[${i}] (valid ${arr.lo}..${arr.lo + arr.len - 1}). On a real controller this is a major fault (Type 4, Code 83).`, r.line);
+          lv = { type: arr.type, get: () => arr.data[k], set: v => { arr.data[k] = v; } }; cell = null;
+        } else if (seg.k === 'mem') { cell = cell.m[seg.u]; }
+        else {
+          const base = asLv(), b = seg.k === 'bit' ? seg.b : this.ev(seg.e).v;
+          if (b < 0 || b >= BITS[base.type]) throw this.fault(`Bit index ${b} is out of range for ${base.type} (0..${BITS[base.type] - 1}). Major fault (Type 4, Code 83).`, r.line);
+          lv = { type: 'BOOL', get: () => ((base.get() >> b) & 1) === 1, set: v => { const x = base.get(); base.set(wrap(base.type, v ? x | (1 << b) : x & ~(1 << b))); } }; cell = null;
+        }
+      }
+      return cell && cell.kind !== 'scalar' ? { whole: cell } : asLv();
+    }
+    ev(e) {
+      switch (e.n) {
+        case 'num': return e.real ? { t: 'R', v: e.v } : { t: 'I', v: e.v | 0 };
+        case 'bool': return { t: 'B', v: e.v };
+        case 'ref': { const lv = this.resolve(e); return tv(lv.type, lv.get()); }
+        case 'un': { const a = this.ev(e.a);
+          if (e.op === 'NOT') return a.t === 'B' ? { t: 'B', v: !a.v } : { t: 'I', v: ~a.v };
+          return a.t === 'R' ? { t: 'R', v: -a.v } : { t: 'I', v: (-a.v) | 0 }; }
+        case 'bin': return this.bin(e);
+        case 'fn': return this.fn(e);
+      }
+    }
+    bin(e) {
+      const a = this.ev(e.a), b = this.ev(e.b), o = e.op;
+      if (o === 'AND' || o === 'OR' || o === 'XOR') {
+        if (a.t === 'B' && b.t === 'B') return { t: 'B', v: o === 'AND' ? a.v && b.v : o === 'OR' ? a.v || b.v : a.v !== b.v };
+        const x = num(a), y = num(b); return { t: 'I', v: o === 'AND' ? x & y : o === 'OR' ? x | y : x ^ y };
+      }
+      const x = num(a), y = num(b), R = a.t === 'R' || b.t === 'R';
+      switch (o) {
+        case '=': return { t: 'B', v: x === y }; case '<>': return { t: 'B', v: x !== y };
+        case '<': return { t: 'B', v: x < y }; case '>': return { t: 'B', v: x > y };
+        case '<=': return { t: 'B', v: x <= y }; case '>=': return { t: 'B', v: x >= y };
+        case '+': return R ? { t: 'R', v: Math.fround(x + y) } : { t: 'I', v: (x + y) | 0 };
+        case '-': return R ? { t: 'R', v: Math.fround(x - y) } : { t: 'I', v: (x - y) | 0 };
+        case '*': return R ? { t: 'R', v: Math.fround(x * y) } : { t: 'I', v: Math.imul(x, y) };
+        case '/': if (y === 0) throw this.fault('Division by zero. (A real controller logs a minor fault — Type 4, Code 4 — and the result is garbage.)', e.line);
+          return R ? { t: 'R', v: Math.fround(x / y) } : { t: 'I', v: Math.trunc(x / y) | 0 };
+        case 'MOD': if (y === 0) throw this.fault('MOD by zero', e.line);
+          return R ? { t: 'R', v: Math.fround(x - y * Math.trunc(x / y)) } : { t: 'I', v: (x % y) | 0 };
+        case '**': return { t: 'R', v: Math.fround(Math.pow(x, y)) };
+      }
+    }
+    fn(e) {
+      const a = e.args.map(x => this.ev(x)), v = a.map(num), R = a.some(x => x.t === 'R'), mk = n => R ? { t: 'R', v: Math.fround(n) } : { t: 'I', v: n | 0 };
+      const rr = n => { if (isNaN(n)) throw this.fault(`${e.name} got an invalid argument (${v[0]})`, e.line); return { t: 'R', v: Math.fround(n) }; };
+      switch (e.u) {
+        case 'ABS': return mk(Math.abs(v[0]));
+        case 'SQRT': case 'SQR': if (v[0] < 0) throw this.fault(`SQRT of a negative number (${v[0]})`, e.line); return rr(Math.sqrt(v[0]));
+        case 'TRUNC': case 'TRN': return { t: 'I', v: Math.trunc(v[0]) | 0 };
+        case 'SIN': return rr(Math.sin(v[0])); case 'COS': return rr(Math.cos(v[0])); case 'TAN': return rr(Math.tan(v[0]));
+        case 'LN': if (v[0] <= 0) throw this.fault('LN of a number ≤ 0', e.line); return rr(Math.log(v[0]));
+        case 'LOG': if (v[0] <= 0) throw this.fault('LOG of a number ≤ 0', e.line); return rr(Math.log10(v[0]));
+        case 'MIN': return mk(Math.min(...v)); case 'MAX': return mk(Math.max(...v));
+        case 'LIMIT': return mk(Math.min(Math.max(v[1], v[0]), v[2]));
+      }
+    }
+    exec(list) {
+      for (const s of list) {
+        switch (s.n) {
+          case 'assign': { const lv = this.resolve(s.target); lv.set(conv(lv.type, this.ev(s.e), s.line)); break; }
+          case 'if': { let done = false; for (const a of s.arms) { if (truthy(this.ev(a.cond))) { this.exec(a.body); done = true; break; } } if (!done && s.els) this.exec(s.els); break; }
+          case 'case': { const x = this.ev(s.sel).v; const br = s.branches.find(b => b.labels.some(([lo, hi]) => x >= lo && x <= hi)); if (br) this.exec(br.body); else if (s.els) this.exec(s.els); break; }
+          case 'for': {
+            const lv = this.resolve(s.ref); lv.set(conv(lv.type, this.ev(s.from), s.line));
+            const to = this.ev(s.to).v, by = s.by ? this.ev(s.by).v : 1;
+            for (;;) {
+              const c = lv.get(); if (by >= 0 ? c > to : c < to) break;
+              this.tick(s.line);
+              try { this.exec(s.body); } catch (x) { if (x === EXIT) break; throw x; }
+              lv.set(wrap(lv.type, lv.get() + by));
+            }
+            break;
+          }
+          case 'while': { try { while (truthy(this.ev(s.cond))) { this.tick(s.line); this.exec(s.body); } } catch (x) { if (x !== EXIT) throw x; } break; }
+          case 'repeat': { try { do { this.tick(s.line); this.exec(s.body); } while (!truthy(this.ev(s.cond))); } catch (x) { if (x !== EXIT) throw x; } break; }
+          case 'exit': throw EXIT;
+          case 'return': throw RET;
+          case 'call': this.proc(s.u, this.resolve(s.args[0]).whole); break;
+        }
+      }
+    }
+    proc(name, c) {
+      const m = c.m, now = this.now;
+      if (name === 'OSRI' || name === 'OSFI') { const i = m.INPUTBIT.v; m.OUTPUTBIT.v = name === 'OSRI' ? i && !c.prev : !i && c.prev; c.prev = i; return; }
+      const en = m.TIMERENABLE.v, pre = Math.max(0, m.PRE.v);
+      if (m.RESET.v) { m.ACC.v = 0; m.DN.v = false; m.TT.v = false; m.EN.v = en; c.last = now; return; }
+      if (name === 'TONR') {
+        if (en) {
+          if (c.last != null) m.ACC.v = m.ACC.v + (now - c.last);
+          c.last = now;
+          if (m.ACC.v >= pre) { m.ACC.v = pre; m.DN.v = true; } else m.DN.v = false;
+          m.EN.v = true; m.TT.v = !m.DN.v;
+        } else { m.ACC.v = 0; m.DN.v = false; m.EN.v = false; m.TT.v = false; c.last = null; }
+      } else { // TOFR
+        if (en) { m.EN.v = true; m.DN.v = true; m.ACC.v = 0; m.TT.v = false; c.last = null; }
+        else {
+          m.EN.v = false;
+          if (m.DN.v) { if (c.last != null) m.ACC.v += now - c.last; c.last = now; if (m.ACC.v >= pre) { m.ACC.v = pre; m.DN.v = false; } }
+          m.TT.v = m.DN.v;
+        }
+      }
+    }
+    scan(dt) {
+      this.now += dt; this.loop = 0;
+      try { this.exec(this.ast.body); } catch (x) { if (x !== RET) throw x; }
+    }
+    write(name, v) {
+      const c = this.tags.get(name.toUpperCase());
+      if (c.kind === 'array') v.forEach((x, i) => { c.data[i] = rawConv(c.type, x); }); else c.v = rawConv(c.type, v);
+    }
+    read(name) { const c = this.tags.get(name.toUpperCase()); return c.kind === 'array' ? c.data.slice() : c.v; }
+  }
+
+  // ---------- test harness ----------
+  function simulate(src, prob, test) {
+    const prog = new Program(src, prob.tags);
+    const outs = prob.tags.filter(t => t.dir === 'out').map(t => t.name);
+    const inputs = {}; const cps = []; let t = 0; const dt = test.dt || 100;
+    for (const [n, set] of test.steps) {
+      Object.assign(inputs, set);
+      for (let k = 0; k < n; k++) {
+        for (const nm in inputs) prog.write(nm, inputs[nm]);
+        t += dt;
+        try { prog.scan(dt); } catch (e) { e.at = t; e.partial = cps; e.prog = prog; throw e; }
+      }
+      const o = {}; outs.forEach(nm => { o[nm] = prog.read(nm); });
+      cps.push({ t, set: { ...set }, inputs: JSON.parse(JSON.stringify(inputs)), out: o });
+    }
+    cps.prog = prog; return cps;
+  }
+  const close = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) <= 1e-3 + 1e-5 * Math.abs(b) : a === b;
+  const same = (a, b) => Array.isArray(b) ? a.length === b.length && a.every((x, i) => close(x, b[i])) : close(a, b);
+
+  return { lex, parse, Program, simulate, same, STError, STRUCTS };
+})();
+if (typeof module !== 'undefined') module.exports = STEngine;
+</script>
+<script>const PROBLEMS = [
+{
+  id: 'motor-seal-in', title: 'Motor start/stop seal-in', diff: 'Easy', topics: ['Boolean logic', 'Latching'],
+  desc: `<p>Write the classic three-wire motor control. Pressing <code>Start_PB</code> starts the motor, and it keeps running after the button is released.</p>
+<p>Pressing <code>Stop_PB</code> or an <code>Overload_Trip</code> stops it. Stop and overload always win, even if Start is held at the same time.</p>
+<p class="note">Both push-buttons read TRUE while pressed. (In the field, Stop is usually wired normally-closed. The input here has already been inverted for you.)</p>`,
+  tags: [
+    { name: 'Start_PB', type: 'BOOL', dir: 'in', d: 'TRUE while Start is pressed' },
+    { name: 'Stop_PB', type: 'BOOL', dir: 'in', d: 'TRUE while Stop is pressed' },
+    { name: 'Overload_Trip', type: 'BOOL', dir: 'in', d: 'TRUE when the overload relay has tripped' },
+    { name: 'Motor_Run', type: 'BOOL', dir: 'out', d: 'Motor contactor output' }],
+  starter: `// Motor_Run should seal itself in.\n\nMotor_Run := ;\n`,
+  hints: ['A seal-in is just OR-ing the output with itself: (Start OR Motor_Run).', 'Put the stop conditions in series with AND NOT so they always win.'],
+  solution: `Motor_Run := (Start_PB OR Motor_Run)\n             AND NOT Stop_PB\n             AND NOT Overload_Trip;\n`,
+  tests: [
+    { name: 'Start, release, stop', steps: [[1, {}], [1, { Start_PB: true }], [3, { Start_PB: false }], [1, { Stop_PB: true }], [2, { Stop_PB: false }]] },
+    { name: 'Stop beats Start', steps: [[1, { Start_PB: true, Stop_PB: true }], [1, { Stop_PB: false }], [1, { Start_PB: false }]] },
+    { name: 'Overload trip', hidden: true, steps: [[1, { Start_PB: true }], [2, { Start_PB: false }], [1, { Overload_Trip: true }], [1, { Start_PB: true }], [1, { Overload_Trip: false, Start_PB: false }], [1, { Start_PB: true }], [1, { Start_PB: false }]] }]
+},
+{
+  id: 'part-counter', title: 'Rising-edge part counter', diff: 'Easy', topics: ['Edge detection', 'Counters'],
+  desc: `<p>A photo-eye on a conveyor turns <code>Part_Sensor</code> TRUE while a part is in front of it. A part can block the sensor for many scans.</p>
+<p>Count each part <b>once</b>, on the rising edge of the sensor. While <code>Reset_Count</code> is TRUE, hold <code>Part_Count</code> at 0 and ignore the sensor.</p>`,
+  tags: [
+    { name: 'Part_Sensor', type: 'BOOL', dir: 'in', d: 'Photo-eye, TRUE while blocked' },
+    { name: 'Reset_Count', type: 'BOOL', dir: 'in', d: 'Clears the count' },
+    { name: 'Part_Count', type: 'DINT', dir: 'out', d: 'Number of parts counted' },
+    { name: 'Sensor_Prev', type: 'BOOL', dir: 'int', d: 'Storage bit for edge detection' }],
+  starter: `IF Reset_Count THEN\n  \nEND_IF;\n`,
+  hints: ['A rising edge is "TRUE now AND it was FALSE last scan".', 'Update Sensor_Prev at the end of the routine, after you have used it.'],
+  solution: `IF Reset_Count THEN\n  Part_Count := 0;\nELSIF Part_Sensor AND NOT Sensor_Prev THEN\n  Part_Count := Part_Count + 1;\nEND_IF;\n\nSensor_Prev := Part_Sensor;\n`,
+  tests: [
+    { name: 'Two parts, one held', steps: [[1, {}], [3, { Part_Sensor: true }], [1, { Part_Sensor: false }], [1, { Part_Sensor: true }], [1, { Part_Sensor: false }]] },
+    { name: 'Reset while parts pass', steps: [[1, { Part_Sensor: true }], [1, { Part_Sensor: false }], [1, { Part_Sensor: true }], [1, { Part_Sensor: false }], [1, { Reset_Count: true }], [1, { Part_Sensor: true }], [1, { Part_Sensor: false, Reset_Count: false }], [1, { Part_Sensor: true }], [1, { Part_Sensor: false }]] },
+    { name: 'Sensor held through reset release', hidden: true, steps: [[1, { Reset_Count: true, Part_Sensor: true }], [2, { Reset_Count: false }], [1, { Part_Sensor: false }], [1, { Part_Sensor: true }], [5, { Part_Sensor: false }]] }]
+},
+{
+  id: 'toggle', title: 'Push-on / push-off toggle', diff: 'Easy', topics: ['Edge detection', 'Flip-flop'],
+  desc: `<p>One push-button controls a light. Each press toggles <code>Light</code>: the first press turns it on and the next turns it off. Holding the button must not make it flicker.</p>`,
+  tags: [
+    { name: 'Toggle_PB', type: 'BOOL', dir: 'in', d: 'TRUE while pressed' },
+    { name: 'Light', type: 'BOOL', dir: 'out', d: 'Light output' },
+    { name: 'PB_Prev', type: 'BOOL', dir: 'int', d: 'Storage bit' }],
+  starter: `// Toggle Light once per press\n`,
+  hints: ['Detect the rising edge first, then invert Light only on that scan.', 'Light := NOT Light; flips a BOOL.'],
+  solution: `IF Toggle_PB AND NOT PB_Prev THEN\n  Light := NOT Light;\nEND_IF;\nPB_Prev := Toggle_PB;\n`,
+  tests: [
+    { name: 'Press, release, press', steps: [[1, {}], [1, { Toggle_PB: true }], [2, { Toggle_PB: false }], [1, { Toggle_PB: true }], [1, { Toggle_PB: false }]] },
+    { name: 'Long hold', hidden: true, steps: [[10, { Toggle_PB: true }], [1, { Toggle_PB: false }], [4, { Toggle_PB: true }], [1, { Toggle_PB: false }], [1, { Toggle_PB: true }]] }]
+},
+{
+  id: 'analog-scaling', title: '4–20 mA pressure scaling', diff: 'Easy', topics: ['REAL math', 'Scaling', 'Clamping'],
+  desc: `<p>A pressure transmitter reads 0–150 PSI as 4–20 mA. The analog card reports this in <code>Raw_Counts</code>, where 4000 counts is 4 mA and 20000 counts is 20 mA.</p>
+<ul><li>Scale linearly into <code>Pressure_PSI</code>, clamped to 0.0–150.0.</li>
+<li>If <code>Raw_Counts</code> is below 3600 or above 21000, the signal is bad. Set <code>Sensor_Fault</code> and <b>hold the last good</b> <code>Pressure_PSI</code>.</li>
+<li>Otherwise clear <code>Sensor_Fault</code>.</li></ul>`,
+  tags: [
+    { name: 'Raw_Counts', type: 'DINT', dir: 'in', d: '4000 = 4 mA, 20000 = 20 mA' },
+    { name: 'Pressure_PSI', type: 'REAL', dir: 'out', d: 'Scaled pressure, 0.0–150.0' },
+    { name: 'Sensor_Fault', type: 'BOOL', dir: 'out', d: 'Under/over range' }],
+  starter: `// EU = (Raw - RawMin) * (EUMax - EUMin) / (RawMax - RawMin) + EUMin\n`,
+  hints: ['If every operand is a DINT, the division is integer division and the fraction is lost. Use a REAL literal such as 150.0.', 'Only write Pressure_PSI on the good-signal path, so it holds when the signal is faulted.'],
+  solution: `IF Raw_Counts < 3600 OR Raw_Counts > 21000 THEN\n  Sensor_Fault := 1;\nELSE\n  Sensor_Fault := 0;\n  Pressure_PSI := (Raw_Counts - 4000) * 150.0 / 16000.0;\n  IF Pressure_PSI < 0.0 THEN\n    Pressure_PSI := 0.0;\n  ELSIF Pressure_PSI > 150.0 THEN\n    Pressure_PSI := 150.0;\n  END_IF;\nEND_IF;\n`,
+  tests: [
+    { name: 'Span points', steps: [[1, { Raw_Counts: 4000 }], [1, { Raw_Counts: 12000 }], [1, { Raw_Counts: 20000 }], [1, { Raw_Counts: 4100 }]] },
+    { name: 'Clamp and fault hold', steps: [[1, { Raw_Counts: 3800 }], [1, { Raw_Counts: 20500 }], [1, { Raw_Counts: 3000 }], [1, { Raw_Counts: 12345 }]] },
+    { name: 'Over-range hold', hidden: true, steps: [[1, { Raw_Counts: 9999 }], [1, { Raw_Counts: 25000 }], [1, { Raw_Counts: 21000 }], [1, { Raw_Counts: 3599 }], [1, { Raw_Counts: 3600 }]] }]
+},
+{
+  id: 'array-max', title: 'Find the maximum in an array', diff: 'Easy', topics: ['Arrays', 'FOR loops'],
+  desc: `<p>Find the largest value in <code>Data[0..9]</code> and write it to <code>Max_Value</code>. Write its position to <code>Max_Index</code>. If the largest value appears more than once, report the <b>first</b> index.</p>`,
+  tags: [
+    { name: 'Data', type: 'DINT', dim: 10, dir: 'in', d: 'ARRAY[0..9] OF DINT' },
+    { name: 'Max_Value', type: 'DINT', dir: 'out', d: 'Largest element' },
+    { name: 'Max_Index', type: 'DINT', dir: 'out', d: 'Index of first largest element' },
+    { name: 'i', type: 'DINT', dir: 'int', d: 'Loop index' }],
+  starter: `FOR i := 0 TO 9 DO\n  \nEND_FOR;\n`,
+  hints: ['Seed Max_Value with Data[0], not 0. The data might be all negative.', 'Use > rather than >= to keep the first occurrence.'],
+  solution: `Max_Value := Data[0];\nMax_Index := 0;\nFOR i := 1 TO 9 DO\n  IF Data[i] > Max_Value THEN\n    Max_Value := Data[i];\n    Max_Index := i;\n  END_IF;\nEND_FOR;\n`,
+  tests: [
+    { name: 'Mixed values', steps: [[1, { Data: [3, 17, 4, 9, 2, 11, 0, 8, 6, 5] }]] },
+    { name: 'All negative', steps: [[1, { Data: [-40, -12, -99, -7, -50, -8, -30, -61, -15, -22] }]] },
+    { name: 'Duplicates and last slot', hidden: true, steps: [[1, { Data: [5, 9, 1, 9, 3, 9, 2, 0, 4, 7] }], [1, { Data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 100] }]] }]
+},
+{
+  id: 'bit-count', title: 'Count bits in a status word', diff: 'Medium', topics: ['Bit access', 'FOR loops'],
+  desc: `<p>A drive reports 32 status flags packed into <code>Status_Word</code>. Set <code>Bits_On</code> to the number of bits that are 1.</p>
+<p>Set <code>Lowest_Bit</code> to the number of the lowest bit that is set, or −1 if no bit is set. Remember that bit 31 is the sign bit of a DINT.</p>
+<p class="note">Rockwell indirect bit syntax: <code>Status_Word.[i]</code>.</p>`,
+  tags: [
+    { name: 'Status_Word', type: 'DINT', dir: 'in', d: '32 packed flags' },
+    { name: 'Bits_On', type: 'DINT', dir: 'out', d: 'Count of 1 bits' },
+    { name: 'Lowest_Bit', type: 'DINT', dir: 'out', d: 'Lowest set bit, or -1' },
+    { name: 'i', type: 'DINT', dir: 'int', d: 'Loop index' }],
+  starter: `Bits_On := 0;\nLowest_Bit := -1;\n`,
+  hints: ['Loop i from 0 to 31 and test Status_Word.[i].', 'Looping downward (31 TO 0 BY -1) lets you overwrite Lowest_Bit without an extra flag. You can also use EXIT.'],
+  solution: `Bits_On := 0;\nLowest_Bit := -1;\nFOR i := 31 TO 0 BY -1 DO\n  IF Status_Word.[i] THEN\n    Bits_On := Bits_On + 1;\n    Lowest_Bit := i;\n  END_IF;\nEND_FOR;\n`,
+  tests: [
+    { name: 'Small words', steps: [[1, { Status_Word: 0 }], [1, { Status_Word: 1 }], [1, { Status_Word: 240 }], [1, { Status_Word: 0b10100000 }]] },
+    { name: 'Sign bit', hidden: true, steps: [[1, { Status_Word: -2147483648 }], [1, { Status_Word: -1 }], [1, { Status_Word: 0x55555554 }]] }]
+},
+{
+  id: 'debounce', title: 'Input debounce with TONR', diff: 'Medium', topics: ['Timers', 'Filtering'],
+  desc: `<p>A limit switch chatters. <code>Clean_Output</code> should change to match <code>Raw_Input</code> only after the input has stayed at the new state for <b>300 ms</b> without a break. This applies to both rising and falling changes.</p>
+<p>Use the <code>Deb_Tmr</code> FBD_TIMER with <code>TONR</code>. The scan time is 50 ms.</p>`,
+  tags: [
+    { name: 'Raw_Input', type: 'BOOL', dir: 'in', d: 'Bouncy switch' },
+    { name: 'Clean_Output', type: 'BOOL', dir: 'out', d: 'Debounced state' },
+    { name: 'Deb_Tmr', type: 'FBD_TIMER', dir: 'int', d: 'TONR timer' }],
+  starter: `Deb_Tmr.PRE := 300;\nDeb_Tmr.TimerEnable := ;\nTONR(Deb_Tmr);\n`,
+  hints: ['Time only while the input disagrees with the output.', 'When the timer is done, copy the input to the output. The timer then disables and resets on its own.'],
+  solution: `Deb_Tmr.PRE := 300;\nDeb_Tmr.TimerEnable := Raw_Input <> Clean_Output;\nTONR(Deb_Tmr);\n\nIF Deb_Tmr.DN THEN\n  Clean_Output := Raw_Input;\nEND_IF;\n`,
+  tests: [
+    { name: 'Bounce, then settle on', dt: 50, steps: [[2, {}], [3, { Raw_Input: true }], [2, { Raw_Input: false }], [4, { Raw_Input: true }], [6, {}]] },
+    { name: 'Settle off', dt: 50, steps: [[12, { Raw_Input: true }], [2, { Raw_Input: false }], [1, { Raw_Input: true }], [3, { Raw_Input: false }], [6, {}]] },
+    { name: 'Rapid chatter never passes', hidden: true, dt: 50, steps: [[2, { Raw_Input: true }], [2, { Raw_Input: false }], [2, { Raw_Input: true }], [2, { Raw_Input: false }], [3, { Raw_Input: true }], [2, { Raw_Input: false }]] }]
+},
+{
+  id: 'hi-alarm', title: 'High-temp alarm with delay and deadband', diff: 'Medium', topics: ['Timers', 'Hysteresis', 'Alarms'],
+  desc: `<p>Raise <code>Hi_Alarm</code> when <code>Temp_PV</code> has been above <code>Alarm_SP</code> for <b>2 s</b> continuously. If the temperature dips back to or below the setpoint, the delay starts over.</p>
+<p>Once raised, the alarm stays on until <code>Temp_PV</code> drops below <code>Alarm_SP − Deadband</code>. It then clears immediately.</p>
+<p>Scan time is 250 ms. Use <code>Alm_Tmr</code>.</p>`,
+  tags: [
+    { name: 'Temp_PV', type: 'REAL', dir: 'in', d: 'Measured temperature, °C' },
+    { name: 'Alarm_SP', type: 'REAL', dir: 'in', d: 'Alarm setpoint, °C' },
+    { name: 'Deadband', type: 'REAL', dir: 'in', d: 'Clear deadband, °C' },
+    { name: 'Hi_Alarm', type: 'BOOL', dir: 'out', d: 'Alarm output' },
+    { name: 'Alm_Tmr', type: 'FBD_TIMER', dir: 'int', d: 'Delay-on timer' }],
+  starter: `Alm_Tmr.PRE := 2000;\n`,
+  hints: ['The timer enable is simply Temp_PV > Alarm_SP.', 'Set the alarm from the timer and clear it from the deadband check. Use IF/ELSIF so that neither branch fights the other.'],
+  solution: `Alm_Tmr.PRE := 2000;\nAlm_Tmr.TimerEnable := Temp_PV > Alarm_SP;\nTONR(Alm_Tmr);\n\nIF Alm_Tmr.DN THEN\n  Hi_Alarm := 1;\nELSIF Temp_PV < Alarm_SP - Deadband THEN\n  Hi_Alarm := 0;\nEND_IF;\n`,
+  tests: [
+    { name: 'Short excursion, then real alarm', dt: 250, steps: [[2, { Temp_PV: 1490.0, Alarm_SP: 1500.0, Deadband: 10.0 }], [5, { Temp_PV: 1505.0 }], [2, { Temp_PV: 1495.0 }], [4, { Temp_PV: 1506.0 }], [6, {}]] },
+    { name: 'Deadband hold and clear', dt: 250, steps: [[12, { Temp_PV: 1520.0, Alarm_SP: 1500.0, Deadband: 10.0 }], [4, { Temp_PV: 1495.0 }], [1, { Temp_PV: 1490.5 }], [1, { Temp_PV: 1489.0 }], [3, { Temp_PV: 1495.0 }]] },
+    { name: 'Setpoint moved', hidden: true, dt: 250, steps: [[12, { Temp_PV: 800.0, Alarm_SP: 790.0, Deadband: 5.0 }], [2, { Alarm_SP: 850.0 }], [12, { Temp_PV: 900.0 }], [2, { Temp_PV: 846.0 }], [1, { Temp_PV: 844.0 }]] }]
+},
+{
+  id: 'moving-average', title: 'Moving average (ring buffer)', diff: 'Medium', topics: ['Arrays', 'MOD', 'Filtering'],
+  desc: `<p>Every scan, store <code>New_Sample</code> and output <code>Avg_Out</code>: the average of the <b>last 5 samples</b>, including this one.</p>
+<p>Until 5 samples have been collected, average only the samples you have so far. Use <code>Buffer</code> as a ring buffer rather than shifting the whole array.</p>`,
+  tags: [
+    { name: 'New_Sample', type: 'REAL', dir: 'in', d: 'Sample this scan' },
+    { name: 'Avg_Out', type: 'REAL', dir: 'out', d: 'Average of last ≤5 samples' },
+    { name: 'Buffer', type: 'REAL', dim: 5, dir: 'int', d: 'ARRAY[0..4] OF REAL' },
+    { name: 'Write_Idx', type: 'DINT', dir: 'int', d: 'Next slot to write' },
+    { name: 'Count', type: 'DINT', dir: 'int', d: 'Samples collected (max 5)' },
+    { name: 'Sum', type: 'REAL', dir: 'int', d: 'Scratch' },
+    { name: 'i', type: 'DINT', dir: 'int', d: 'Loop index' }],
+  starter: `Buffer[Write_Idx] := New_Sample;\n`,
+  hints: ['Write_Idx := (Write_Idx + 1) MOD 5; wraps the index.', 'Before the buffer fills, slots 0..Count-1 hold the valid samples.'],
+  solution: `Buffer[Write_Idx] := New_Sample;\nWrite_Idx := (Write_Idx + 1) MOD 5;\nIF Count < 5 THEN\n  Count := Count + 1;\nEND_IF;\n\nSum := 0.0;\nFOR i := 0 TO Count - 1 DO\n  Sum := Sum + Buffer[i];\nEND_FOR;\nAvg_Out := Sum / Count;\n`,
+  tests: [
+    { name: 'Filling up', steps: [[1, { New_Sample: 10.0 }], [1, { New_Sample: 20.0 }], [1, { New_Sample: 30.0 }], [1, { New_Sample: 40.0 }], [1, { New_Sample: 50.0 }], [1, { New_Sample: 60.0 }], [1, { New_Sample: 70.0 }]] },
+    { name: 'Wraps many times', hidden: true, steps: [[1, { New_Sample: 1.5 }], [1, { New_Sample: -2.0 }], [7, { New_Sample: 4.0 }], [1, { New_Sample: 100.0 }], [1, { New_Sample: 0.0 }], [3, { New_Sample: 2.25 }]] }]
+},
+{
+  id: 'bubble-sort', title: 'Sort an array ascending', diff: 'Medium', topics: ['Arrays', 'Nested loops'],
+  desc: `<p>Copy <code>Data[0..9]</code> into <code>Sorted[0..9]</code> and sort <code>Sorted</code> in ascending order. Leave <code>Data</code> unchanged.</p>
+<p>Any sorting algorithm is fine. Watch your loop bounds: reading <code>Sorted[10]</code> faults the controller.</p>`,
+  tags: [
+    { name: 'Data', type: 'DINT', dim: 10, dir: 'in', d: 'ARRAY[0..9] OF DINT' },
+    { name: 'Sorted', type: 'DINT', dim: 10, dir: 'out', d: 'ARRAY[0..9] OF DINT' },
+    { name: 'i', type: 'DINT', dir: 'int', d: 'Loop index' },
+    { name: 'j', type: 'DINT', dir: 'int', d: 'Loop index' },
+    { name: 'Temp', type: 'DINT', dir: 'int', d: 'Swap scratch' }],
+  starter: `FOR i := 0 TO 9 DO\n  Sorted[i] := Data[i];\nEND_FOR;\n\n// sort Sorted[] here\n`,
+  hints: ['Bubble sort: compare neighbours j and j+1 and swap them if they are out of order.', 'The inner loop must stop at 8 − i, so that j+1 never reaches 10.'],
+  solution: `FOR i := 0 TO 9 DO\n  Sorted[i] := Data[i];\nEND_FOR;\n\nFOR i := 0 TO 8 DO\n  FOR j := 0 TO 8 - i DO\n    IF Sorted[j] > Sorted[j + 1] THEN\n      Temp := Sorted[j];\n      Sorted[j] := Sorted[j + 1];\n      Sorted[j + 1] := Temp;\n    END_IF;\n  END_FOR;\nEND_FOR;\n`,
+  tests: [
+    { name: 'Random order', steps: [[1, { Data: [42, 7, 19, 3, 88, 21, 5, 64, 13, 30] }]] },
+    { name: 'Reversed', steps: [[1, { Data: [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] }]] },
+    { name: 'Negatives and duplicates', hidden: true, steps: [[1, { Data: [0, -5, 12, -5, 7, 7, -100, 3, 12, 1] }], [1, { Data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }]] }]
+},
+{
+  id: 'traffic-light', title: 'Traffic light state machine', diff: 'Hard', topics: ['CASE', 'State machines', 'Timers'],
+  desc: `<p>Build a sequencer with <code>CASE</code>. <code>Step</code> must report the state: 0 = off, 10 = red (4 s), 20 = green (5 s), 30 = yellow (2 s). After yellow it goes back to red.</p>
+<p>When <code>Enable</code> goes TRUE, start at red. When it goes FALSE, go to step 0 with every lamp off. Exactly one lamp is on in each running step.</p>
+<p class="note">Scan time is 100 ms. Checks are taken mid-phase, so being one scan early or late at a transition is fine.</p>`,
+  tags: [
+    { name: 'Enable', type: 'BOOL', dir: 'in', d: 'Run the sequence' },
+    { name: 'Step', type: 'DINT', dir: 'out', d: '0, 10, 20 or 30' },
+    { name: 'Red_Lamp', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Yellow_Lamp', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Green_Lamp', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Step_Tmr', type: 'FBD_TIMER', dir: 'int', d: 'Step timer' },
+    { name: 'Last_Step', type: 'DINT', dir: 'int', d: 'Step on the previous scan' }],
+  starter: `CASE Step OF\n  0:\n    IF Enable THEN Step := 10; END_IF;\n  10: // red\n    \nEND_CASE;\n`,
+  hints: ['Restart the step timer whenever Step changes. Comparing Step with Last_Step tells you a transition just happened.', 'Set the lamps from Step after the CASE, so each lamp has exactly one assignment.'],
+  solution: `IF NOT Enable THEN\n  Step := 0;\nEND_IF;\n\nCASE Step OF\n  0:\n    IF Enable THEN Step := 10; END_IF;\n  10: // red\n    Step_Tmr.PRE := 4000;\n    IF Step_Tmr.DN THEN Step := 20; END_IF;\n  20: // green\n    Step_Tmr.PRE := 5000;\n    IF Step_Tmr.DN THEN Step := 30; END_IF;\n  30: // yellow\n    Step_Tmr.PRE := 2000;\n    IF Step_Tmr.DN THEN Step := 10; END_IF;\nEND_CASE;\n\n// restart the timer on every step change\nStep_Tmr.TimerEnable := (Step <> 0) AND (Step = Last_Step);\nLast_Step := Step;\nTONR(Step_Tmr);\n\nRed_Lamp    := Step = 10;\nGreen_Lamp  := Step = 20;\nYellow_Lamp := Step = 30;\n`,
+  tests: [
+    { name: 'One full cycle', dt: 100, steps: [[3, {}], [20, { Enable: true }], [45, {}], [35, {}], [30, {}], [45, {}]] },
+    { name: 'Disable mid-green, restart', dt: 100, steps: [[60, { Enable: true }], [5, { Enable: false }], [3, { Enable: true }], [17, {}], [45, {}]] }]
+},
+{
+  id: 'ramp-soak', title: 'Furnace setpoint ramp', diff: 'Hard', topics: ['REAL math', 'Rate limiting', 'Process'],
+  desc: `<p>Furnace controllers never jump the setpoint straight to a new target. Drive <code>Working_SP</code> toward <code>Target_SP</code> at <code>Ramp_Rate</code> °C/min.</p>
+<ul><li>While <code>Ramp_Enable</code> is FALSE, track the furnace for a bumpless start: set <code>Working_SP := PV_Temp</code> and clear <code>Ramp_Done</code>.</li>
+<li>While it is TRUE, move <code>Working_SP</code> by <code>Ramp_Rate × Scan_Time_ms / 60000</code> each scan, up or down, and never past the target.</li>
+<li><code>Ramp_Done</code> is TRUE when <code>Working_SP</code> equals <code>Target_SP</code>.</li></ul>`,
+  tags: [
+    { name: 'Ramp_Enable', type: 'BOOL', dir: 'in', d: 'Ramp active' },
+    { name: 'PV_Temp', type: 'REAL', dir: 'in', d: 'Furnace temperature, °C' },
+    { name: 'Target_SP', type: 'REAL', dir: 'in', d: 'Final setpoint, °C' },
+    { name: 'Ramp_Rate', type: 'REAL', dir: 'in', d: '°C per minute' },
+    { name: 'Scan_Time_ms', type: 'DINT', dir: 'in', d: 'Task period, ms' },
+    { name: 'Working_SP', type: 'REAL', dir: 'out', d: 'Ramped setpoint' },
+    { name: 'Ramp_Done', type: 'BOOL', dir: 'out', d: 'Reached target' },
+    { name: 'Step_Size', type: 'REAL', dir: 'int', d: 'Scratch' }],
+  starter: `IF NOT Ramp_Enable THEN\n  \nELSE\n  \nEND_IF;\n`,
+  hints: ['Step_Size := Ramp_Rate * Scan_Time_ms / 60000.0;', 'MIN(Working_SP + Step_Size, Target_SP) stops an upward ramp from overshooting. Use MAX for a downward one.'],
+  solution: `IF NOT Ramp_Enable THEN\n  Working_SP := PV_Temp;\n  Ramp_Done := 0;\nELSE\n  Step_Size := Ramp_Rate * Scan_Time_ms / 60000.0;\n  IF Working_SP < Target_SP THEN\n    Working_SP := MIN(Working_SP + Step_Size, Target_SP);\n  ELSIF Working_SP > Target_SP THEN\n    Working_SP := MAX(Working_SP - Step_Size, Target_SP);\n  END_IF;\n  Ramp_Done := Working_SP = Target_SP;\nEND_IF;\n`,
+  tests: [
+    { name: 'Ramp up 25 → 35 °C', steps: [[2, { PV_Temp: 25.0, Target_SP: 35.0, Ramp_Rate: 300.0, Scan_Time_ms: 100 }], [5, { Ramp_Enable: true }], [10, {}], [10, {}]] },
+    { name: 'Retarget downward', steps: [[1, { PV_Temp: 1200.0, Target_SP: 1210.0, Ramp_Rate: 600.0, Scan_Time_ms: 100 }], [15, { Ramp_Enable: true }], [3, { Target_SP: 1205.0 }], [10, {}]] },
+    { name: 'Disable mid-ramp, odd step size', hidden: true, steps: [[1, { PV_Temp: 500.0, Target_SP: 501.0, Ramp_Rate: 90.0, Scan_Time_ms: 250 }], [3, { Ramp_Enable: true }], [1, { Ramp_Enable: false, PV_Temp: 480.0 }], [1, { Ramp_Enable: true, Target_SP: 480.0 }], [2, {}]] }]
+},
+{
+  id: 'lead-lag', title: 'Lead/lag pump alternation', diff: 'Hard', topics: ['Hysteresis', 'Alternation'],
+  desc: `<p>Two pumps empty a wet well. The <b>lead</b> call turns on at <code>Wet_Well_Level</code> ≥ 70 % and off at ≤ 30 %. The <b>lag</b> call turns on at ≥ 85 % and off at ≤ 50 %.</p>
+<p>Pump 1 starts as lead. Each time the lead call turns off, which is the end of a pump-down, swap the roles by toggling <code>Lead_Is_Pump2</code>. The lead pump follows the lead call and the other pump follows the lag call.</p>`,
+  tags: [
+    { name: 'Wet_Well_Level', type: 'REAL', dir: 'in', d: 'Level, %' },
+    { name: 'Pump1_Run', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Pump2_Run', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Lead_Is_Pump2', type: 'BOOL', dir: 'out', d: 'FALSE = pump 1 leads' },
+    { name: 'Lead_Call', type: 'BOOL', dir: 'int', d: '' },
+    { name: 'Lag_Call', type: 'BOOL', dir: 'int', d: '' }],
+  starter: `// lead call with hysteresis\n\n// lag call with hysteresis\n\n// map calls to pumps\n`,
+  hints: ['Only toggle on the call\'s falling edge. Check Lead_Call AND level ≤ 30, then clear it.', 'Between the on and off levels, write nothing: the call simply holds.'],
+  solution: `IF Wet_Well_Level >= 70.0 THEN\n  Lead_Call := 1;\nELSIF Wet_Well_Level <= 30.0 AND Lead_Call THEN\n  Lead_Call := 0;\n  Lead_Is_Pump2 := NOT Lead_Is_Pump2;\nEND_IF;\n\nIF Wet_Well_Level >= 85.0 THEN\n  Lag_Call := 1;\nELSIF Wet_Well_Level <= 50.0 THEN\n  Lag_Call := 0;\nEND_IF;\n\nIF Lead_Is_Pump2 THEN\n  Pump2_Run := Lead_Call;\n  Pump1_Run := Lag_Call;\nELSE\n  Pump1_Run := Lead_Call;\n  Pump2_Run := Lag_Call;\nEND_IF;\n`,
+  tests: [
+    { name: 'One pump-down then swap', steps: [[1, { Wet_Well_Level: 20.0 }], [1, { Wet_Well_Level: 50.0 }], [1, { Wet_Well_Level: 72.0 }], [1, { Wet_Well_Level: 60.0 }], [1, { Wet_Well_Level: 31.0 }], [1, { Wet_Well_Level: 30.0 }], [1, { Wet_Well_Level: 20.0 }], [1, { Wet_Well_Level: 75.0 }]] },
+    { name: 'Lag assists', steps: [[1, { Wet_Well_Level: 75.0 }], [1, { Wet_Well_Level: 90.0 }], [1, { Wet_Well_Level: 60.0 }], [1, { Wet_Well_Level: 45.0 }], [1, { Wet_Well_Level: 25.0 }], [1, { Wet_Well_Level: 86.0 }], [1, { Wet_Well_Level: 50.0 }], [1, { Wet_Well_Level: 10.0 }]] },
+    { name: 'No swap without a cycle', hidden: true, steps: [[1, { Wet_Well_Level: 10.0 }], [1, { Wet_Well_Level: 29.0 }], [1, { Wet_Well_Level: 69.9 }], [1, { Wet_Well_Level: 70.0 }], [1, { Wet_Well_Level: 69.0 }], [1, { Wet_Well_Level: 30.0 }], [1, { Wet_Well_Level: 30.0 }], [1, { Wet_Well_Level: 70.0 }], [1, { Wet_Well_Level: 0.0 }]] }]
+},
+{
+  id: 'first-out', title: 'First-out alarm annunciator', diff: 'Hard', topics: ['Arrays', 'Edge detection', 'Alarms'],
+  desc: `<p>A trip often sets off a cascade of alarms, and the operator needs to know which one came <b>first</b>. <code>First_Out</code> holds the index (0–7) of the first alarm in <code>Alarm_In</code> to go FALSE→TRUE since the last acknowledge, or −1 if there is none yet.</p>
+<ul><li>If several alarms trip on the same scan, the lowest index wins.</li>
+<li>While <code>Ack_PB</code> is TRUE, reset <code>First_Out</code> to −1. Alarms that are still active do not count again until they clear and re-trip.</li>
+<li><code>Active_Count</code> is the number of alarms that are TRUE right now.</li></ul>`,
+  tags: [
+    { name: 'Alarm_In', type: 'BOOL', dim: 8, dir: 'in', d: 'ARRAY[0..7] OF BOOL' },
+    { name: 'Ack_PB', type: 'BOOL', dir: 'in', d: 'Acknowledge' },
+    { name: 'First_Out', type: 'DINT', dir: 'out', init: -1, d: 'Index or -1 (starts at -1)' },
+    { name: 'Active_Count', type: 'DINT', dir: 'out', d: 'Alarms active now' },
+    { name: 'Alarm_Prev', type: 'BOOL', dim: 8, dir: 'int', d: 'ARRAY[0..7] OF BOOL' },
+    { name: 'i', type: 'DINT', dir: 'int', d: 'Loop index' }],
+  starter: `IF Ack_PB THEN\n  First_Out := -1;\nEND_IF;\n\nFOR i := 0 TO 7 DO\n  \nEND_FOR;\n`,
+  hints: ['Each alarm needs its own edge detection, so keep a matching Alarm_Prev array.', 'Capture an edge only while First_Out = -1. An ascending loop then gives the lowest index for free.'],
+  solution: `IF Ack_PB THEN\n  First_Out := -1;\nEND_IF;\n\nActive_Count := 0;\nFOR i := 0 TO 7 DO\n  IF Alarm_In[i] THEN\n    Active_Count := Active_Count + 1;\n    IF NOT Alarm_Prev[i] AND First_Out = -1 THEN\n      First_Out := i;\n    END_IF;\n  END_IF;\n  Alarm_Prev[i] := Alarm_In[i];\nEND_FOR;\n`,
+  tests: (() => { const A = s => s.split('').map(c => c === '1'); return [
+    { name: 'Cascade and acknowledge', steps: [[1, { Alarm_In: A('00000000') }], [1, { Alarm_In: A('00010000') }], [1, { Alarm_In: A('01010000') }], [1, { Ack_PB: true }], [1, { Ack_PB: false }], [1, { Alarm_In: A('01010100') }]] },
+    { name: 'Same-scan trips', steps: [[1, { Alarm_In: A('00100010') }], [1, { Alarm_In: A('00000000') }], [1, { Ack_PB: true }], [1, { Ack_PB: false }], [1, { Alarm_In: A('00000011') }]] },
+    { name: 'Re-trip after clear', hidden: true, steps: [[1, { Alarm_In: A('10000000') }], [1, { Ack_PB: true }], [1, { Ack_PB: false }], [2, {}], [1, { Alarm_In: A('00000000') }], [1, { Alarm_In: A('10000001') }]] }]; })()
+}];
+if (typeof module !== 'undefined') module.exports = PROBLEMS;
+</script>
+<script>(function () {
+const A = s => s.split('').map(c => c === '1');
+const pulse = (extra, on = 1, off = 4) => [[on, Object.assign({ Shaft_Prox: true }, extra || {})], [off, { Shaft_Prox: false }]];
+const enc = det => [[1, { Encoder_Pulse: true, Reject_Detect: det }], [1, { Encoder_Pulse: false, Reject_Detect: false }]];
+const MORE = [
+// ---------------- EASY ----------------
+{
+  id: 'permissive-chain', title: 'Conveyor permissives and reason code', diff: 'Easy', topics: ['Boolean logic', 'IF/ELSIF'],
+  desc: `<p>The conveyor may run only while every permissive is healthy. <code>Conveyor_Run</code> is <code>Run_Cmd</code> AND all permissives.</p>
+<p>The HMI also needs to know <b>why</b> the conveyor is not ready. Set <code>Not_Ready_Code</code> to the first missing permissive, in this order: 1 = guard open, 2 = e-stop not OK, 3 = downstream not ready. Use 0 when all are healthy. <code>Run_Cmd</code> is not a permissive.</p>`,
+  tags: [
+    { name: 'Run_Cmd', type: 'BOOL', dir: 'in', d: 'Operator run request' },
+    { name: 'Guard_Closed', type: 'BOOL', dir: 'in', d: 'Guard switch made' },
+    { name: 'EStop_OK', type: 'BOOL', dir: 'in', d: 'Safety relay healthy' },
+    { name: 'Downstream_Ready', type: 'BOOL', dir: 'in', d: 'Next machine ready' },
+    { name: 'Conveyor_Run', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Not_Ready_Code', type: 'DINT', dir: 'out', d: '0, 1, 2 or 3' }],
+  starter: `IF NOT Guard_Closed THEN\n  \nEND_IF;\n`,
+  hints: ['An IF/ELSIF chain naturally reports the first failure only.', 'Then Conveyor_Run := Run_Cmd AND (Not_Ready_Code = 0);'],
+  solution: `IF NOT Guard_Closed THEN\n  Not_Ready_Code := 1;\nELSIF NOT EStop_OK THEN\n  Not_Ready_Code := 2;\nELSIF NOT Downstream_Ready THEN\n  Not_Ready_Code := 3;\nELSE\n  Not_Ready_Code := 0;\nEND_IF;\n\nConveyor_Run := Run_Cmd AND Not_Ready_Code = 0;\n`,
+  tests: [
+    { name: 'All combinations of one missing', steps: [[1, { Run_Cmd: true, Guard_Closed: true, EStop_OK: true, Downstream_Ready: true }], [1, { Guard_Closed: false }], [1, { Guard_Closed: true, EStop_OK: false }], [1, { EStop_OK: true, Downstream_Ready: false }], [1, { Downstream_Ready: true, Run_Cmd: false }]] },
+    { name: 'Several missing at once', hidden: true, steps: [[1, { Run_Cmd: true }], [1, { EStop_OK: true }], [1, { Downstream_Ready: true }], [1, { Guard_Closed: true, EStop_OK: false }], [1, { EStop_OK: true }]] }]
+},
+{
+  id: 'tank-volume', title: 'Tank volume from level', diff: 'Easy', topics: ['REAL math', 'Clamping'],
+  desc: `<p>A vertical cylindrical tank has inside diameter <code>Diameter_m</code> and straight-side height <code>Height_m</code>. A radar transmitter reads <code>Level_m</code>.</p>
+<ul><li>Clamp the level to 0…<code>Height_m</code> first. Radar can read slightly negative or above the top.</li>
+<li><code>Volume_L</code> = π × (D/2)² × level × 1000. Use π = 3.14159265.</li>
+<li><code>Percent_Full</code> = level ÷ height × 100.</li></ul>`,
+  tags: [
+    { name: 'Level_m', type: 'REAL', dir: 'in', d: 'Measured level, m' },
+    { name: 'Diameter_m', type: 'REAL', dir: 'in', d: '' },
+    { name: 'Height_m', type: 'REAL', dir: 'in', d: '' },
+    { name: 'Volume_L', type: 'REAL', dir: 'out', d: 'Litres' },
+    { name: 'Percent_Full', type: 'REAL', dir: 'out', d: '0–100' },
+    { name: 'Lvl', type: 'REAL', dir: 'int', d: 'Clamped level' }],
+  starter: `Lvl := Level_m;\n`,
+  hints: ['LIMIT(0.0, Level_m, Height_m) clamps in one line.', 'Compute the radius as Diameter_m / 2.0, a REAL division.'],
+  solution: `Lvl := LIMIT(0.0, Level_m, Height_m);\nVolume_L := 3.14159265 * (Diameter_m / 2.0) * (Diameter_m / 2.0) * Lvl * 1000.0;\nPercent_Full := Lvl / Height_m * 100.0;\n`,
+  tests: [
+    { name: '2 m × 3 m tank', steps: [[1, { Diameter_m: 2.0, Height_m: 3.0, Level_m: 1.5 }], [1, { Level_m: -0.1 }], [1, { Level_m: 3.4 }]] },
+    { name: 'Small tank', hidden: true, steps: [[1, { Diameter_m: 1.2, Height_m: 2.5, Level_m: 0.75 }], [1, { Level_m: 2.5 }], [1, { Level_m: 0.01 }]] }]
+},
+{
+  id: 'array-stats', title: 'Array total, average, count above', diff: 'Easy', topics: ['Arrays', 'FOR loops', 'REAL math'],
+  desc: `<p>From the ten readings in <code>Data</code>, compute <code>Total</code> and <code>Average</code>. Then compute <code>Above_Avg</code>: how many readings are <b>strictly greater</b> than the average.</p>`,
+  tags: [
+    { name: 'Data', type: 'REAL', dim: 10, dir: 'in', d: 'ARRAY[0..9] OF REAL' },
+    { name: 'Total', type: 'REAL', dir: 'out', d: '' },
+    { name: 'Average', type: 'REAL', dir: 'out', d: '' },
+    { name: 'Above_Avg', type: 'DINT', dir: 'out', d: '' },
+    { name: 'i', type: 'DINT', dir: 'int', d: 'Loop index' }],
+  starter: `Total := 0.0;\n`,
+  hints: ['You need the average before you can count, so use two loops.', 'Reset Total and Above_Avg every scan, or they keep growing.'],
+  solution: `Total := 0.0;\nFOR i := 0 TO 9 DO\n  Total := Total + Data[i];\nEND_FOR;\nAverage := Total / 10.0;\n\nAbove_Avg := 0;\nFOR i := 0 TO 9 DO\n  IF Data[i] > Average THEN\n    Above_Avg := Above_Avg + 1;\n  END_IF;\nEND_FOR;\n`,
+  tests: [
+    { name: '1 to 10, run twice', steps: [[1, { Data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }], [1, {}]] },
+    { name: 'Outlier', steps: [[1, { Data: [10, 10, 10, 10, 10, 10, 10, 10, 10, 100] }]] },
+    { name: 'Negatives', hidden: true, steps: [[1, { Data: [-2.5, 4, 0, 7.5, -10, 3, 3, 3, 1, 1] }], [1, { Data: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5] }]] }]
+},
+{
+  id: 'lane-selector', title: 'Round-robin lane selector', diff: 'Easy', topics: ['MOD', 'Arrays'],
+  desc: `<p>Parts are sent to four lanes in turn: part 1 goes to lane 1, part 2 to lane 2, … part 5 back to lane 1. From <code>Part_ID</code>, set <code>Lane</code> (1–4) and turn on only the matching <code>Lane_Valve[Lane−1]</code>.</p>
+<p>A <code>Part_ID</code> of 0 or less is invalid. Set <code>Lane := 0</code> and turn every valve off.</p>`,
+  tags: [
+    { name: 'Part_ID', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Lane', type: 'DINT', dir: 'out', d: '0–4' },
+    { name: 'Lane_Valve', type: 'BOOL', dim: 4, dir: 'out', d: 'ARRAY[0..3] OF BOOL' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' }],
+  starter: `FOR i := 0 TO 3 DO\n  Lane_Valve[i] := 0;\nEND_FOR;\n`,
+  hints: ['(Part_ID − 1) MOD 4 gives 0…3. Add 1 to get the lane.', 'Clear all the valves first, then set just one of them.'],
+  solution: `FOR i := 0 TO 3 DO\n  Lane_Valve[i] := 0;\nEND_FOR;\n\nIF Part_ID <= 0 THEN\n  Lane := 0;\nELSE\n  Lane := (Part_ID - 1) MOD 4 + 1;\n  Lane_Valve[Lane - 1] := 1;\nEND_IF;\n`,
+  tests: [
+    { name: 'First eight parts', steps: [1, 2, 3, 4, 5, 6, 7, 8].map(n => [1, { Part_ID: n }]) },
+    { name: 'Invalid and huge IDs', hidden: true, steps: [[1, { Part_ID: 13 }], [1, { Part_ID: 0 }], [1, { Part_ID: -3 }], [1, { Part_ID: 2147483647 }]] }]
+},
+{
+  id: 'falling-edge', title: 'Falling-edge one-shot', diff: 'Easy', topics: ['Edge detection'],
+  desc: `<p><code>Door_Closed</code> is TRUE while a cabinet door is shut. Make <code>Opened_Pulse</code> TRUE for <b>exactly one scan</b> each time the door opens (TRUE→FALSE), and count the openings in <code>Open_Count</code>.</p>
+<p>If the door is already open on the very first scan, that is not an opening.</p>`,
+  tags: [
+    { name: 'Door_Closed', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Opened_Pulse', type: 'BOOL', dir: 'out', d: 'One-scan pulse' },
+    { name: 'Open_Count', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Door_Prev', type: 'BOOL', dir: 'int', d: 'Storage bit' }],
+  starter: `Opened_Pulse := ;\n`,
+  hints: ['A falling edge is "was TRUE last scan AND is FALSE now".', 'Assign the pulse every scan so it goes FALSE again on its own.'],
+  solution: `Opened_Pulse := Door_Prev AND NOT Door_Closed;\nIF Opened_Pulse THEN\n  Open_Count := Open_Count + 1;\nEND_IF;\nDoor_Prev := Door_Closed;\n`,
+  tests: [
+    { name: 'Open, hold open, close, open', steps: [[2, { Door_Closed: true }], [1, { Door_Closed: false }], [2, {}], [1, { Door_Closed: true }], [1, { Door_Closed: false }], [1, {}]] },
+    { name: 'Starts open', hidden: true, steps: [[1, { Door_Closed: false }], [1, {}], [1, { Door_Closed: true }], [3, { Door_Closed: false }]] }]
+},
+{
+  id: 'peak-hold', title: 'Peak hold (min / max)', diff: 'Easy', topics: ['Comparison', 'First scan'],
+  desc: `<p>Track the highest and lowest <code>Value</code> seen in <code>Peak_Max</code> and <code>Peak_Min</code>.</p>
+<p>On the very first scan, and on any scan while <code>Reset_Peaks</code> is TRUE, set both peaks to the current <code>Value</code>.</p>`,
+  tags: [
+    { name: 'Value', type: 'REAL', dir: 'in', d: '' },
+    { name: 'Reset_Peaks', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Peak_Max', type: 'REAL', dir: 'out', d: '' },
+    { name: 'Peak_Min', type: 'REAL', dir: 'out', d: '' },
+    { name: 'Initialized', type: 'BOOL', dir: 'int', d: 'FALSE until the first scan has run' }],
+  starter: `IF Reset_Peaks OR NOT Initialized THEN\n  \nEND_IF;\n`,
+  hints: ['Peak_Min starts at 0.0, so without first-scan seeding it never rises to a positive minimum.', 'Set Initialized := 1 the first time through.'],
+  solution: `IF Reset_Peaks OR NOT Initialized THEN\n  Peak_Max := Value;\n  Peak_Min := Value;\n  Initialized := 1;\nELSE\n  IF Value > Peak_Max THEN Peak_Max := Value; END_IF;\n  IF Value < Peak_Min THEN Peak_Min := Value; END_IF;\nEND_IF;\n`,
+  tests: [
+    { name: 'Positive values with reset', steps: [[1, { Value: 10.0 }], [1, { Value: 15.0 }], [1, { Value: 7.0 }], [1, { Value: 12.0 }], [1, { Value: 9.0, Reset_Peaks: true }], [1, { Value: 20.0, Reset_Peaks: false }]] },
+    { name: 'All negative', hidden: true, steps: [[1, { Value: -5.0 }], [1, { Value: -2.0 }], [1, { Value: -8.5 }], [1, { Value: -3.0 }]] }]
+},
+{
+  id: 'hoa-mode', title: 'Hand-Off-Auto selector decode', diff: 'Easy', topics: ['Boolean logic', 'Fault handling'],
+  desc: `<p>A three-position HOA switch has two contacts: <code>Sel_Hand</code> and <code>Sel_Auto</code>. Decode them into <code>Mode</code>: 0 = Off, 1 = Hand, 2 = Auto. If both contacts are made at once, the switch is broken. Set <code>Mode := 99</code> and <code>Switch_Fault</code>.</p>
+<p><code>Pump_Run</code> runs in Hand, follows <code>Auto_Call</code> in Auto, and is off in Off or on a fault.</p>`,
+  tags: [
+    { name: 'Sel_Hand', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Sel_Auto', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Auto_Call', type: 'BOOL', dir: 'in', d: 'Level control demand' },
+    { name: 'Mode', type: 'DINT', dir: 'out', d: '0, 1, 2 or 99' },
+    { name: 'Switch_Fault', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Pump_Run', type: 'BOOL', dir: 'out', d: '' }],
+  starter: `// decode Mode first, then drive the pump from Mode\n`,
+  hints: ['Check "both made" first in the IF chain.', 'Pump_Run := (Mode = 1) OR (Mode = 2 AND Auto_Call);'],
+  solution: `IF Sel_Hand AND Sel_Auto THEN\n  Mode := 99;\nELSIF Sel_Hand THEN\n  Mode := 1;\nELSIF Sel_Auto THEN\n  Mode := 2;\nELSE\n  Mode := 0;\nEND_IF;\n\nSwitch_Fault := Mode = 99;\nPump_Run := Mode = 1 OR (Mode = 2 AND Auto_Call);\n`,
+  tests: [
+    { name: 'Each position', steps: [[1, {}], [1, { Sel_Hand: true }], [1, { Sel_Hand: false, Sel_Auto: true }], [1, { Auto_Call: true }], [1, { Sel_Hand: true }]] },
+    { name: 'Fault with call', hidden: true, steps: [[1, { Sel_Hand: true, Sel_Auto: true, Auto_Call: true }], [1, { Sel_Hand: false }], [1, { Sel_Auto: false }]] }]
+},
+{
+  id: 'valve-mismatch', title: 'Valve position mismatch', diff: 'Easy', topics: ['ABS', 'Comparison'],
+  desc: `<p>A control valve has a command <code>Valve_Cmd</code> and a position feedback <code>Valve_Fbk</code>, both in %. Set <code>Position_Error</code> = feedback − command.</p>
+<p><code>In_Tolerance</code> is TRUE when the error magnitude is ≤ 2.0 %. <code>Mismatch</code> is TRUE when it is &gt; 5.0 %. Between the two, both stay FALSE.</p>`,
+  tags: [
+    { name: 'Valve_Cmd', type: 'REAL', dir: 'in', d: '%' },
+    { name: 'Valve_Fbk', type: 'REAL', dir: 'in', d: '%' },
+    { name: 'Position_Error', type: 'REAL', dir: 'out', d: 'Fbk − Cmd' },
+    { name: 'In_Tolerance', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Mismatch', type: 'BOOL', dir: 'out', d: '' }],
+  starter: `Position_Error := ;\n`,
+  hints: ['ABS(Position_Error) handles both directions.', 'Watch ≤ versus &lt; at exactly 2.0 and 5.0.'],
+  solution: `Position_Error := Valve_Fbk - Valve_Cmd;\nIn_Tolerance := ABS(Position_Error) <= 2.0;\nMismatch := ABS(Position_Error) > 5.0;\n`,
+  tests: [
+    { name: 'Boundaries', steps: [[1, { Valve_Cmd: 50.0, Valve_Fbk: 50.0 }], [1, { Valve_Fbk: 52.0 }], [1, { Valve_Fbk: 55.0 }], [1, { Valve_Fbk: 55.5 }]] },
+    { name: 'Negative error', hidden: true, steps: [[1, { Valve_Cmd: 80.0, Valve_Fbk: 78.0 }], [1, { Valve_Fbk: 74.0 }], [1, { Valve_Fbk: 76.0 }]] }]
+},
+{
+  id: 'linear-search', title: 'Search an array', diff: 'Easy', topics: ['Arrays', 'FOR loops'],
+  desc: `<p>Find the first position of <code>Target</code> in <code>Data[0..19]</code> and put it in <code>Found_Index</code>, or −1 if it is not there. Count how many times it appears in <code>Occurrences</code>.</p>`,
+  tags: [
+    { name: 'Data', type: 'DINT', dim: 20, dir: 'in', d: 'ARRAY[0..19] OF DINT' },
+    { name: 'Target', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Found_Index', type: 'DINT', dir: 'out', d: 'First index, or -1' },
+    { name: 'Occurrences', type: 'DINT', dir: 'out', d: '' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' }],
+  starter: `Found_Index := -1;\nOccurrences := 0;\n`,
+  hints: ['Only record the index while Found_Index is still −1.', 'Don\'t EXIT early, because you still need the count.'],
+  solution: `Found_Index := -1;\nOccurrences := 0;\nFOR i := 0 TO 19 DO\n  IF Data[i] = Target THEN\n    Occurrences := Occurrences + 1;\n    IF Found_Index = -1 THEN\n      Found_Index := i;\n    END_IF;\n  END_IF;\nEND_FOR;\n`,
+  tests: [
+    { name: 'Found twice', steps: [[1, { Data: [4, 8, 15, 16, 23, 42, 8, 1, 0, 0, 3, 3, 3, 9, 9, 7, 5, 5, 2, 6], Target: 8 }], [1, { Target: 99 }]] },
+    { name: 'Edges', hidden: true, steps: [[1, { Data: [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7], Target: 7 }], [1, { Target: 0 }], [1, { Data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, -4], Target: -4 }]] }]
+},
+// ---------------- MEDIUM ----------------
+{
+  id: 'off-delay-fan', title: 'Cooling fan off-delay (TOFR)', diff: 'Medium', topics: ['Timers', 'TOFR'],
+  desc: `<p>A heater needs its cooling fan to keep running after it switches off. <code>Fan_Run</code> is on whenever <code>Heater_On</code> is on, and for <b>30 s</b> after it goes off. If the heater comes back on during the cool-down, the fan simply keeps running.</p>
+<p>At power-up with the heater off, the fan must be off. Scan time is 1 s.</p>`,
+  tags: [
+    { name: 'Heater_On', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Fan_Run', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Fan_Tmr', type: 'FBD_TIMER', dir: 'int', d: 'Use with TOFR (or TONR)' }],
+  starter: `Fan_Tmr.PRE := 30000;\n`,
+  hints: ['TOFR keeps DN TRUE while enabled and for PRE ms after the enable drops.', 'With TONR you would need a seal-in: Fan_Run := Heater_On OR (Fan_Run AND NOT Fan_Tmr.DN).'],
+  solution: `Fan_Tmr.PRE := 30000;\nFan_Tmr.TimerEnable := Heater_On;\nTOFR(Fan_Tmr);\nFan_Run := Fan_Tmr.DN;\n`,
+  tests: [
+    { name: 'One heat cycle', dt: 1000, steps: [[3, {}], [5, { Heater_On: true }], [15, { Heater_On: false }], [20, {}]] },
+    { name: 'Heater returns mid cool-down', hidden: true, dt: 1000, steps: [[5, { Heater_On: true }], [20, { Heater_On: false }], [3, { Heater_On: true }], [25, { Heater_On: false }], [10, {}]] }]
+},
+{
+  id: 'staggered-start', title: 'Staggered motor start', diff: 'Medium', topics: ['Timers', 'Latching'],
+  desc: `<p>Three large motors must not start together, because of inrush current. A momentary <code>Start_PB</code> starts the sequence. <code>Motor1</code> starts immediately, <code>Motor2</code> after 2 s, and <code>Motor3</code> after 4 s.</p>
+<p><code>Stop_PB</code> stops all three at once and wins over Start. Starting again restarts the stagger from zero. Scan time is 250 ms.</p>`,
+  tags: [
+    { name: 'Start_PB', type: 'BOOL', dir: 'in', d: 'Momentary' },
+    { name: 'Stop_PB', type: 'BOOL', dir: 'in', d: 'Momentary' },
+    { name: 'Motor1', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Motor2', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Motor3', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Seq_Active', type: 'BOOL', dir: 'int', d: 'Latched run' },
+    { name: 'Stagger_Tmr', type: 'FBD_TIMER', dir: 'int', d: '' }],
+  starter: `IF Stop_PB THEN\n  Seq_Active := 0;\nELSIF Start_PB THEN\n  Seq_Active := 1;\nEND_IF;\n`,
+  hints: ['One timer with PRE 4000 is enough. Compare its ACC against 2000 for Motor2.', 'Disabling the timer when stopped clears ACC, so a restart is fresh.'],
+  solution: `IF Stop_PB THEN\n  Seq_Active := 0;\nELSIF Start_PB THEN\n  Seq_Active := 1;\nEND_IF;\n\nStagger_Tmr.PRE := 4000;\nStagger_Tmr.TimerEnable := Seq_Active;\nTONR(Stagger_Tmr);\n\nMotor1 := Seq_Active;\nMotor2 := Seq_Active AND Stagger_Tmr.ACC >= 2000;\nMotor3 := Stagger_Tmr.DN;\n`,
+  tests: [
+    { name: 'Start and stop', dt: 250, steps: [[2, {}], [1, { Start_PB: true }], [3, { Start_PB: false }], [8, {}], [8, {}], [1, { Stop_PB: true }], [2, { Stop_PB: false }]] },
+    { name: 'Restart resets the stagger', hidden: true, dt: 250, steps: [[1, { Start_PB: true }], [12, { Start_PB: false }], [1, { Stop_PB: true }], [1, { Stop_PB: false, Start_PB: true }], [4, { Start_PB: false }], [1, { Start_PB: true, Stop_PB: true }], [2, { Start_PB: false, Stop_PB: false }]] }]
+},
+{
+  id: 'run-hours', title: 'Run-hours and start counter', diff: 'Medium', topics: ['Integer math', 'Edge detection', 'Precision'],
+  desc: `<p>Maintenance wants motor run time and a start count. While <code>Motor_Running</code> is TRUE, add <code>Scan_Time_ms</code> to the run time. Report whole seconds in <code>Run_Seconds</code> and <code>Run_Hours</code> = seconds ÷ 3600.</p>
+<p>Count each FALSE→TRUE of <code>Motor_Running</code> in <code>Starts</code>. <code>Reset_Counters</code> clears everything.</p>
+<p class="note">Why not just add 0.25 s to a REAL each scan? After a few months a 32-bit REAL can no longer add tiny steps, and the counter silently stops. Accumulate milliseconds in a DINT and carry them into seconds.</p>`,
+  tags: [
+    { name: 'Motor_Running', type: 'BOOL', dir: 'in', d: 'Run feedback' },
+    { name: 'Scan_Time_ms', type: 'DINT', dir: 'in', d: 'Task period' },
+    { name: 'Reset_Counters', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Run_Seconds', type: 'DINT', dir: 'out', d: 'Whole seconds' },
+    { name: 'Run_Hours', type: 'REAL', dir: 'out', d: '' },
+    { name: 'Starts', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Ms_Accum', type: 'DINT', dir: 'int', d: 'Leftover milliseconds' },
+    { name: 'Run_Prev', type: 'BOOL', dir: 'int', d: '' }],
+  starter: `IF Reset_Counters THEN\n  \nELSIF Motor_Running THEN\n  \nEND_IF;\n`,
+  hints: ['After adding to Ms_Accum, move every full 1000 ms into Run_Seconds. A WHILE loop handles scan times over 1 s.', 'Run_Hours := Run_Seconds / 3600.0; (the REAL literal matters)'],
+  solution: `IF Reset_Counters THEN\n  Run_Seconds := 0;\n  Ms_Accum := 0;\n  Starts := 0;\nELSIF Motor_Running THEN\n  Ms_Accum := Ms_Accum + Scan_Time_ms;\n  WHILE Ms_Accum >= 1000 DO\n    Ms_Accum := Ms_Accum - 1000;\n    Run_Seconds := Run_Seconds + 1;\n  END_WHILE;\n  IF NOT Run_Prev THEN\n    Starts := Starts + 1;\n  END_IF;\nEND_IF;\nRun_Prev := Motor_Running;\nRun_Hours := Run_Seconds / 3600.0;\n`,
+  tests: [
+    { name: 'Two short runs', dt: 250, steps: [[2, { Scan_Time_ms: 250 }], [10, { Motor_Running: true }], [3, { Motor_Running: false }], [4, { Motor_Running: true }], [1, { Motor_Running: false }]] },
+    { name: 'Long scans and reset', hidden: true, steps: [[90, { Scan_Time_ms: 60000, Motor_Running: true }], [1, { Motor_Running: false }], [1, { Reset_Counters: true }], [1, { Reset_Counters: false, Scan_Time_ms: 2500, Motor_Running: true }], [1, {}]] }]
+},
+{
+  id: 'rotate-array', title: 'Rotate an array', diff: 'Medium', topics: ['Arrays', 'MOD'],
+  desc: `<p>Copy <code>Data[0..9]</code> into <code>Rotated</code>, rotated left by <code>Shift</code> places: <code>Rotated[i] = Data[(i + Shift) wrapped to 0..9]</code>.</p>
+<p><code>Shift</code> can be larger than 10 or negative, where −1 rotates right by one. Careful: in ST, MOD of a negative number is negative.</p>`,
+  tags: [
+    { name: 'Data', type: 'DINT', dim: 10, dir: 'in', d: 'ARRAY[0..9] OF DINT' },
+    { name: 'Shift', type: 'DINT', dir: 'in', d: 'Any value' },
+    { name: 'Rotated', type: 'DINT', dim: 10, dir: 'out', d: 'ARRAY[0..9] OF DINT' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' },
+    { name: 'k', type: 'DINT', dir: 'int', d: 'Source index' }],
+  starter: `FOR i := 0 TO 9 DO\n  \nEND_FOR;\n`,
+  hints: ['−3 MOD 10 is −3, not 7.', '((i + Shift) MOD 10 + 10) MOD 10 is always 0…9.'],
+  solution: `FOR i := 0 TO 9 DO\n  k := ((i + Shift) MOD 10 + 10) MOD 10;\n  Rotated[i] := Data[k];\nEND_FOR;\n`,
+  tests: [
+    { name: 'Left by 3', steps: [[1, { Data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], Shift: 3 }], [1, { Shift: 0 }]] },
+    { name: 'Negative and large', hidden: true, steps: [[1, { Data: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100], Shift: -1 }], [1, { Shift: 23 }], [1, { Shift: -47 }]] }]
+},
+{
+  id: 'bcd-convert', title: 'Integer to BCD for a display', diff: 'Medium', topics: ['Integer math', 'Bit packing'],
+  desc: `<p>A 4-digit panel display wants BCD: each decimal digit goes in its own 4-bit nibble. For example, 1234 becomes <code>16#1234</code> (= 4660).</p>
+<p>Convert <code>Value</code> (0–9999) into <code>BCD_Out</code>. If <code>Value</code> is out of range, output 0 and set <code>Range_Error</code>.</p>`,
+  tags: [
+    { name: 'Value', type: 'DINT', dir: 'in', d: '' },
+    { name: 'BCD_Out', type: 'DINT', dir: 'out', d: 'Packed BCD' },
+    { name: 'Range_Error', type: 'BOOL', dir: 'out', d: '' }],
+  starter: `// thousands digit: Value / 1000\n// hundreds digit: (Value / 100) MOD 10\n`,
+  hints: ['DINT division truncates, which is exactly what you want here.', 'Nibble weights are 4096, 256, 16 and 1.'],
+  solution: `IF Value < 0 OR Value > 9999 THEN\n  BCD_Out := 0;\n  Range_Error := 1;\nELSE\n  Range_Error := 0;\n  BCD_Out := (Value / 1000) * 4096\n           + ((Value / 100) MOD 10) * 256\n           + ((Value / 10) MOD 10) * 16\n           + Value MOD 10;\nEND_IF;\n`,
+  tests: [
+    { name: 'Digits', steps: [0, 9, 10, 1234, 507].map(v => [1, { Value: v }]) },
+    { name: 'Range', hidden: true, steps: [9999, 10000, -1, 8080].map(v => [1, { Value: v }]) }]
+},
+{
+  id: 'checksum', title: 'Message checksum', diff: 'Medium', topics: ['Bitwise', 'Serial comms'],
+  desc: `<p>An RS-232 device sends 8 data bytes in <code>Msg</code> (each 0–255), followed by a checksum <code>Rx_Check</code>. Compute both common checks:</p>
+<ul><li><code>Xor_Check</code>: XOR of all 8 bytes</li><li><code>Sum_Check</code>: sum of all 8 bytes, MOD 256</li></ul>
+<p>The device uses the sum. Set <code>Valid</code> when <code>Sum_Check = Rx_Check</code>.</p>`,
+  tags: [
+    { name: 'Msg', type: 'DINT', dim: 8, dir: 'in', d: 'ARRAY[0..7], bytes' },
+    { name: 'Rx_Check', type: 'DINT', dir: 'in', d: 'Received checksum' },
+    { name: 'Xor_Check', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Sum_Check', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Valid', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' }],
+  starter: `Xor_Check := 0;\nSum_Check := 0;\n`,
+  hints: ['XOR on two DINTs is bitwise in ST.', 'Take MOD 256 after the loop (or inside it, which gives the same result).'],
+  solution: `Xor_Check := 0;\nSum_Check := 0;\nFOR i := 0 TO 7 DO\n  Xor_Check := Xor_Check XOR Msg[i];\n  Sum_Check := Sum_Check + Msg[i];\nEND_FOR;\nSum_Check := Sum_Check MOD 256;\nValid := Sum_Check = Rx_Check;\n`,
+  tests: [
+    { name: 'Good frame', steps: [[1, { Msg: [1, 2, 3, 4, 5, 6, 7, 8], Rx_Check: 36 }], [1, { Msg: [255, 255, 255, 255, 0, 0, 0, 1], Rx_Check: 253 }]] },
+    { name: 'Corrupt frame', hidden: true, steps: [[1, { Msg: [16, 32, 64, 128, 170, 85, 0, 255], Rx_Check: 0 }], [1, { Rx_Check: 198 }]] }]
+},
+{
+  id: 'tank-batch', title: 'Fill-mix-drain sequence', diff: 'Medium', topics: ['CASE', 'State machines', 'Timers'],
+  desc: `<p>Write a batch tank sequence with <code>Step</code>: 0 = idle, 10 = fill, 20 = mix, 30 = drain.</p>
+<ul><li>Idle: <code>Start_PB</code> begins filling.</li>
+<li>Fill: <code>Inlet_Valve</code> open until <code>Level_High</code>.</li>
+<li>Mix: <code>Mixer</code> on for 3 s.</li>
+<li>Drain: <code>Outlet_Valve</code> open until <code>Level_Low</code> goes FALSE (tank empty), then back to idle.</li></ul>
+<p><code>Stop_PB</code> returns to idle with every output off, from any step. Scan time is 250 ms.</p>`,
+  tags: [
+    { name: 'Start_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Stop_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Level_High', type: 'BOOL', dir: 'in', d: 'TRUE = full' },
+    { name: 'Level_Low', type: 'BOOL', dir: 'in', d: 'TRUE = liquid above low switch' },
+    { name: 'Step', type: 'DINT', dir: 'out', d: '0, 10, 20, 30' },
+    { name: 'Inlet_Valve', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Mixer', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Outlet_Valve', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Mix_Tmr', type: 'FBD_TIMER', dir: 'int', d: '' }],
+  starter: `IF Stop_PB THEN\n  Step := 0;\nEND_IF;\n\nCASE Step OF\n  0:\n    \nEND_CASE;\n`,
+  hints: ['Enable Mix_Tmr only while Step = 20. Leaving the step resets it automatically.', 'Drive outputs from Step after the CASE: Inlet_Valve := Step = 10; and so on.'],
+  solution: `IF Stop_PB THEN\n  Step := 0;\nEND_IF;\n\nCASE Step OF\n  0:  IF Start_PB AND NOT Stop_PB THEN Step := 10; END_IF;\n  10: IF Level_High THEN Step := 20; END_IF;\n  20: IF Mix_Tmr.DN THEN Step := 30; END_IF;\n  30: IF NOT Level_Low THEN Step := 0; END_IF;\nEND_CASE;\n\nMix_Tmr.PRE := 3000;\nMix_Tmr.TimerEnable := Step = 20;\nTONR(Mix_Tmr);\n\nInlet_Valve := Step = 10;\nMixer := Step = 20;\nOutlet_Valve := Step = 30;\n`,
+  tests: [
+    { name: 'Full batch', dt: 250, steps: [[2, {}], [1, { Start_PB: true }], [3, { Start_PB: false }], [2, { Level_Low: true }], [2, { Level_High: true }], [5, {}], [12, {}], [2, { Level_High: false }], [3, { Level_Low: false }]] },
+    { name: 'Stop during mix', hidden: true, dt: 250, steps: [[1, { Start_PB: true, Level_Low: true, Level_High: true }], [1, { Start_PB: false }], [4, {}], [1, { Stop_PB: true }], [4, { Stop_PB: false }], [1, { Start_PB: true }], [2, { Start_PB: false }]] }]
+},
+{
+  id: 'voting-2oo3', title: '2-out-of-3 sensor voting', diff: 'Medium', topics: ['Safety logic', 'MIN/MAX'],
+  desc: `<p>Three thermocouples measure the same zone. Report the <b>median</b> as <code>Voted_Temp</code>, so one failed sensor can't drag the reading.</p>
+<p><code>Trip</code> when at least <b>two</b> sensors are above <code>Trip_SP</code>. Raise <code>Dev_Alarm</code> when any sensor differs from the median by more than 10.0 °C.</p>`,
+  tags: [
+    { name: 'Temp_A', type: 'REAL', dir: 'in', d: '°C' },
+    { name: 'Temp_B', type: 'REAL', dir: 'in', d: '°C' },
+    { name: 'Temp_C', type: 'REAL', dir: 'in', d: '°C' },
+    { name: 'Trip_SP', type: 'REAL', dir: 'in', d: '°C' },
+    { name: 'Voted_Temp', type: 'REAL', dir: 'out', d: 'Median' },
+    { name: 'Trip', type: 'BOOL', dir: 'out', d: '2oo3' },
+    { name: 'Dev_Alarm', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Votes', type: 'DINT', dir: 'int', d: '' }],
+  starter: `Votes := 0;\n`,
+  hints: ['Median of three: MAX(MIN(A,B), MIN(MAX(A,B), C)).', 'Count votes with three IFs, then Trip := Votes >= 2;'],
+  solution: `Voted_Temp := MAX(MIN(Temp_A, Temp_B), MIN(MAX(Temp_A, Temp_B), Temp_C));\n\nVotes := 0;\nIF Temp_A > Trip_SP THEN Votes := Votes + 1; END_IF;\nIF Temp_B > Trip_SP THEN Votes := Votes + 1; END_IF;\nIF Temp_C > Trip_SP THEN Votes := Votes + 1; END_IF;\nTrip := Votes >= 2;\n\nDev_Alarm := ABS(Temp_A - Voted_Temp) > 10.0\n          OR ABS(Temp_B - Voted_Temp) > 10.0\n          OR ABS(Temp_C - Voted_Temp) > 10.0;\n`,
+  tests: [
+    { name: 'One sensor fails high', steps: [[1, { Temp_A: 1500.0, Temp_B: 1502.0, Temp_C: 1499.0, Trip_SP: 1600.0 }], [1, { Temp_B: 1800.0 }], [1, { Temp_C: 1650.0 }]] },
+    { name: 'Orderings', hidden: true, steps: [[1, { Temp_A: 30.0, Temp_B: 10.0, Temp_C: 20.0, Trip_SP: 15.0 }], [1, { Temp_A: 10.0, Temp_B: 30.0, Temp_C: 20.0 }], [1, { Temp_A: 20.0, Temp_B: 10.0, Temp_C: 30.0, Trip_SP: 25.0 }]] }]
+},
+{
+  id: 'totalizer', title: 'Flow totalizer with low-flow cutoff', diff: 'Medium', topics: ['Integration', 'REAL math'],
+  desc: `<p>Integrate <code>Flow_GPM</code> into <code>Total_Gal</code>. Each scan, add flow × <code>Scan_Time_ms</code> ÷ 60000.</p>
+<p>A flowmeter drifts around zero, so any flow below 0.5 GPM (negative included) counts as 0. Show the flow you actually used in <code>Flow_Clipped</code>. <code>Reset_Total</code> zeroes the total.</p>`,
+  tags: [
+    { name: 'Flow_GPM', type: 'REAL', dir: 'in', d: 'Gallons per minute' },
+    { name: 'Scan_Time_ms', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Reset_Total', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Flow_Clipped', type: 'REAL', dir: 'out', d: 'After cutoff' },
+    { name: 'Total_Gal', type: 'REAL', dir: 'out', d: '' }],
+  starter: `IF Flow_GPM < 0.5 THEN\n  \nEND_IF;\n`,
+  hints: ['Apply the cutoff first, then integrate the clipped value.', 'Divide by 60000.0, a REAL, or the integer math rounds everything away.'],
+  solution: `IF Flow_GPM < 0.5 THEN\n  Flow_Clipped := 0.0;\nELSE\n  Flow_Clipped := Flow_GPM;\nEND_IF;\n\nIF Reset_Total THEN\n  Total_Gal := 0.0;\nELSE\n  Total_Gal := Total_Gal + Flow_Clipped * Scan_Time_ms / 60000.0;\nEND_IF;\n`,
+  tests: [
+    { name: 'Steady flow then drift', steps: [[10, { Flow_GPM: 120.0, Scan_Time_ms: 500 }], [5, { Flow_GPM: 0.3 }], [4, { Flow_GPM: -2.0 }], [3, { Flow_GPM: 60.0 }]] },
+    { name: 'Reset mid-run', hidden: true, steps: [[6, { Flow_GPM: 30.0, Scan_Time_ms: 1000 }], [1, { Reset_Total: true }], [4, { Reset_Total: false, Flow_GPM: 0.5 }]] }]
+},
+{
+  id: 'rate-of-change', title: 'Rate-of-change alarm', diff: 'Medium', topics: ['REAL math', 'Alarms', 'First scan'],
+  desc: `<p>Compute how fast <code>Temp_PV</code> is changing, in °C per minute: <code>Rate_C_per_min</code> = (PV − PV last scan) × 60000 ÷ <code>Scan_Time_ms</code>. On the first scan there is no previous value, so the rate is 0.</p>
+<p>Set <code>Rate_Alarm</code> when the rate's magnitude exceeds <code>Max_Rate</code>, rising or falling.</p>`,
+  tags: [
+    { name: 'Temp_PV', type: 'REAL', dir: 'in', d: '°C' },
+    { name: 'Scan_Time_ms', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Max_Rate', type: 'REAL', dir: 'in', d: '°C/min' },
+    { name: 'Rate_C_per_min', type: 'REAL', dir: 'out', d: '' },
+    { name: 'Rate_Alarm', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Prev_Temp', type: 'REAL', dir: 'int', d: '' },
+    { name: 'Have_Prev', type: 'BOOL', dir: 'int', d: '' }],
+  starter: `IF Have_Prev THEN\n  \nELSE\n  \nEND_IF;\nPrev_Temp := Temp_PV;\n`,
+  hints: ['Without the first-scan guard, the first rate is computed against 0.0 and gives a huge spike.', 'ABS(Rate_C_per_min) > Max_Rate covers both directions.'],
+  solution: `IF Have_Prev THEN\n  Rate_C_per_min := (Temp_PV - Prev_Temp) * 60000.0 / Scan_Time_ms;\nELSE\n  Rate_C_per_min := 0.0;\n  Have_Prev := 1;\nEND_IF;\nPrev_Temp := Temp_PV;\nRate_Alarm := ABS(Rate_C_per_min) > Max_Rate;\n`,
+  tests: [
+    { name: 'Heat-up', steps: [[1, { Temp_PV: 1000.0, Scan_Time_ms: 1000, Max_Rate: 40.0 }], [1, { Temp_PV: 1000.5 }], [1, { Temp_PV: 1001.0 }], [1, { Temp_PV: 1002.0 }], [1, { Temp_PV: 1002.0 }]] },
+    { name: 'Fast drop', hidden: true, steps: [[1, { Temp_PV: 500.0, Scan_Time_ms: 500, Max_Rate: 50.0 }], [1, { Temp_PV: 499.0 }], [1, { Temp_PV: 498.5 }], [1, { Temp_PV: 498.0 }]] }]
+},
+{
+  id: 'drum-sequencer', title: 'Drum sequencer', diff: 'Medium', topics: ['Arrays', 'Timers', 'Bit access'],
+  desc: `<p>A drum table <code>Drum[0..5]</code> holds an output pattern for each step. While <code>Run</code> is TRUE, advance <code>Drum_Step</code> every <code>Step_Time_ms</code>, wrapping from 5 back to 0.</p>
+<p>Output the current pattern in <code>Out_Word</code> and its bits 0–2 on <code>Valve_1</code>…<code>Valve_3</code>. When <code>Run</code> goes FALSE, hold the step. Resuming restarts that step's time. Scan time is 100 ms.</p>`,
+  tags: [
+    { name: 'Run', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Drum', type: 'DINT', dim: 6, dir: 'in', d: 'ARRAY[0..5] OF DINT' },
+    { name: 'Step_Time_ms', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Drum_Step', type: 'DINT', dir: 'out', d: '0–5' },
+    { name: 'Out_Word', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Valve_1', type: 'BOOL', dir: 'out', d: 'Bit 0' },
+    { name: 'Valve_2', type: 'BOOL', dir: 'out', d: 'Bit 1' },
+    { name: 'Valve_3', type: 'BOOL', dir: 'out', d: 'Bit 2' },
+    { name: 'Step_Tmr', type: 'FBD_TIMER', dir: 'int', d: '' }],
+  starter: `Step_Tmr.PRE := Step_Time_ms;\nStep_Tmr.TimerEnable := Run;\nTONR(Step_Tmr);\n`,
+  hints: ['When DN, advance the step and pulse Step_Tmr.Reset to restart the timer.', 'Valve_1 := Out_Word.0; reads a single bit.'],
+  solution: `Step_Tmr.PRE := Step_Time_ms;\nStep_Tmr.TimerEnable := Run;\nTONR(Step_Tmr);\n\nIF Step_Tmr.DN THEN\n  Drum_Step := (Drum_Step + 1) MOD 6;\n  Step_Tmr.Reset := 1;\n  TONR(Step_Tmr);\n  Step_Tmr.Reset := 0;\nEND_IF;\n\nOut_Word := Drum[Drum_Step];\nValve_1 := Out_Word.0;\nValve_2 := Out_Word.1;\nValve_3 := Out_Word.2;\n`,
+  tests: [
+    { name: 'Four steps', dt: 100, steps: [[2, { Drum: [1, 3, 2, 6, 4, 0], Step_Time_ms: 2000 }], [10, { Run: true }], [20, {}], [20, {}], [20, {}]] },
+    { name: 'Pause and resume', hidden: true, dt: 100, steps: [[30, { Drum: [5, 2, 7, 0, 1, 4], Step_Time_ms: 2000, Run: true }], [10, { Run: false }], [10, { Run: true }], [20, {}], [20, {}]] }]
+},
+{
+  id: 'lift-position', title: 'Furnace lift positioning', diff: 'Medium', topics: ['Motion', 'Interlocks', 'ABS'],
+  desc: `<p>A furnace lift moves to <code>Target_Pos</code> using <code>Actual_Pos</code> feedback from the drive (mm).</p>
+<ul><li><code>In_Position</code> when |target − actual| ≤ 0.5 mm.</li>
+<li>When <code>Enable</code> is TRUE and the error is &gt; 0.5, run <code>Move_Up</code>. When it is &lt; −0.5, run <code>Move_Down</code>.</li>
+<li><code>Slow_Speed</code> while moving within 10 mm of target.</li>
+<li>An active <code>Upper_Limit</code> blocks up moves and an active <code>Lower_Limit</code> blocks down moves. Moving away from a limit is still allowed. Set <code>Limit_Fault</code> while a move is wanted into an active limit.</li></ul>`,
+  tags: [
+    { name: 'Enable', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Target_Pos', type: 'REAL', dir: 'in', d: 'mm' },
+    { name: 'Actual_Pos', type: 'REAL', dir: 'in', d: 'mm' },
+    { name: 'Upper_Limit', type: 'BOOL', dir: 'in', d: 'TRUE = on limit' },
+    { name: 'Lower_Limit', type: 'BOOL', dir: 'in', d: 'TRUE = on limit' },
+    { name: 'Move_Up', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Move_Down', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Slow_Speed', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'In_Position', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Limit_Fault', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Pos_Error', type: 'REAL', dir: 'int', d: '' },
+    { name: 'Want_Up', type: 'BOOL', dir: 'int', d: '' },
+    { name: 'Want_Down', type: 'BOOL', dir: 'int', d: '' }],
+  starter: `Pos_Error := Target_Pos - Actual_Pos;\n`,
+  hints: ['Work out "want up" and "want down" first, then apply the limits.', 'Limit_Fault := (Want_Up AND Upper_Limit) OR (Want_Down AND Lower_Limit);'],
+  solution: `Pos_Error := Target_Pos - Actual_Pos;\nIn_Position := ABS(Pos_Error) <= 0.5;\n\nWant_Up := Enable AND Pos_Error > 0.5;\nWant_Down := Enable AND Pos_Error < -0.5;\n\nMove_Up := Want_Up AND NOT Upper_Limit;\nMove_Down := Want_Down AND NOT Lower_Limit;\nSlow_Speed := (Move_Up OR Move_Down) AND ABS(Pos_Error) < 10.0;\nLimit_Fault := (Want_Up AND Upper_Limit) OR (Want_Down AND Lower_Limit);\n`,
+  tests: [
+    { name: 'Move up and settle', steps: [[1, { Target_Pos: 500.0, Actual_Pos: 100.0 }], [1, { Enable: true }], [1, { Actual_Pos: 495.0 }], [1, { Actual_Pos: 499.6 }], [1, { Actual_Pos: 500.5 }], [1, { Actual_Pos: 503.0 }]] },
+    { name: 'Limits', hidden: true, steps: [[1, { Enable: true, Target_Pos: 900.0, Actual_Pos: 850.0, Upper_Limit: true }], [1, { Target_Pos: 800.0 }], [1, { Upper_Limit: false, Lower_Limit: true }], [1, { Target_Pos: 849.8 }]] }]
+},
+// ---------------- HARD ----------------
+{
+  id: 'fifo-queue', title: 'FIFO queue (FFL / FFU)', diff: 'Hard', topics: ['Arrays', 'Edge detection', 'Data structures'],
+  desc: `<p>Build a 5-slot first-in-first-out queue, the ST version of FFL/FFU. On a rising edge of <code>Load_PB</code>, add <code>Load_Value</code> to the back of the queue. Ignore the load if the queue is full.</p>
+<p>On a rising edge of <code>Unload_PB</code>, remove the oldest value into <code>Unloaded_Value</code>. Ignore the unload if the queue is empty.</p>
+<p>If both edges happen on the same scan, unload first. Keep <code>Count</code>, <code>Full</code> and <code>Empty</code> updated.</p>`,
+  tags: [
+    { name: 'Load_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Unload_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Load_Value', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Unloaded_Value', type: 'DINT', dir: 'out', d: 'Last value removed' },
+    { name: 'Count', type: 'DINT', dir: 'out', d: '0–5' },
+    { name: 'Full', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Empty', type: 'BOOL', dir: 'out', d: '', init: true },
+    { name: 'Queue', type: 'DINT', dim: 5, dir: 'int', d: 'ARRAY[0..4] OF DINT' },
+    { name: 'Load_Prev', type: 'BOOL', dir: 'int', d: '' },
+    { name: 'Unload_Prev', type: 'BOOL', dir: 'int', d: '' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' }],
+  starter: `// unload first\n\n// then load\n\nFull := Count = 5;\nEmpty := Count = 0;\n`,
+  hints: ['FFU style: take Queue[0], then shift Queue[1..4] down by one.', 'A ring buffer with head and tail indexes works too. Only the outputs are checked.'],
+  solution: `IF Unload_PB AND NOT Unload_Prev AND Count > 0 THEN\n  Unloaded_Value := Queue[0];\n  FOR i := 0 TO 3 DO\n    Queue[i] := Queue[i + 1];\n  END_FOR;\n  Count := Count - 1;\nEND_IF;\n\nIF Load_PB AND NOT Load_Prev AND Count < 5 THEN\n  Queue[Count] := Load_Value;\n  Count := Count + 1;\nEND_IF;\n\nLoad_Prev := Load_PB;\nUnload_Prev := Unload_PB;\nFull := Count = 5;\nEmpty := Count = 0;\n`,
+  tests: (() => {
+    const L = v => [[1, { Load_PB: true, Load_Value: v }], [1, { Load_PB: false }]], U = () => [[1, { Unload_PB: true }], [1, { Unload_PB: false }]];
+    return [
+      { name: 'Load three, unload one', steps: [...L(11), ...L(22), ...L(33), ...U()] },
+      { name: 'Fill, overflow, drain, underflow', steps: [...L(1), ...L(2), ...L(3), ...L(4), ...L(5), ...L(6), ...U(), ...U(), ...U(), ...U(), ...U(), ...U()] },
+      { name: 'Simultaneous edges', hidden: true, steps: [...L(7), ...L(8), [1, { Load_PB: true, Unload_PB: true, Load_Value: 9 }], [1, { Load_PB: false, Unload_PB: false }], [3, { Load_PB: true, Load_Value: 10 }], ...U(), ...U(), ...U()] }];
+  })()
+},
+{
+  id: 'jam-detect', title: 'Conveyor jam detection', diff: 'Hard', topics: ['Timers', 'Edge detection', 'Watchdog'],
+  desc: `<p>A proximity switch <code>Shaft_Prox</code> pulses as the tail pulley turns. While the conveyor runs, every rising edge proves the belt is moving.</p>
+<ul><li><code>Motor_Out</code> = <code>Motor_Run_Cmd</code> AND NOT <code>Jam_Fault</code>.</li>
+<li>While <code>Motor_Out</code> is on, if <b>2 s</b> pass with no rising edge, latch <code>Jam_Fault</code>, which drops the motor. Each edge restarts the 2 s, and so does every motor start.</li>
+<li><code>Jam_Reset</code> clears the fault.</li></ul>
+<p>Scan time is 100 ms.</p>`,
+  tags: [
+    { name: 'Motor_Run_Cmd', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Shaft_Prox', type: 'BOOL', dir: 'in', d: 'Pulse per pulley turn' },
+    { name: 'Jam_Reset', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Motor_Out', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Jam_Fault', type: 'BOOL', dir: 'out', d: 'Latched' },
+    { name: 'Jam_Tmr', type: 'FBD_TIMER', dir: 'int', d: '' },
+    { name: 'Prox_Prev', type: 'BOOL', dir: 'int', d: '' }],
+  starter: `IF Jam_Reset THEN\n  Jam_Fault := 0;\nEND_IF;\nMotor_Out := Motor_Run_Cmd AND NOT Jam_Fault;\n`,
+  hints: ['Enable the timer while the motor runs, but drop the enable for one scan on each prox edge. That resets ACC.', 'When the timer is done, latch the fault and also clear Motor_Out on that same scan.'],
+  solution: `IF Jam_Reset THEN\n  Jam_Fault := 0;\nEND_IF;\nMotor_Out := Motor_Run_Cmd AND NOT Jam_Fault;\n\nJam_Tmr.PRE := 2000;\nJam_Tmr.TimerEnable := Motor_Out AND NOT (Shaft_Prox AND NOT Prox_Prev);\nTONR(Jam_Tmr);\nProx_Prev := Shaft_Prox;\n\nIF Jam_Tmr.DN THEN\n  Jam_Fault := 1;\n  Motor_Out := 0;\nEND_IF;\n`,
+  tests: [
+    { name: 'Running, then belt stops', dt: 100, steps: [[2, {}], ...pulse({ Motor_Run_Cmd: true }), ...pulse(), ...pulse(), ...pulse(), [15, {}], [15, {}]] },
+    { name: 'Reset and restart', dt: 100, steps: [[25, { Motor_Run_Cmd: true }], [1, { Jam_Reset: true }], [1, { Jam_Reset: false }], ...pulse(null, 1, 9), ...pulse(null, 1, 9), ...pulse(null, 1, 9)] },
+    { name: 'Slow but alive', hidden: true, dt: 100, steps: [[1, { Motor_Run_Cmd: true }], ...pulse(null, 2, 16), ...pulse(null, 2, 16), ...pulse(null, 2, 16), [1, { Motor_Run_Cmd: false }], [30, {}], [5, { Motor_Run_Cmd: true }]] }]
+},
+{
+  id: 'pi-controller', title: 'PI controller with anti-windup', diff: 'Hard', topics: ['Control loops', 'REAL math', 'Bumpless transfer'],
+  desc: `<p>Implement this PI algorithm exactly, every scan:</p>
+<ul><li><code>Error := SP − PV</code></li>
+<li><b>Auto</b>: Integral += Ki × Error × <code>Scan_Time_ms</code>/1000, then clamp Integral to 0…100. CV = Kp × Error + Integral, clamped to 0…100.</li>
+<li><b>Manual</b>: CV = <code>Manual_CV</code> clamped to 0…100. Back-calculate Integral = CV − Kp × Error, clamped to 0…100, so that switching to Auto is bumpless.</li></ul>
+<p>The integral clamp is the anti-windup. Without it, a long saturation leaves the loop stuck at 100 % long after the error reverses.</p>`,
+  tags: [
+    { name: 'PV', type: 'REAL', dir: 'in', d: '' },
+    { name: 'SP', type: 'REAL', dir: 'in', d: '' },
+    { name: 'Kp', type: 'REAL', dir: 'in', d: 'Gain, %/unit' },
+    { name: 'Ki', type: 'REAL', dir: 'in', d: '%/unit/s' },
+    { name: 'Scan_Time_ms', type: 'DINT', dir: 'in', d: '' },
+    { name: 'Auto_Mode', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Manual_CV', type: 'REAL', dir: 'in', d: '%' },
+    { name: 'CV', type: 'REAL', dir: 'out', d: '0–100 %' },
+    { name: 'Error', type: 'REAL', dir: 'int', d: '' },
+    { name: 'Integral', type: 'REAL', dir: 'int', d: '' }],
+  starter: `Error := SP - PV;\nIF Auto_Mode THEN\n  \nELSE\n  \nEND_IF;\n`,
+  hints: ['LIMIT(0.0, x, 100.0) makes every clamp a one-liner.', 'Clamp Integral before using it to compute CV.'],
+  solution: `Error := SP - PV;\nIF Auto_Mode THEN\n  Integral := Integral + Ki * Error * Scan_Time_ms / 1000.0;\n  Integral := LIMIT(0.0, Integral, 100.0);\n  CV := LIMIT(0.0, Kp * Error + Integral, 100.0);\nELSE\n  CV := LIMIT(0.0, Manual_CV, 100.0);\n  Integral := LIMIT(0.0, CV - Kp * Error, 100.0);\nEND_IF;\n`,
+  tests: [
+    { name: 'Manual to auto, bumpless', steps: [[2, { PV: 95.0, SP: 100.0, Kp: 2.0, Ki: 0.5, Scan_Time_ms: 500, Manual_CV: 30.0 }], [1, { Auto_Mode: true }], [3, {}], [2, { PV: 100.0 }]] },
+    { name: 'Windup recovery', steps: [[1, { PV: 0.0, SP: 50.0, Kp: 2.0, Ki: 0.5, Scan_Time_ms: 500, Auto_Mode: true }], [40, {}], [1, { SP: -10.0 }], [8, {}]] },
+    { name: 'Manual clamp', hidden: true, steps: [[1, { PV: 40.0, SP: 50.0, Kp: 1.5, Ki: 1.0, Scan_Time_ms: 250, Manual_CV: 120.0 }], [1, { Manual_CV: -5.0 }], [1, { Manual_CV: 60.0 }], [4, { Auto_Mode: true }]] }]
+},
+{
+  id: 'recipe-dosing', title: 'Recipe dosing on a scale', diff: 'Hard', topics: ['Arrays', 'Sequencing', 'Process'],
+  desc: `<p>Four ingredients are dosed one after another into a hopper on a scale. <code>Scale_Weight</code> is the cumulative weight.</p>
+<ul><li>On a rising edge of <code>Start_PB</code> while idle (<code>Active_Ingredient = −1</code>), clear <code>Batch_Done</code> and begin ingredient 0.</li>
+<li>While dosing ingredient k, only <code>Valve[k]</code> is open. Close it once <code>Scale_Weight ≥ cumulative target − Preact</code>, where the cumulative target is <code>Recipe_SP[0] + … + Recipe_SP[k]</code>, then move on to k+1.</li>
+<li>After ingredient 3, return to idle (−1) and set <code>Batch_Done</code>. Start presses during a batch are ignored.</li></ul>`,
+  tags: [
+    { name: 'Start_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Scale_Weight', type: 'REAL', dir: 'in', d: 'kg, cumulative' },
+    { name: 'Recipe_SP', type: 'REAL', dim: 4, dir: 'in', d: 'kg per ingredient' },
+    { name: 'Preact', type: 'REAL', dir: 'in', d: 'kg still in flight when valve closes' },
+    { name: 'Valve', type: 'BOOL', dim: 4, dir: 'out', d: 'ARRAY[0..3] OF BOOL' },
+    { name: 'Active_Ingredient', type: 'DINT', dir: 'out', d: '-1 idle, 0..3 dosing', init: -1 },
+    { name: 'Batch_Done', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Target', type: 'REAL', dir: 'int', d: 'Cumulative target' },
+    { name: 'Start_Prev', type: 'BOOL', dir: 'int', d: '' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' }],
+  starter: `IF Active_Ingredient = -1 THEN\n  \nELSIF Scale_Weight >= Target - Preact THEN\n  \nEND_IF;\nStart_Prev := Start_PB;\n`,
+  hints: ['Keep a running cumulative Target and add Recipe_SP[k] each time you advance.', 'Drive the valves at the end: Valve[i] := (i = Active_Ingredient);'],
+  solution: `IF Active_Ingredient = -1 THEN\n  IF Start_PB AND NOT Start_Prev THEN\n    Active_Ingredient := 0;\n    Target := Recipe_SP[0];\n    Batch_Done := 0;\n  END_IF;\nELSIF Scale_Weight >= Target - Preact THEN\n  Active_Ingredient := Active_Ingredient + 1;\n  IF Active_Ingredient > 3 THEN\n    Active_Ingredient := -1;\n    Batch_Done := 1;\n  ELSE\n    Target := Target + Recipe_SP[Active_Ingredient];\n  END_IF;\nEND_IF;\nStart_Prev := Start_PB;\n\nFOR i := 0 TO 3 DO\n  Valve[i] := i = Active_Ingredient;\nEND_FOR;\n`,
+  tests: [
+    { name: 'Full batch', steps: [[1, { Recipe_SP: [10, 5, 20, 2.5], Preact: 0.5, Scale_Weight: 0.0 }], [1, { Start_PB: true }], [1, { Start_PB: false, Scale_Weight: 4.0 }], [1, { Scale_Weight: 9.4 }], [1, { Scale_Weight: 9.5 }], [1, { Scale_Weight: 12.0 }], [1, { Scale_Weight: 14.6 }], [1, { Scale_Weight: 20.0 }], [1, { Scale_Weight: 34.5 }], [1, { Scale_Weight: 36.9 }], [1, { Scale_Weight: 37.0 }], [2, {}]] },
+    { name: 'Start held and re-pressed', hidden: true, steps: [[1, { Recipe_SP: [1, 1, 1, 1], Preact: 0.0, Scale_Weight: 0.0, Start_PB: true }], [3, {}], [1, { Start_PB: false }], [1, { Start_PB: true, Scale_Weight: 1.0 }], [1, { Scale_Weight: 2.0 }], [1, { Scale_Weight: 3.0 }], [1, { Scale_Weight: 4.0 }], [1, { Start_PB: false }], [1, { Start_PB: true, Scale_Weight: 0.0 }]] }]
+},
+{
+  id: 'shift-register', title: 'Reject tracking shift register', diff: 'Hard', topics: ['Arrays', 'Edge detection', 'Tracking'],
+  desc: `<p>A vision camera inspects products at station 0. The reject gate is <b>8 pitches</b> downstream. <code>Encoder_Pulse</code> pulses once per product pitch.</p>
+<ul><li>On each rising edge of <code>Encoder_Pulse</code>, shift <code>Track[0..11]</code> one place downstream (Track[11] falls off). Then store <code>Reject_Detect</code> in <code>Track[0]</code>.</li>
+<li><code>Reject_Gate</code> = <code>Track[8]</code>.</li>
+<li>Count, in <code>Reject_Count</code>, each shift that moves a TRUE into position 8.</li></ul>
+<p class="note">This is the BSL instruction written by hand. Shift in the right direction, or one reject smears down the whole array.</p>`,
+  tags: [
+    { name: 'Encoder_Pulse', type: 'BOOL', dir: 'in', d: 'One per pitch' },
+    { name: 'Reject_Detect', type: 'BOOL', dir: 'in', d: 'Camera result' },
+    { name: 'Reject_Gate', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Reject_Count', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Track', type: 'BOOL', dim: 12, dir: 'int', d: 'ARRAY[0..11] OF BOOL' },
+    { name: 'Enc_Prev', type: 'BOOL', dir: 'int', d: '' },
+    { name: 'i', type: 'DINT', dir: 'int', d: '' }],
+  starter: `IF Encoder_Pulse AND NOT Enc_Prev THEN\n  \nEND_IF;\nEnc_Prev := Encoder_Pulse;\nReject_Gate := Track[8];\n`,
+  hints: ['FOR i := 11 TO 1 BY -1 DO Track[i] := Track[i - 1]; END_FOR;', 'Looping upward copies Track[0] into every slot. Try it and watch the trace.'],
+  solution: `IF Encoder_Pulse AND NOT Enc_Prev THEN\n  FOR i := 11 TO 1 BY -1 DO\n    Track[i] := Track[i - 1];\n  END_FOR;\n  Track[0] := Reject_Detect;\n  IF Track[8] THEN\n    Reject_Count := Reject_Count + 1;\n  END_IF;\nEND_IF;\nEnc_Prev := Encoder_Pulse;\nReject_Gate := Track[8];\n`,
+  tests: [
+    { name: 'One reject travels to the gate', steps: [...enc(true), ...[1, 2, 3, 4, 5, 6, 7, 8, 9].flatMap(() => enc(false))] },
+    { name: 'Back-to-back rejects', hidden: true, steps: [...enc(false), ...enc(true), ...enc(true), ...enc(false), ...enc(true), ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap(() => enc(false)), [3, { Encoder_Pulse: true }]] }]
+}];
+PROBLEMS.push(...MORE);
+const rank = { Easy: 0, Medium: 1, Hard: 2 };
+PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
+})();
+</script>
+<script>
+{
+const E = STEngine, P = PROBLEMS;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let store = { code: {}, solved: {}, tried: {} };
+try { const s = JSON.parse(localStorage.getItem('st-practice-v1') || 'null'); if (s) store = Object.assign(store, s); } catch (e) {}
+const save = () => { try { localStorage.setItem('st-practice-v1', JSON.stringify(store)); } catch (e) {} };
+const expCache = {};
+const expected = (p, i) => expCache[p.id + i] || (expCache[p.id + i] = E.simulate(p.solution, p, p.tests[i]));
+const typeOf = (p, n) => (p.tags.find(t => t.name === n) || {}).type;
+function fmt(v, type) {
+  if (Array.isArray(v)) return '[' + v.map(x => fmt(x, type)).join(', ') + ']';
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  if (type === 'REAL') { const r = Number(v.toFixed(4)); return Number.isInteger(r) ? r + '.0' : String(r); }
+  return String(v);
+}
+const ICON = {
+  solved: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Solved"><circle cx="10" cy="10" r="9" fill="var(--ok)"/><path d="M6 10.5l2.6 2.6L14.5 7" stroke="var(--panel)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  tried: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Attempted"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--med)" stroke-width="2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="var(--med)"/></svg>',
+  none: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Not started"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--line)" stroke-width="2"/></svg>'
+};
+const status = id => store.solved[id] ? 'solved' : store.tried[id] ? 'tried' : 'none';
+
+// ---------- highlighter ----------
+const KW = new Set('IF THEN ELSIF ELSE END_IF CASE OF END_CASE FOR TO BY DO END_FOR WHILE END_WHILE REPEAT UNTIL END_REPEAT EXIT RETURN AND OR XOR NOT MOD VAR END_VAR ARRAY'.split(' '));
+const TY = new Set('BOOL SINT INT DINT REAL FBD_TIMER FBD_ONESHOT TIMER TONR TOFR OSRI OSFI ABS SQRT SQR MIN MAX LIMIT TRUNC TRN SIN COS TAN LN LOG'.split(' '));
+const RX = /(\/\/[^\n]*|\(\*[\s\S]*?(?:\*\)|$)|\/\*[\s\S]*?(?:\*\/|$))|(\b\d[\d_]*(?:#[0-9A-Fa-f_]+)?(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_]\w*)/g;
+function hilite(src) {
+  let out = '', last = 0;
+  src.replace(RX, (m, com, nm, id, off) => {
+    out += esc(src.slice(last, off)); last = off + m.length;
+    if (com) out += `<span class="c">${esc(m)}</span>`;
+    else if (nm) out += `<span class="n">${m}</span>`;
+    else { const u = m.toUpperCase(); out += KW.has(u) ? `<span class="k">${m}</span>` : TY.has(u) ? `<span class="y">${m}</span>` : (u === 'TRUE' || u === 'FALSE') ? `<span class="n">${m}</span>` : esc(m); }
+    return m;
+  });
+  return out + esc(src.slice(last));
+}
+
+// ---------- list view ----------
+let filter = 'All', query = '';
+function renderTicks() {
+  const n = P.filter(p => store.solved[p.id]).length;
+  $('#ticks').innerHTML = P.map(p => `<span class="${store.solved[p.id] ? 'on' : ''}" title="${esc(p.title)}"></span>`).join('');
+  $('#prog').innerHTML = `<span class="lbl">${n} of ${P.length} solved</span>`;
+}
+function renderList() {
+  $('#filters').innerHTML = ['All', 'Easy', 'Medium', 'Hard'].map(f => `<button class="chip" aria-pressed="${f === filter}" data-f="${f}">${f}${f === 'All' ? '' : ' · ' + P.filter(p => p.diff === f).length}</button>`).join('');
+  const list = P.map((p, i) => ({ p, i })).filter(({ p }) => (filter === 'All' || p.diff === filter) && (!query || (p.title + ' ' + p.topics.join(' ')).toLowerCase().includes(query))).map(({ p, i }) =>
+    `<tr class="row" data-id="${p.id}"><td class="st">${ICON[status(p.id)]}</td><td><a href="#${p.id}">${i + 1}. ${esc(p.title)}</a></td><td class="topics">${p.topics.join(' · ')}</td><td class="${p.diff}">${p.diff}</td></tr>`);
+  $('#rows').innerHTML = list.join(''); $('#none').hidden = list.length > 0;
+}
+$('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; renderList(); } });
+$('#q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); renderList(); });
+$('#rows').addEventListener('click', e => { const r = e.target.closest('tr[data-id]'); if (r && !e.target.closest('a')) location.hash = r.dataset.id; });
+
+// ---------- trace table ----------
+function trace(p, test, exp, got, fail) {
+  const outs = p.tags.filter(t => t.dir === 'out');
+  const head = `<tr><th>Time</th><th class="set">Inputs written</th>${outs.map(o => `<th>${o.name}</th>`).join('')}</tr>`;
+  const rows = exp.map((c, k) => {
+    const n = test.steps[k][0], keys = Object.keys(c.set);
+    const set = keys.length ? keys.map(nm => `${nm} := ${fmt(c.set[nm], typeOf(p, nm))}`).join('<br>') : '<span class="muted">(no change)</span>';
+    const g = got && got[k];
+    const cells = outs.map(o => {
+      const e = c.out[o.name], f = fmt(e, o.type);
+      if (!got) return `<td>${f}</td>`;
+      if (!g) return `<td class="na">${f}<small>${fail ? 'not reached' : ''}</small></td>`;
+      return E.same(g.out[o.name], e) ? `<td class="ok">${f}</td>` : `<td class="bad">${f}<small>yours: ${fmt(g.out[o.name], o.type)}</small></td>`;
+    }).join('');
+    return `<tr><td class="t">${c.t} ms${n > 1 ? `<br><small>${n} scans</small>` : ''}</td><td class="set">${set}</td>${cells}</tr>`;
+  }).join('');
+  return `<div class="scroll"><table class="trace">${head}${rows}</table></div>`;
+}
+
+// ---------- problem view ----------
+let cur = null, tab = 'desc', hintsShown = 0, solShown = false, lastRes = null, sel = 0;
+function renderLeft() {
+  const p = cur, i = P.indexOf(p);
+  const nav = `<div class="navp"><button class="btn sm" data-go="${i - 1}" ${i === 0 ? 'disabled' : ''} aria-label="Previous problem">‹ Prev</button><button class="btn sm" data-go="${i + 1}" ${i === P.length - 1 ? 'disabled' : ''} aria-label="Next problem">Next ›</button></div>`;
+  let body = '';
+  if (tab === 'desc') {
+    const tt = p.tags.map(t => `<tr><td>${t.name}</td><td><code>${t.dim ? `ARRAY[0..${t.dim - 1}] OF ${t.type}` : t.type}</code></td><td><span class="dir ${t.dir}">${{ in: 'Input', out: 'Output', int: 'Internal' }[t.dir]}</span></td><td class="muted">${esc(t.d || '')}</td></tr>`).join('');
+    const exIdx = p.tests.findIndex(t => !t.hidden);
+    body = `<div class="desc">${p.desc}</div><h3>Tags</h3><div class="scroll"><table class="tt"><tr><th>Name</th><th>Type</th><th>Usage</th><th>Notes</th></tr>${tt}</table></div>
+      <h3>Example — ${esc(p.tests[exIdx].name)} <span class="muted" style="font-weight:400">(${p.tests[exIdx].dt || 100} ms scan)</span></h3>${trace(p, p.tests[exIdx], expected(p, exIdx), null)}
+      <p class="note" style="margin-top:10px">${p.tests.filter(t => !t.hidden).length} example test${p.tests.filter(t => !t.hidden).length > 1 ? 's' : ''} + ${p.tests.filter(t => t.hidden).length} hidden.</p>`;
+  } else if (tab === 'hints') {
+    body = p.hints.slice(0, hintsShown).map((h, k) => `<div class="hint"><b>Hint ${k + 1}.</b> ${esc(h)}</div>`).join('') +
+      (hintsShown < p.hints.length ? `<button class="btn" id="moreHint">Show hint ${hintsShown + 1} of ${p.hints.length}</button>` : '<p class="muted">That\'s every hint.</p>');
+  } else {
+    body = solShown ? `<p class="muted">One reference solution. Other approaches pass too, as long as the outputs match.</p><pre class="solpre">${hilite(p.solution)}</pre><button class="btn sm" id="copySol">Copy</button>`
+      : `<p>Try it first. Reading the answer teaches far less than fighting with it for ten minutes.</p><button class="btn" id="showSol">Reveal solution</button>`;
+  }
+  $('#left').innerHTML = `<div class="ph"><span class="num">${i + 1} / ${P.length}</span><span class="${p.diff}">${p.diff}</span>${store.solved[p.id] ? '<span class="solved-badge">Solved</span>' : ''}${nav}<h1>${esc(p.title)}</h1><span class="topics">${p.topics.join(' · ')}</span></div>
+    <div class="tabs" role="tablist">${[['desc', 'Description'], ['hints', 'Hints'], ['sol', 'Solution']].map(([k, l]) => `<button class="tab" role="tab" aria-selected="${tab === k}" data-tab="${k}">${l}</button>`).join('')}</div>${body}`;
+}
+$('#left').addEventListener('click', e => {
+  const t = e.target;
+  if (t.dataset.tab) { tab = t.dataset.tab; renderLeft(); }
+  else if (t.dataset.go != null) location.hash = P[+t.dataset.go].id;
+  else if (t.id === 'moreHint') { hintsShown++; renderLeft(); }
+  else if (t.id === 'showSol') { solShown = true; renderLeft(); }
+  else if (t.id === 'copySol') { navigator.clipboard.writeText(cur.solution).then(() => { t.textContent = 'Copied'; }, () => { t.textContent = 'Copy blocked — select the text instead'; }); }
+});
+
+// ---------- editor ----------
+const ta = $('#src'), hl = $('#hl'), gut = $('#gut');
+let errLine = 0;
+function paint() {
+  hl.innerHTML = hilite(ta.value) + '\n ';
+  const n = ta.value.split('\n').length;
+  gut.innerHTML = Array.from({ length: n }, (_, k) => `<div class="${k + 1 === errLine ? 'err' : ''}">${k + 1}</div>`).join('');
+  sync();
+}
+function sync() { hl.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft; gut.scrollTop = ta.scrollTop; }
+function insert(s) { if (!document.execCommand || !document.execCommand('insertText', false, s)) { ta.setRangeText(s, ta.selectionStart, ta.selectionEnd, 'end'); paint(); } }
+let escaped = false;
+ta.addEventListener('input', () => { if (cur) { store.code[cur.id] = ta.value; save(); } paint(); });
+ta.addEventListener('scroll', sync);
+ta.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { escaped = true; return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(e.shiftKey); return; }
+  if (e.key === 'Tab' && !escaped) { e.preventDefault(); insert('  '); return; }
+  escaped = false;
+  if (e.key === 'Enter') { e.preventDefault(); const s = ta.value.slice(0, ta.selectionStart), line = s.slice(s.lastIndexOf('\n') + 1); let ind = line.match(/^\s*/)[0]; if (/\b(THEN|DO|OF|ELSE|REPEAT|VAR)\s*$/i.test(line) || /^\s*-?\d+(\.\.\d+)?\s*:\s*$/.test(line)) ind += '  '; insert('\n' + ind); }
+});
+function gotoLine(l) {
+  const lines = ta.value.split('\n'); let off = 0; for (let k = 0; k < l - 1 && k < lines.length; k++) off += lines[k].length + 1;
+  ta.focus(); ta.setSelectionRange(off, off + (lines[l - 1] || '').length); ta.scrollTop = Math.max(0, (l - 4) * 22); sync();
+}
+let resetArm = null;
+$('#resetBtn').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!resetArm) { b.textContent = 'Click again to reset'; resetArm = setTimeout(() => { b.textContent = 'Reset code'; resetArm = null; }, 3000); return; }
+  clearTimeout(resetArm); resetArm = null; b.textContent = 'Reset code';
+  ta.value = cur.starter; store.code[cur.id] = ta.value; save(); errLine = 0; paint();
+});
+
+// ---------- running ----------
+function run(all) {
+  const p = cur, src = ta.value;
+  store.code[p.id] = src; if (!store.solved[p.id]) store.tried[p.id] = true;
+  const res = [], idx = p.tests.map((_, i) => i).filter(i => all || !p.tests[i].hidden);
+  let compile = null;
+  for (const i of idx) {
+    const t = p.tests[i], exp = expected(p, i); let got, err = null, prog = null;
+    try { got = E.simulate(src, p, t); prog = got.prog; }
+    catch (x) {
+      const e = x instanceof E.STError ? x : new E.STError('Simulator error: ' + x.message, 0, 'Internal error');
+      if (e.kind !== 'Runtime fault') { compile = e; break; }
+      err = e; got = e.partial; prog = e.prog;
+    }
+    const pass = !err && exp.every((c, k) => Object.keys(c.out).every(nm => E.same(got[k].out[nm], c.out[nm])));
+    res.push({ i, t, exp, got, err, pass, prog });
+  }
+  errLine = compile ? compile.line : (res.find(r => r.err) || {}).err?.line || 0;
+  const ok = !compile && res.every(r => r.pass);
+  if (all && ok) { store.solved[p.id] = true; delete store.tried[p.id]; }
+  save(); paint(); renderTicks();
+  lastRes = { all, compile, res, ok }; sel = Math.max(0, res.findIndex(r => !r.pass));
+  renderConsole(); if (all && ok) renderLeft();
+}
+function monitor(prog) {
+  if (!prog) return '';
+  const items = [];
+  for (const [, c] of prog.tags) {
+    if (c.kind === 'struct') items.push(`<div>${esc(c.name)}<br><span>${Object.values(c.m).map(m => `${m.name}=${fmt(m.v, m.type)}`).join(' ')}</span></div>`);
+    else items.push(`<div>${esc(c.name)} <span>${esc(c.kind === 'array' ? fmt(c.data, c.type) : fmt(c.v, c.type))}</span></div>`);
+  }
+  return `<details><summary>Tag monitor — values after the last scan of this test</summary><div class="mon">${items.join('')}</div></details>`;
+}
+function renderConsole() {
+  const R = lastRes, el = $('#console');
+  if (!R) { el.innerHTML = '<p class="muted" style="margin:0">Run your routine to see the scan-by-scan results here.</p>'; return; }
+  if (R.compile) {
+    const e = R.compile;
+    el.innerHTML = `<div class="verdict fail"><b>${esc(e.kind)}</b><span class="muted">Fix it, then run again</span></div><div class="errbox"><b>Line ${e.line}</b><p>${esc(e.message)}</p><button class="btn sm" id="goLine">Go to line ${e.line}</button></div>`;
+    return;
+  }
+  const passed = R.res.filter(r => r.pass).length, first = R.res.find(r => !r.pass);
+  const title = R.ok ? (R.all ? 'Accepted' : 'Examples pass') : first.err ? 'Runtime fault' : 'Wrong answer';
+  const sub = R.ok ? (R.all ? 'All tests passed, hidden ones included. Problem solved.' : 'Now submit to run the hidden tests.') : `${passed} / ${R.res.length} tests passed`;
+  const r = R.res[sel];
+  const detail = `${r.err ? `<div class="errbox"><b>Line ${r.err.line} · at t = ${r.err.at} ms</b><p>${esc(r.err.message)}</p><button class="btn sm" id="goLine">Go to line ${r.err.line}</button></div>` : ''}
+    <p class="muted" style="margin:0 0 8px;font-size:14px">${esc(r.t.name)}${r.t.hidden ? ' (hidden test)' : ''} · ${r.t.dt || 100} ms scan</p>${trace(cur, r.t, r.exp, r.got || [], !!r.err)}${monitor(r.prog)}`;
+  el.innerHTML = `<div class="verdict ${R.ok ? 'pass' : 'fail'}"><b>${title}</b><span class="muted">${sub}</span></div>
+    <div class="tchips" role="group" aria-label="Tests">${R.res.map((x, k) => `<button class="tchip ${x.pass ? '' : 'f'}" aria-pressed="${k === sel}" data-sel="${k}"><i></i>${x.t.hidden ? 'Hidden: ' : ''}${esc(x.t.name)}</button>`).join('')}</div>${detail}`;
+}
+$('#console').addEventListener('click', e => {
+  const b = e.target.closest('[data-sel]'); if (b) { sel = +b.dataset.sel; renderConsole(); return; }
+  if (e.target.id === 'goLine') gotoLine(errLine);
+});
+$('#runBtn').addEventListener('click', () => run(false));
+$('#subBtn').addEventListener('click', () => run(true));
+
+// ---------- routing ----------
+function route() {
+  const id = location.hash.slice(1), p = P.find(x => x.id === id);
+  renderTicks();
+  if (!p) { $('#probView').hidden = true; $('#listView').hidden = false; cur = null; renderList(); document.title = 'Structured Text Practice · Darshan Shah'; return; }
+  $('#listView').hidden = true; $('#probView').hidden = false;
+  if (cur !== p) { cur = p; tab = 'desc'; hintsShown = 0; solShown = false; lastRes = null; errLine = 0; ta.value = store.code[p.id] ?? p.starter; ta.scrollTop = 0; }
+  document.title = p.title + ' · ST Practice';
+  renderLeft(); renderConsole(); paint(); window.scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+route();
+}
+</script>
+</body>
+</html>
