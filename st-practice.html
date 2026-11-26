@@ -130,6 +130,14 @@ details{margin-top:14px}summary{cursor:pointer;color:var(--mute);font-size:14px;
 .navp{display:flex;gap:8px;margin-left:auto}
 .how{padding-left:20px;margin:0 0 6px}.how li{margin:6px 0}
 .linkbtn{background:none;border:0;padding:6px 0;color:var(--accink);text-decoration:underline;font-size:15px;margin-left:auto;min-height:36px}
+.langs{white-space:nowrap}.lb{display:inline-block;font:500 12px var(--mono);padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--mute);margin-right:4px}.lb.done{border-color:var(--ok);color:var(--ok)}
+.segs{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}.seg{border:0;background:transparent;padding:6px 12px;min-height:36px;font-size:14px;color:var(--mute)}.seg[aria-pressed=true]{background:var(--ink);color:var(--bg)}.seg:disabled{opacity:.4;cursor:not-allowed}
+.palette{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line)}.palette button{font:500 12.5px var(--mono);border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:4px 8px;min-height:32px}.palette button:hover{border-color:var(--mute)}.palette .pk{font-family:inherit;font-weight:600}
+.ldv{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:6px}.ldlive .ldv{border:0;border-radius:0 0 6px 6px;max-height:420px;overflow:auto}.ldv.stale,#ldDraw.stale{opacity:.45}
+.ldsvg{display:block}.ldsvg text{font-family:var(--mono);fill:var(--ink)}.ld-tag{font-size:11px}.ld-sym{font-size:11px;font-weight:600}.ld-mn{font-size:12px;font-weight:600}.ld-nm{font-size:10px;fill:var(--mute)!important}.ld-arg{font-size:11px}.ld-flag{font-size:10px;fill:var(--ok)!important;font-weight:600}.ld-rn{font-size:11px;fill:var(--mute)!important}
+.lderr{color:var(--bad);font-family:var(--mono);font-size:12.5px}
+.ldnote{background:light-dark(#eef2f7,#1d2329);border-radius:6px;padding:10px 12px;font-size:15px}
+.b{color:var(--ty);font-weight:600}
 .solved-badge{color:var(--ok);font-weight:500}
 @media(max-width:600px){table{font-size:13px}.topics{display:none}.left{padding:18px 16px}.scale .lbl{display:none}}
 @media(prefers-reduced-motion:no-preference){.verdict{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(4px)}}}
@@ -152,10 +160,10 @@ h1,h2,.brand{font-family:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-s
 </header>
 
 <main class="wrap" id="listView">
-  <h1>Structured Text problems</h1>
-  <p class="lede">Practise Logix-style ST (the Studio 5000 dialect) the way you would on a coding judge. Write a routine, run it against simulated PLC scans, and get graded output by output.</p>
-  <div class="filt"><div class="chips" id="filters" role="group" aria-label="Filter by difficulty"></div><input id="q" type="search" placeholder="Search title or topic — e.g. timers, arrays" aria-label="Search problems"></div>
-  <div class="list scroll"><table><thead><tr><th class="st">Status</th><th>Problem</th><th class="topics">Topics</th><th>Difficulty</th></tr></thead><tbody id="rows"></tbody></table><p id="none" class="muted" style="padding:16px;margin:0" hidden>No problems match that search.</p></div>
+  <h1>Structured Text and ladder problems</h1>
+  <p class="lede">Practise Allen-Bradley Logix code, in Structured Text and ladder logic, the way you would on a coding judge. Write a routine, run it against simulated PLC scans, and get graded output by output.</p>
+  <div class="filt"><div class="chips" id="filters" role="group" aria-label="Filter by difficulty"></div><div class="chips" id="lfilters" role="group" aria-label="Filter by language"></div><input id="q" type="search" placeholder="Search title or topic — e.g. timers, arrays" aria-label="Search problems"></div>
+  <div class="list scroll"><table><thead><tr><th class="st">Status</th><th>Problem</th><th>Language</th><th class="topics">Topics</th><th>Difficulty</th></tr></thead><tbody id="rows"></tbody></table><p id="none" class="muted" style="padding:16px;margin:0" hidden>No problems match that search.</p></div>
 
   <div class="ref">
     <section><h2>How grading works</h2><ul>
@@ -168,19 +176,27 @@ h1,h2,.brand{font-family:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-s
     <section><h2>Supported syntax</h2><ul>
       <li><code>:=</code>, <code>IF/ELSIF/ELSE</code>, <code>CASE … OF</code> (ranges <code>1..5:</code>), <code>FOR … BY</code>, <code>WHILE</code>, <code>REPEAT</code>, <code>EXIT</code>, <code>RETURN</code></li>
       <li><code>AND OR XOR NOT &amp;</code> (bitwise on integers), <code>= &lt;&gt; &lt; &lt;= &gt; &gt;=</code>, <code>+ - * / MOD **</code></li>
-      <li>Types: BOOL, SINT, INT, DINT, REAL, ARRAY, FBD_TIMER, FBD_ONESHOT</li>
-      <li>Instructions: <code>TONR</code>, <code>TOFR</code>, <code>OSRI</code>, <code>OSFI</code>. Functions: ABS, SQRT, MIN, MAX, LIMIT, TRUNC, SIN, COS, TAN, LN, LOG</li>
+      <li>Types: BOOL, SINT, INT, DINT, REAL, ARRAY, FBD_TIMER, FBD_ONESHOT, TIMER, COUNTER</li>
+      <li>Instructions: <code>TONR</code>, <code>TOFR</code>, <code>OSRI</code>, <code>OSFI</code>. Functions: ABS, SQRT/SQR, TRN, SIN, COS, TAN, LN, LOG. Like Studio 5000, there is no MIN, MAX or LIMIT, so clamp with IF</li>
       <li>Bits: <code>Word.5</code>, <code>Word.[i]</code>. Literals: <code>16#FF</code>, <code>2#1010</code>, <code>1.5e3</code>. Comments: <code>//</code>, <code>(* *)</code>, <code>/* */</code></li>
-      <li>Optional local tags at the top of a routine:</li></ul>
+      <li>Optional local tags at the top of a routine. This is a simulator convenience: in Studio 5000 you create tags in the tag editor.</li></ul>
       <pre>VAR
   Count : DINT := 0;
   Buf   : ARRAY[0..4] OF REAL;
 END_VAR</pre></section>
+    <section><h2>Ladder logic</h2><ul>
+      <li>Written as Studio 5000 rung text, one rung per line ending in <code>;</code>. This is the same format as "Edit rung as text" and L5X exports. The diagram draws itself as you type.</li>
+      <li>Branches: <code>BST XIC(A) NXB XIC(B) BND</code> puts A and B in parallel.</li>
+      <li>Bits: <code>XIC XIO OTE OTL OTU ONS OSR OSF</code>. Timers and counters: <code>TON TOF RTO CTU CTD RES</code>, for example <code>TON(T1,5000,0)</code></li>
+      <li>Compare: <code>EQU NEQ GRT GEQ LES LEQ LIM CMP</code>. Math and move: <code>MOV ADD SUB MUL DIV MOD CPT CLR ABS</code></li>
+      <li>After a run, the power-flow view shows which contacts were energized on the last scan.</li></ul>
+      <pre>BST XIC(Start) NXB XIC(Motor) BND XIO(Stop) OTE(Motor);
+XIC(Motor) TON(Run_Tmr,5000,0);</pre></section>
     <section><h2>Editor keys</h2><ul>
       <li><b>Ctrl/⌘ + Enter</b> runs the examples. <b>Ctrl/⌘ + Shift + Enter</b> submits.</li>
       <li><b>Tab</b> indents by two spaces and <b>Enter</b> keeps the current indent. Press <b>Esc</b>, then Tab, to move focus out of the editor.</li>
       <li>Your code and solved problems are kept in this browser.</li></ul>
-      <p class="muted" style="font-size:14px;margin-top:12px">This is a simulator for the common subset of Logix ST, not Studio 5000 itself. Use it to build fluency, then verify on real hardware.</p></section>
+      <p class="muted" style="font-size:14px;margin-top:12px">This is a simulator for the common subset of Logix ST and ladder, not Studio 5000 itself. Use it to build fluency, then verify on real hardware.</p></section>
   </div>
 </main>
 
@@ -189,10 +205,14 @@ END_VAR</pre></section>
     <article class="card left" id="left"></article>
     <div class="right">
       <div class="card">
-        <div class="bar"><span id="lang">Structured Text · MainRoutine</span><span class="sp"></span>
+        <div class="bar"><div class="segs" id="langSw" role="group" aria-label="Language"></div><span class="sp"></span>
           <button class="btn sm" id="resetBtn">Reset code</button></div>
+        <div class="palette" id="palette" hidden role="toolbar" aria-label="Insert ladder instruction">
+          <button data-ins="RUNG" class="pk">New rung ;</button><button data-ins="BR" class="pk">Branch</button><button data-ins="XIC">XIC</button><button data-ins="XIO">XIO</button><button data-ins="OTE">OTE</button><button data-ins="OTL">OTL</button><button data-ins="OTU">OTU</button><button data-ins="ONS">ONS</button><button data-ins="TON">TON</button><button data-ins="TOF">TOF</button><button data-ins="RTO">RTO</button><button data-ins="CTU">CTU</button><button data-ins="CTD">CTD</button><button data-ins="RES">RES</button><button data-ins="EQU">EQU</button><button data-ins="NEQ">NEQ</button><button data-ins="GRT">GRT</button><button data-ins="GEQ">GEQ</button><button data-ins="LES">LES</button><button data-ins="LEQ">LEQ</button><button data-ins="LIM">LIM</button><button data-ins="CMP">CMP</button><button data-ins="MOV">MOV</button><button data-ins="ADD">ADD</button><button data-ins="SUB">SUB</button><button data-ins="MUL">MUL</button><button data-ins="DIV">DIV</button><button data-ins="CPT">CPT</button><button data-ins="ABS">ABS</button>
+        </div>
         <div class="ed"><div class="gut" id="gut"></div><div class="code"><pre id="hl" aria-hidden="true"></pre><textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Structured Text editor"></textarea></div></div>
       </div>
+      <section class="card ldlive" id="ldLive" hidden><div class="bar"><span>Live ladder diagram</span><span class="sp"></span><span id="ldErr" class="lderr"></span></div><div class="ldv scroll" id="ldDraw"></div></section>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <button class="btn dark" id="runBtn">Run examples</button>
         <button class="btn go" id="subBtn">Submit</button>
@@ -206,12 +226,15 @@ END_VAR</pre></section>
 <script>const STEngine = (function () {
   const KW = new Set(['IF','THEN','ELSIF','ELSE','END_IF','CASE','OF','END_CASE','FOR','TO','BY','DO','END_FOR','WHILE','END_WHILE','REPEAT','UNTIL','END_REPEAT','EXIT','RETURN','AND','OR','XOR','NOT','MOD','VAR','END_VAR','ARRAY','TRUE','FALSE']);
   const BITS = { SINT: 8, INT: 16, DINT: 32 };
-  const TYPEMAP = { BOOL: 'BOOL', SINT: 'SINT', INT: 'INT', DINT: 'DINT', REAL: 'REAL', FBD_TIMER: 'FBD_TIMER', TIMER: 'FBD_TIMER', FBD_ONESHOT: 'FBD_ONESHOT' };
+  const TYPEMAP = { BOOL: 'BOOL', SINT: 'SINT', INT: 'INT', DINT: 'DINT', REAL: 'REAL', FBD_TIMER: 'FBD_TIMER', TIMER: 'TIMER', COUNTER: 'COUNTER', FBD_ONESHOT: 'FBD_ONESHOT' };
   const STRUCTS = {
     FBD_TIMER: { TIMERENABLE: ['TimerEnable', 'BOOL'], PRE: ['PRE', 'DINT'], RESET: ['Reset', 'BOOL'], ACC: ['ACC', 'DINT'], EN: ['EN', 'BOOL'], TT: ['TT', 'BOOL'], DN: ['DN', 'BOOL'] },
-    FBD_ONESHOT: { INPUTBIT: ['InputBit', 'BOOL'], OUTPUTBIT: ['OutputBit', 'BOOL'] }
+    FBD_ONESHOT: { INPUTBIT: ['InputBit', 'BOOL'], OUTPUTBIT: ['OutputBit', 'BOOL'] },
+    TIMER: { PRE: ['PRE', 'DINT'], ACC: ['ACC', 'DINT'], EN: ['EN', 'BOOL'], TT: ['TT', 'BOOL'], DN: ['DN', 'BOOL'] },
+    COUNTER: { PRE: ['PRE', 'DINT'], ACC: ['ACC', 'DINT'], CU: ['CU', 'BOOL'], CD: ['CD', 'BOOL'], DN: ['DN', 'BOOL'], OV: ['OV', 'BOOL'], UN: ['UN', 'BOOL'] }
   };
-  const FUNCS = { ABS: 1, SQRT: 1, SQR: 1, TRUNC: 1, TRN: 1, SIN: 1, COS: 1, TAN: 1, LN: 1, LOG: 1, MIN: -2, MAX: -2, LIMIT: 3 };
+  const FUNCS = { ABS: 1, SQRT: 1, SQR: 1, TRN: 1, SIN: 1, COS: 1, TAN: 1, LN: 1, LOG: 1 };
+  const NOT_LOGIX = { MIN: 'Logix Structured Text has no MIN function. Compare with IF/ELSE instead', MAX: 'Logix Structured Text has no MAX function. Compare with IF/ELSE instead', LIMIT: 'Logix Structured Text has no LIMIT function. Clamp with IF/ELSIF instead (LIM in ladder is a range test, not a clamp)', TRUNC: 'Logix uses TRN, not TRUNC' };
   const PROCS = { TONR: 'FBD_TIMER', TOFR: 'FBD_TIMER', OSRI: 'FBD_ONESHOT', OSFI: 'FBD_ONESHOT' };
   const EXIT = { sig: 'exit' }, RET = { sig: 'ret' };
 
@@ -268,7 +291,7 @@ END_VAR</pre></section>
   }
 
   // ---------- parser ----------
-  function parse(src) {
+  function parse(src, mode) {
     const T = lex(src); let p = 0;
     const pk = (o = 0) => T[Math.min(p + o, T.length - 1)];
     const isOp = (v, o = 0) => pk(o).t === 'op' && pk(o).v === v;
@@ -426,6 +449,10 @@ END_VAR</pre></section>
     const xor = binLevel(and, ['XOR']);
     const expr = binLevel(xor, ['OR']);
 
+    if (mode === 'expr') {
+      if (pk().t === 'eof') throw new STError('Empty operand', pk().line);
+      const e = expr(); if (pk().t !== 'eof') throw new STError(`Unexpected ${desc(pk())} in operand`, pk().line); return e;
+    }
     while (isKw('VAR')) varBlock();
     const body = stmtList(() => pk().t === 'eof', '');
     return { decls, body };
@@ -528,12 +555,13 @@ END_VAR</pre></section>
         }
         case 'fn': {
           if (PROCS[e.u]) throw new STError(`${e.name} is an instruction, not a function — call it on its own line: ${e.name}(MyTag);`, e.line, 'Verify error');
+          if (NOT_LOGIX[e.u]) throw new STError(NOT_LOGIX[e.u], e.line, 'Verify error');
           const ar = FUNCS[e.u]; if (ar == null) throw new STError(`Unknown function '${e.name}'`, e.line, 'Verify error');
           if ((ar > 0 && e.args.length !== ar) || (ar < 0 && e.args.length < -ar)) throw new STError(`${e.name} expects ${ar > 0 ? ar : 'at least ' + -ar} argument(s)`, e.line, 'Verify error');
           const ts = e.args.map(a => this.sexpr(a));
           if (ts.includes('B')) throw new STError(`${e.name} needs numeric arguments`, e.line, 'Verify error');
-          if (['TRUNC', 'TRN'].includes(e.u)) return 'I';
-          if (['ABS', 'MIN', 'MAX', 'LIMIT'].includes(e.u)) return ts.includes('R') ? 'R' : 'I';
+          if (e.u === 'TRN') return 'I';
+          if (e.u === 'ABS') return ts.includes('R') ? 'R' : 'I';
           return 'R';
         }
       }
@@ -619,12 +647,10 @@ END_VAR</pre></section>
       switch (e.u) {
         case 'ABS': return mk(Math.abs(v[0]));
         case 'SQRT': case 'SQR': if (v[0] < 0) throw this.fault(`SQRT of a negative number (${v[0]})`, e.line); return rr(Math.sqrt(v[0]));
-        case 'TRUNC': case 'TRN': return { t: 'I', v: Math.trunc(v[0]) | 0 };
+        case 'TRN': return { t: 'I', v: Math.trunc(v[0]) | 0 };
         case 'SIN': return rr(Math.sin(v[0])); case 'COS': return rr(Math.cos(v[0])); case 'TAN': return rr(Math.tan(v[0]));
         case 'LN': if (v[0] <= 0) throw this.fault('LN of a number ≤ 0', e.line); return rr(Math.log(v[0]));
         case 'LOG': if (v[0] <= 0) throw this.fault('LOG of a number ≤ 0', e.line); return rr(Math.log10(v[0]));
-        case 'MIN': return mk(Math.min(...v)); case 'MAX': return mk(Math.max(...v));
-        case 'LIMIT': return mk(Math.min(Math.max(v[1], v[0]), v[2]));
       }
     }
     exec(list) {
@@ -684,9 +710,193 @@ END_VAR</pre></section>
     read(name) { const c = this.tags.get(name.toUpperCase()); return c.kind === 'array' ? c.data.slice() : c.v; }
   }
 
+  // ---------- ladder (Logix rung text) ----------
+  const LD = {
+    XIC: ['bit'], XIO: ['bit'], OTE: ['bitw'], OTL: ['bitw'], OTU: ['bitw'], ONS: ['bitw'], OSR: ['bitw', 'bitw'], OSF: ['bitw', 'bitw'],
+    TON: ['timer', 'lit', 'lit'], TOF: ['timer', 'lit', 'lit'], RTO: ['timer', 'lit', 'lit'],
+    CTU: ['counter', 'lit', 'lit'], CTD: ['counter', 'lit', 'lit'], RES: ['tc'],
+    EQU: ['num', 'num'], NEQ: ['num', 'num'], GRT: ['num', 'num'], GEQ: ['num', 'num'], LES: ['num', 'num'], LEQ: ['num', 'num'],
+    LIM: ['num', 'num', 'num'], CMP: ['expr'],
+    MOV: ['num', 'dest'], ADD: ['num', 'num', 'dest'], SUB: ['num', 'num', 'dest'], MUL: ['num', 'num', 'dest'], DIV: ['num', 'num', 'dest'], MOD: ['num', 'num', 'dest'],
+    CPT: ['dest', 'expr'], CLR: ['dest'], ABS: ['num', 'dest'], AFI: [], NOP: []
+  };
+  const LD_HINT = { TONR: 'TONR is the Structured Text timer. In ladder, use TON with a TIMER tag', XOR: 'Ladder XOR works on integers. For BOOL logic, use contacts on parallel branches', JSR: 'Subroutines are not part of this simulator', FOR: 'FOR loops are not supported in this ladder simulator. Use Structured Text for array problems' };
+  function parseLadder(src) {
+    const toks = []; let i = 0, line = 1; const n = src.length;
+    while (i < n) {
+      const c = src[i];
+      if (c === '\n') { line++; i++; continue; }
+      if (/\s/.test(c)) { i++; continue; }
+      if (c === '/' && src[i + 1] === '/') { while (i < n && src[i] !== '\n') i++; continue; }
+      if (c === ';') { toks.push({ t: ';', line }); i++; continue; }
+      if (/[A-Za-z_]/.test(c)) {
+        const L = line; let name = ''; while (i < n && /[A-Za-z0-9_]/.test(src[i])) name += src[i++];
+        const u = name.toUpperCase();
+        if (u === 'BST' || u === 'NXB' || u === 'BND') { toks.push({ t: u, line: L }); continue; }
+        while (i < n && (src[i] === ' ' || src[i] === '\t')) i++;
+        const args = [];
+        if (src[i] === '(') {
+          i++; let depth = 0, cur = '', curLine = line;
+          for (;;) {
+            if (i >= n) throw new STError(`${name}( is missing its closing ')'`, L);
+            const ch = src[i++];
+            if (ch === '\n') line++;
+            if (ch === '(') depth++;
+            if (ch === ')') { if (depth === 0) { args.push({ s: cur.trim(), line: curLine }); break; } depth--; }
+            if (ch === ',' && depth === 0) { args.push({ s: cur.trim(), line: curLine }); cur = ''; curLine = line; continue; }
+            cur += ch;
+          }
+          if (args.length === 1 && args[0].s === '') args.length = 0;
+        }
+        toks.push({ t: 'ins', name, u, args, line: L }); continue;
+      }
+      throw new STError(`Unexpected '${c}' in rung text. Each rung is instructions like XIC(Tag) OTE(Out); ending with ';'`, line);
+    }
+    let p = 0, id = 0; const rungs = [];
+    const series = (stops) => {
+      const out = [];
+      while (p < toks.length && !stops.includes(toks[p].t)) {
+        const t = toks[p];
+        if (t.t === 'BST') {
+          p++; const br = { k: 'br', branches: [], id: id++, line: t.line };
+          br.branches.push(series(['NXB', 'BND', ';']));
+          while (toks[p] && toks[p].t === 'NXB') { p++; br.branches.push(series(['NXB', 'BND', ';'])); }
+          if (!toks[p] || toks[p].t !== 'BND') throw new STError('Branch opened with BST is never closed with BND', t.line);
+          p++; out.push(br);
+        } else if (t.t === 'ins') { p++; out.push({ k: 'ins', name: t.name, u: t.u, args: t.args, line: t.line, id: id++ }); }
+        else throw new STError(`${t.t} without a matching BST`, t.line);
+      }
+      return out;
+    };
+    while (p < toks.length) {
+      const L = toks[p].line, elems = series([';']);
+      if (!toks[p]) throw new STError(`Rung ${rungs.length} is missing its closing ';'`, L);
+      p++; rungs.push({ elems, line: L, n: rungs.length });
+    }
+    return rungs;
+  }
+
+  class LadderProgram extends Program {
+    constructor(src, tagDefs) {
+      super('', tagDefs);
+      this.rungs = parseLadder(src);
+      this.trace = {};
+      const walk = list => { for (const e of list) { if (e.k === 'br') e.branches.forEach(walk); else this.verifyIns(e); } };
+      try { this.rungs.forEach(r => walk(r.elems)); }
+      catch (err) { if (err.message) err.message = err.message.replace(' or declare it in a VAR block', ''); throw err; }
+    }
+    verifyIns(e) {
+      const spec = LD[e.u];
+      const V = m => new STError(m, e.line, 'Verify error');
+      if (!spec) throw V(LD_HINT[e.u] || `Unknown ladder instruction '${e.name}'. Supported: ${Object.keys(LD).join(', ')}`);
+      if (e.args.length !== spec.length) throw V(`${e.u} takes ${spec.length} operand${spec.length === 1 ? '' : 's'} (${spec.join(', ')}), got ${e.args.length}`);
+      e.ex = e.args.map((a, k) => {
+        if (a.s === '' || a.s === '?') throw V(`${e.u}: operand ${k + 1} is empty`);
+        let x; try { x = parse(a.s, 'expr'); } catch (err) { throw V(`${e.u}: can't read operand '${a.s}': ${err.message}`); }
+        const kind = spec[k];
+        const isRef = x.n === 'ref';
+        const fix = n => { const r = JSON.parse(JSON.stringify(n)); const set = o => { if (o && typeof o === 'object') { if ('line' in o) o.line = e.line; Object.values(o).forEach(set); } }; set(r); return r; };
+        x = fix(x);
+        if (kind === 'bit' || kind === 'bitw') {
+          if (!isRef) throw V(`${e.u} needs a BOOL tag or bit, not '${a.s}'`);
+          if (this.sexpr(x) !== 'B') throw V(`${e.u} needs a BOOL. '${a.s}' is not a bit. For a DINT bit, write Tag.5`);
+        } else if (kind === 'timer' || kind === 'counter' || kind === 'tc') {
+          if (!isRef) throw V(`${e.u} needs a ${kind === 'counter' ? 'COUNTER' : 'TIMER'} tag`);
+          const st = this.sref(x);
+          const ok = kind === 'tc' ? (st.struct === 'TIMER' || st.struct === 'COUNTER') : st.struct === (kind === 'timer' ? 'TIMER' : 'COUNTER');
+          if (!ok) throw V(`${e.u} needs a ${kind === 'tc' ? 'TIMER or COUNTER' : kind.toUpperCase()} tag; '${a.s}' is ${st.struct || st.s || 'an array'}`);
+        } else if (kind === 'lit') {
+          const v = x.n === 'num' ? x.v : (x.n === 'un' && x.op === '-' && x.a.n === 'num') ? -x.a.v : null;
+          if (v == null || !Number.isInteger(v)) throw V(`${e.u}: preset and accum must be whole-number constants (ms for timers)`);
+          x = { n: 'num', v, real: false };
+        } else if (kind === 'dest') {
+          if (!isRef) throw V(`${e.u}: the destination must be a tag`);
+          const t = this.sexpr(x); if (t === 'B') throw V(`${e.u}: the destination must be a DINT or REAL tag. Use OTE/OTL/OTU for bits`);
+        } else this.sexpr(x);
+        return x;
+      });
+      if (['TON', 'TOF', 'RTO', 'CTU', 'CTD'].includes(e.u)) {
+        const cell = this.resolve(e.ex[0]).whole; cell.m.PRE.v = e.ex[1].v; cell.m.ACC.v = e.ex[2].v;
+      }
+    }
+    run(list, r) {
+      for (const e of list) {
+        this.tick(e.line);
+        if (e.k === 'br') { let any = false; for (const b of e.branches) { if (this.run(b, r)) any = true; } this.trace[e.id] = [r, any]; r = any; }
+        else { const o = this.ins(e, r); this.trace[e.id] = [r, o]; r = o; }
+      }
+      return r;
+    }
+    ins(e, r) {
+      const X = e.ex, lv = k => this.resolve(X[k]), val = k => this.ev(X[k]), N = k => num(val(k));
+      const store = (k, x) => { const d = lv(k); d.set(conv(d.type, x, e.line)); };
+      const bin = (op) => this.bin({ n: 'bin', op, a: X[0], b: X[1], line: e.line });
+      switch (e.u) {
+        case 'XIC': return r && lv(0).get();
+        case 'XIO': return r && !lv(0).get();
+        case 'OTE': lv(0).set(r); return r;
+        case 'OTL': if (r) lv(0).set(true); return r;
+        case 'OTU': if (r) lv(0).set(false); return r;
+        case 'ONS': { const s = lv(0), o = r && !s.get(); s.set(r); return o; }
+        case 'OSR': { const s = lv(0); lv(1).set(r && !s.get()); s.set(r); return r; }
+        case 'OSF': { const s = lv(0); lv(1).set(!r && s.get()); s.set(r); return r; }
+        case 'TON': case 'TOF': case 'RTO': this.timer(e.u, lv(0).whole, r); return r;
+        case 'CTU': case 'CTD': {
+          const m = lv(0).whole.m, bit = e.u === 'CTU' ? m.CU : m.CD;
+          if (r && !bit.v) { m.ACC.v = wrap('DINT', m.ACC.v + (e.u === 'CTU' ? 1 : -1)); }
+          bit.v = r; m.DN.v = m.ACC.v >= m.PRE.v; return r;
+        }
+        case 'RES': if (r) { const c = lv(0).whole, m = c.m; m.ACC.v = 0; m.DN.v = false; ['EN', 'TT', 'CU', 'CD', 'OV', 'UN'].forEach(k => { if (m[k]) m[k].v = false; }); c.last = null; } return r;
+        case 'EQU': return r && N(0) === N(1);
+        case 'NEQ': return r && N(0) !== N(1);
+        case 'GRT': return r && N(0) > N(1);
+        case 'GEQ': return r && N(0) >= N(1);
+        case 'LES': return r && N(0) < N(1);
+        case 'LEQ': return r && N(0) <= N(1);
+        case 'LIM': { const lo = N(0), t = N(1), hi = N(2); return r && (lo <= hi ? (t >= lo && t <= hi) : (t >= lo || t <= hi)); }
+        case 'CMP': return r && truthy(val(0));
+        case 'MOV': if (r) store(1, val(0)); return r;
+        case 'ADD': if (r) store(2, bin('+')); return r;
+        case 'SUB': if (r) store(2, bin('-')); return r;
+        case 'MUL': if (r) store(2, bin('*')); return r;
+        case 'DIV': if (r) store(2, bin('/')); return r;
+        case 'MOD': if (r) store(2, bin('MOD')); return r;
+        case 'CPT': if (r) store(0, val(1)); return r;
+        case 'CLR': if (r) { const d = lv(0); d.set(d.type === 'BOOL' ? false : 0); } return r;
+        case 'ABS': if (r) store(1, this.fn({ n: 'fn', u: 'ABS', name: 'ABS', args: [X[0]], line: e.line })); return r;
+        case 'AFI': return false;
+        case 'NOP': return r;
+      }
+    }
+    timer(kind, c, en) {
+      const m = c.m, now = this.now, pre = Math.max(0, m.PRE.v);
+      if (kind === 'TON' || kind === 'RTO') {
+        if (en) {
+          if (c.last != null && m.ACC.v < pre) m.ACC.v = m.ACC.v + (now - c.last);
+          c.last = now;
+          if (m.ACC.v >= pre) { m.ACC.v = Math.max(m.ACC.v, 0) >= pre ? pre : m.ACC.v; m.DN.v = true; } else m.DN.v = false;
+          m.EN.v = true; m.TT.v = !m.DN.v;
+        } else if (kind === 'TON') { m.ACC.v = 0; m.DN.v = false; m.EN.v = false; m.TT.v = false; c.last = null; }
+        else { m.EN.v = false; m.TT.v = false; c.last = null; }
+      } else {
+        if (en) { m.EN.v = true; m.DN.v = true; m.ACC.v = 0; m.TT.v = false; c.last = null; }
+        else {
+          m.EN.v = false;
+          if (m.DN.v) { if (c.last != null) m.ACC.v += now - c.last; c.last = now; if (m.ACC.v >= pre) { m.ACC.v = pre; m.DN.v = false; } }
+          m.TT.v = m.DN.v;
+        }
+      }
+    }
+    scan(dt) {
+      this.now += dt; this.loop = 0;
+      for (const rg of this.rungs) this.run(rg.elems, true);
+    }
+  }
+  const ldTags = prob => prob.tags.map(t => t.type === 'FBD_TIMER' ? { ...t, type: 'TIMER' } : t).concat(prob.ldTags || []);
+
   // ---------- test harness ----------
-  function simulate(src, prob, test) {
-    const prog = new Program(src, prob.tags);
+  function simulate(src, prob, test, lang) {
+    const prog = lang === 'ld' ? new LadderProgram(src, ldTags(prob)) : new Program(src, prob.tags);
     const outs = prob.tags.filter(t => t.dir === 'out').map(t => t.name);
     const inputs = {}; const cps = []; let t = 0; const dt = test.dt || 100;
     for (const [n, set] of test.steps) {
@@ -704,7 +914,7 @@ END_VAR</pre></section>
   const close = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) <= 1e-3 + 1e-5 * Math.abs(b) : a === b;
   const same = (a, b) => Array.isArray(b) ? a.length === b.length && a.every((x, i) => close(x, b[i])) : close(a, b);
 
-  return { lex, parse, Program, simulate, same, STError, STRUCTS };
+  return { lex, parse, parseLadder, Program, LadderProgram, ldTags, LD, simulate, same, STError, STRUCTS };
 })();
 if (typeof module !== 'undefined') module.exports = STEngine;
 </script>
@@ -917,8 +1127,8 @@ if (typeof module !== 'undefined') module.exports = STEngine;
     { name: 'Ramp_Done', type: 'BOOL', dir: 'out', d: 'Reached target' },
     { name: 'Step_Size', type: 'REAL', dir: 'int', d: 'Scratch' }],
   starter: `IF NOT Ramp_Enable THEN\n  \nELSE\n  \nEND_IF;\n`,
-  hints: ['Step_Size := Ramp_Rate * Scan_Time_ms / 60000.0;', 'MIN(Working_SP + Step_Size, Target_SP) stops an upward ramp from overshooting. Use MAX for a downward one.'],
-  solution: `IF NOT Ramp_Enable THEN\n  Working_SP := PV_Temp;\n  Ramp_Done := 0;\nELSE\n  Step_Size := Ramp_Rate * Scan_Time_ms / 60000.0;\n  IF Working_SP < Target_SP THEN\n    Working_SP := MIN(Working_SP + Step_Size, Target_SP);\n  ELSIF Working_SP > Target_SP THEN\n    Working_SP := MAX(Working_SP - Step_Size, Target_SP);\n  END_IF;\n  Ramp_Done := Working_SP = Target_SP;\nEND_IF;\n`,
+  hints: ['Step_Size := Ramp_Rate * Scan_Time_ms / 60000.0;', 'Add the step, then IF it went past the target, set it equal to the target. Logix ST has no MIN/MAX functions, so clamping is done with IF.'],
+  solution: `IF NOT Ramp_Enable THEN\n  Working_SP := PV_Temp;\n  Ramp_Done := 0;\nELSE\n  Step_Size := Ramp_Rate * Scan_Time_ms / 60000.0;\n  IF Working_SP < Target_SP THEN\n    Working_SP := Working_SP + Step_Size;\n    IF Working_SP > Target_SP THEN\n      Working_SP := Target_SP;\n    END_IF;\n  ELSIF Working_SP > Target_SP THEN\n    Working_SP := Working_SP - Step_Size;\n    IF Working_SP < Target_SP THEN\n      Working_SP := Target_SP;\n    END_IF;\n  END_IF;\n  Ramp_Done := Working_SP = Target_SP;\nEND_IF;\n`,
   tests: [
     { name: 'Ramp up 25 → 35 °C', steps: [[2, { PV_Temp: 25.0, Target_SP: 35.0, Ramp_Rate: 300.0, Scan_Time_ms: 100 }], [5, { Ramp_Enable: true }], [10, {}], [10, {}]] },
     { name: 'Retarget downward', steps: [[1, { PV_Temp: 1200.0, Target_SP: 1210.0, Ramp_Rate: 600.0, Scan_Time_ms: 100 }], [15, { Ramp_Enable: true }], [3, { Target_SP: 1205.0 }], [10, {}]] },
@@ -1004,8 +1214,8 @@ const MORE = [
     { name: 'Percent_Full', type: 'REAL', dir: 'out', d: '0–100' },
     { name: 'Lvl', type: 'REAL', dir: 'int', d: 'Clamped level' }],
   starter: `Lvl := Level_m;\n`,
-  hints: ['LIMIT(0.0, Level_m, Height_m) clamps in one line.', 'Compute the radius as Diameter_m / 2.0, a REAL division.'],
-  solution: `Lvl := LIMIT(0.0, Level_m, Height_m);\nVolume_L := 3.14159265 * (Diameter_m / 2.0) * (Diameter_m / 2.0) * Lvl * 1000.0;\nPercent_Full := Lvl / Height_m * 100.0;\n`,
+  hints: ['Copy the level into Lvl, then use IF/ELSIF to pull it back inside 0…Height_m. Logix ST has no LIMIT function.', 'Compute the radius as Diameter_m / 2.0, a REAL division.'],
+  solution: `Lvl := Level_m;\nIF Lvl < 0.0 THEN\n  Lvl := 0.0;\nELSIF Lvl > Height_m THEN\n  Lvl := Height_m;\nEND_IF;\n\nVolume_L := 3.14159265 * (Diameter_m / 2.0) * (Diameter_m / 2.0) * Lvl * 1000.0;\nPercent_Full := Lvl / Height_m * 100.0;\n`,
   tests: [
     { name: '2 m × 3 m tank', steps: [[1, { Diameter_m: 2.0, Height_m: 3.0, Level_m: 1.5 }], [1, { Level_m: -0.1 }], [1, { Level_m: 3.4 }]] },
     { name: 'Small tank', hidden: true, steps: [[1, { Diameter_m: 1.2, Height_m: 2.5, Level_m: 0.75 }], [1, { Level_m: 2.5 }], [1, { Level_m: 0.01 }]] }]
@@ -1271,10 +1481,12 @@ const MORE = [
     { name: 'Voted_Temp', type: 'REAL', dir: 'out', d: 'Median' },
     { name: 'Trip', type: 'BOOL', dir: 'out', d: '2oo3' },
     { name: 'Dev_Alarm', type: 'BOOL', dir: 'out', d: '' },
-    { name: 'Votes', type: 'DINT', dir: 'int', d: '' }],
+    { name: 'Votes', type: 'DINT', dir: 'int', d: '' },
+    { name: 'Hi', type: 'REAL', dir: 'int', d: 'Higher of A and B' },
+    { name: 'Lo', type: 'REAL', dir: 'int', d: 'Lower of A and B' }],
   starter: `Votes := 0;\n`,
-  hints: ['Median of three: MAX(MIN(A,B), MIN(MAX(A,B), C)).', 'Count votes with three IFs, then Trip := Votes >= 2;'],
-  solution: `Voted_Temp := MAX(MIN(Temp_A, Temp_B), MIN(MAX(Temp_A, Temp_B), Temp_C));\n\nVotes := 0;\nIF Temp_A > Trip_SP THEN Votes := Votes + 1; END_IF;\nIF Temp_B > Trip_SP THEN Votes := Votes + 1; END_IF;\nIF Temp_C > Trip_SP THEN Votes := Votes + 1; END_IF;\nTrip := Votes >= 2;\n\nDev_Alarm := ABS(Temp_A - Voted_Temp) > 10.0\n          OR ABS(Temp_B - Voted_Temp) > 10.0\n          OR ABS(Temp_C - Voted_Temp) > 10.0;\n`,
+  hints: ['Sort A and B into Hi and Lo. The median is then Hi if C is above Hi, Lo if C is below Lo, and C otherwise.', 'Count votes with three IFs, then Trip := Votes >= 2;'],
+  solution: `// median of three\nIF Temp_A > Temp_B THEN\n  Hi := Temp_A; Lo := Temp_B;\nELSE\n  Hi := Temp_B; Lo := Temp_A;\nEND_IF;\nIF Temp_C > Hi THEN\n  Voted_Temp := Hi;\nELSIF Temp_C < Lo THEN\n  Voted_Temp := Lo;\nELSE\n  Voted_Temp := Temp_C;\nEND_IF;\n\nVotes := 0;\nIF Temp_A > Trip_SP THEN Votes := Votes + 1; END_IF;\nIF Temp_B > Trip_SP THEN Votes := Votes + 1; END_IF;\nIF Temp_C > Trip_SP THEN Votes := Votes + 1; END_IF;\nTrip := Votes >= 2;\n\nDev_Alarm := ABS(Temp_A - Voted_Temp) > 10.0\n          OR ABS(Temp_B - Voted_Temp) > 10.0\n          OR ABS(Temp_C - Voted_Temp) > 10.0;\n`,
   tests: [
     { name: 'One sensor fails high', steps: [[1, { Temp_A: 1500.0, Temp_B: 1502.0, Temp_C: 1499.0, Trip_SP: 1600.0 }], [1, { Temp_B: 1800.0 }], [1, { Temp_C: 1650.0 }]] },
     { name: 'Orderings', hidden: true, steps: [[1, { Temp_A: 30.0, Temp_B: 10.0, Temp_C: 20.0, Trip_SP: 15.0 }], [1, { Temp_A: 10.0, Temp_B: 30.0, Temp_C: 20.0 }], [1, { Temp_A: 20.0, Temp_B: 10.0, Temp_C: 30.0, Trip_SP: 25.0 }]] }]
@@ -1435,8 +1647,8 @@ const MORE = [
     { name: 'Error', type: 'REAL', dir: 'int', d: '' },
     { name: 'Integral', type: 'REAL', dir: 'int', d: '' }],
   starter: `Error := SP - PV;\nIF Auto_Mode THEN\n  \nELSE\n  \nEND_IF;\n`,
-  hints: ['LIMIT(0.0, x, 100.0) makes every clamp a one-liner.', 'Clamp Integral before using it to compute CV.'],
-  solution: `Error := SP - PV;\nIF Auto_Mode THEN\n  Integral := Integral + Ki * Error * Scan_Time_ms / 1000.0;\n  Integral := LIMIT(0.0, Integral, 100.0);\n  CV := LIMIT(0.0, Kp * Error + Integral, 100.0);\nELSE\n  CV := LIMIT(0.0, Manual_CV, 100.0);\n  Integral := LIMIT(0.0, CV - Kp * Error, 100.0);\nEND_IF;\n`,
+  hints: ['Each clamp is an IF/ELSIF pair: below 0.0 set 0.0, above 100.0 set 100.0. Logix ST has no LIMIT function.', 'Clamp Integral before using it to compute CV.'],
+  solution: `Error := SP - PV;\nIF Auto_Mode THEN\n  Integral := Integral + Ki * Error * Scan_Time_ms / 1000.0;\n  IF Integral < 0.0 THEN Integral := 0.0; ELSIF Integral > 100.0 THEN Integral := 100.0; END_IF;\n  CV := Kp * Error + Integral;\nELSE\n  CV := Manual_CV;\nEND_IF;\nIF CV < 0.0 THEN CV := 0.0; ELSIF CV > 100.0 THEN CV := 100.0; END_IF;\n\nIF NOT Auto_Mode THEN\n  // back-calculate for bumpless transfer\n  Integral := CV - Kp * Error;\n  IF Integral < 0.0 THEN Integral := 0.0; ELSIF Integral > 100.0 THEN Integral := 100.0; END_IF;\nEND_IF;\n`,
   tests: [
     { name: 'Manual to auto, bumpless', steps: [[2, { PV: 95.0, SP: 100.0, Kp: 2.0, Ki: 0.5, Scan_Time_ms: 500, Manual_CV: 30.0 }], [1, { Auto_Mode: true }], [3, {}], [2, { PV: 100.0 }]] },
     { name: 'Windup recovery', steps: [[1, { PV: 0.0, SP: 50.0, Kp: 2.0, Ki: 0.5, Scan_Time_ms: 500, Auto_Mode: true }], [40, {}], [1, { SP: -10.0 }], [8, {}]] },
@@ -1539,7 +1751,7 @@ PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
   pitfalls: ['Never resetting the timer between steps. DN stays TRUE and the sequence races through every step in consecutive scans.', 'Setting lamps inside the CASE branches and forgetting to turn the previous lamp off.']
 },
 'ramp-soak': {
-  how: ['Disabled: track <code>PV_Temp</code>, so enabling starts from the furnace\'s actual temperature with no bump.', 'Enabled: step size = rate (°C/min) × scan time (ms) ÷ 60000. This is how far the setpoint may move in one scan.', '<code>MIN(Working_SP + Step_Size, Target_SP)</code> moves up without overshooting, and <code>MAX(…)</code> moves down the same way. Done is an exact comparison, which works because MIN/MAX land exactly on the target.'],
+  how: ['Disabled: track <code>PV_Temp</code>, so enabling starts from the furnace\'s actual temperature with no bump.', 'Enabled: step size = rate (°C/min) × scan time (ms) ÷ 60000. This is how far the setpoint may move in one scan.', 'Add (or subtract) the step, then check whether it went past the target, and if so set it equal to the target. Logix ST has no MIN/MAX, so this IF is how you clamp. Done is an exact comparison, which works because the clamp lands exactly on the target.'],
   pitfalls: ['Adding the step without clamping, so the setpoint overshoots and oscillates around the target.', 'Integer math in the step size (<code>/ 60000</code>), which rounds small steps to 0, so the ramp never moves.']
 },
 'lead-lag': {
@@ -1555,7 +1767,7 @@ PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
   pitfalls: ['Separate IFs for each permissive, where a later one overwrites the code, so you report the last missing instead of the first.']
 },
 'tank-volume': {
-  how: ['<code>LIMIT(0.0, Level_m, Height_m)</code> clamps the level in one line.', 'Volume of a cylinder is π r² h. With r = D/2 and m³ × 1000 = litres.', 'Percent full is the clamped level over the height, × 100.'],
+  how: ['Copy the level and pull it back inside 0…height with IF/ELSIF. Logix ST has no LIMIT function.', 'Volume of a cylinder is π r² h. With r = D/2 and m³ × 1000 = litres.', 'Percent full is the clamped level over the height, × 100.'],
   pitfalls: ['Computing the volume from the unclamped level, which gives negative litres or over 100 %.']
 },
 'array-stats': {
@@ -1615,7 +1827,7 @@ PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
   pitfalls: ['Writing outputs inside the CASE branches, so a valve stays open after the step changes.', 'Leaving the mix timer enabled outside step 20, so DN is already TRUE on the next batch and mixing is skipped.']
 },
 'voting-2oo3': {
-  how: ['Median of three without sorting: <code>MAX(MIN(A,B), MIN(MAX(A,B), C))</code>.', 'Count how many sensors are above the trip setpoint. Two or more trips the furnace, so one failed sensor can neither cause nor block a trip.', 'Deviation compares each sensor with the median using ABS.'],
+  how: ['Median of three: put A and B in order as Hi and Lo. If C is above Hi the median is Hi, if it is below Lo the median is Lo, otherwise it is C. Logix ST has no MIN/MAX, so it is done with IFs.', 'Count how many sensors are above the trip setpoint. Two or more trips the furnace, so one failed sensor can neither cause nor block a trip.', 'Deviation compares each sensor with the median using ABS.'],
   pitfalls: ['Averaging the three instead of taking the median. One sensor failing high drags the average.', 'Tripping on any single sensor (1oo3), which defeats the voting.']
 },
 'totalizer': {
@@ -1643,7 +1855,7 @@ PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
   pitfalls: ['Resetting on <code>Shaft_Prox</code> (level) instead of its edge. A pulley that stops with the flag in front of the prox looks alive forever.']
 },
 'pi-controller': {
-  how: ['Auto: the integral grows by Ki × error × dt every scan, and is clamped to 0–100. That clamp is the anti-windup.', 'CV = P term + integral, clamped to 0–100.', 'Manual: CV follows the operator, and the integral is back-calculated as CV − Kp × error, so the first auto scan gives the same CV. That is bumpless transfer.'],
+  how: ['Auto: the integral grows by Ki × error × dt every scan, and is clamped to 0–100 with an IF/ELSIF. That clamp is the anti-windup.', 'CV = P term + integral, clamped to 0–100. In manual, CV is the operator value, clamped the same way.', 'Manual: CV follows the operator, and the integral is back-calculated as CV − Kp × error, so the first auto scan gives the same CV. That is bumpless transfer.'],
   pitfalls: ['Clamping only CV and not the integral. During a long saturation the integral winds up to thousands, and CV stays at 100 % long after the error reverses.', 'Leaving the integral at 0 in manual, so switching to auto jumps the valve.']
 },
 'recipe-dosing': {
@@ -1657,6 +1869,148 @@ PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
 };
 if (typeof module !== 'undefined') module.exports = EXPLAIN;
 </script>
+<script>(function () {
+const LADDER = {
+'motor-seal-in': {
+  sol: `BST XIC(Start_PB) NXB XIC(Motor_Run) BND XIO(Stop_PB) XIO(Overload_Trip) OTE(Motor_Run);`,
+  how: ['The classic seal-in rung: Start in parallel with a contact of the motor\'s own output, so it holds itself on once started.', 'Stop and Overload are XIO contacts in series after the branch, so either one breaks the rung no matter what the branch is doing.']
+},
+'part-counter': {
+  sol: `XIC(Reset_Count) MOV(0,Part_Count);\nXIC(Part_Sensor) ONS(Sensor_Prev) XIO(Reset_Count) ADD(Part_Count,1,Part_Count);`,
+  how: ['ONS passes power for exactly one scan when the rung before it goes true. Its storage bit remembers last scan\'s state.', 'The ONS comes before the Reset contact, so its storage bit keeps tracking the sensor even while Reset is held. Otherwise, releasing Reset with a part in front of the eye would count it.', 'A CTU counter does the same job when you can use a COUNTER tag.']
+},
+'toggle': {
+  sol: `XIC(Toggle_PB) ONS(PB_Prev) OTE(Toggle_Pulse);\nBST XIC(Toggle_Pulse) XIO(Light) NXB XIO(Toggle_Pulse) XIC(Light) BND OTE(Light);`,
+  how: ['Rung 0 makes a one-scan pulse from the button.', 'Rung 1 is a flip-flop: Light = (pulse AND NOT Light) OR (NOT pulse AND Light). Both branches read Light before the OTE writes it, so it flips exactly once.', 'The tempting single rung, BST XIO(Light) OTL(Light) NXB XIC(Light) OTU(Light) BND, fails. The first branch latches Light, and the second branch then sees it on and unlatches it in the same scan.'],
+  tags: [{ name: 'Toggle_Pulse', type: 'BOOL', dir: 'int', d: 'One-scan pulse (ladder)' }]
+},
+'analog-scaling': {
+  sol: `BST LES(Raw_Counts,3600) NXB GRT(Raw_Counts,21000) BND OTE(Sensor_Fault);\nXIO(Sensor_Fault) CPT(Pressure_PSI,(Raw_Counts-4000)*150.0/16000.0);\nXIO(Sensor_Fault) LES(Pressure_PSI,0.0) MOV(0.0,Pressure_PSI);\nXIO(Sensor_Fault) GRT(Pressure_PSI,150.0) MOV(150.0,Pressure_PSI);`,
+  how: ['Rung 0: two compares in parallel make an OR, giving the fault bit.', 'CPT evaluates a whole expression. The REAL literals keep the fraction.', 'Two clamp rungs follow, and all three math rungs are conditioned on no fault, so the value holds while the signal is bad.']
+},
+'debounce': {
+  sol: `BST XIC(Raw_Input) XIO(Clean_Output) NXB XIO(Raw_Input) XIC(Clean_Output) BND TON(Deb_Tmr,300,0);\nXIC(Deb_Tmr.DN) BST XIC(Raw_Input) OTL(Clean_Output) NXB XIO(Raw_Input) OTU(Clean_Output) BND;`,
+  how: ['The branch is an exclusive-OR built from contacts: true while input and output disagree. The TON times only then.', 'When DN, copy the input across: latch if it is on, unlatch if it is off. Next scan they agree, and the TON resets itself.']
+},
+'hi-alarm': {
+  sol: `GRT(Temp_PV,Alarm_SP) TON(Alm_Tmr,2000,0);\nXIC(Alm_Tmr.DN) OTL(Hi_Alarm);\nXIO(Alm_Tmr.DN) CMP(Temp_PV < Alarm_SP - Deadband) OTU(Hi_Alarm);`,
+  how: ['A GRT feeding a TON is the delay-on.', 'OTL sets the alarm when the timer is done. OTU clears it below the deadband. CMP is used because the limit is an expression, which GRT/LES can\'t take.', 'Between the two thresholds neither rung fires, so the latched alarm holds. That gap is the hysteresis.']
+},
+'traffic-light': {
+  sol: `XIO(Enable) MOV(0,Step);\nXIC(Enable) EQU(Step,0) MOV(10,Step);\nEQU(Step,10) EQU(Step,Last_Step) XIC(Step_Tmr.DN) MOV(20,Step);\nEQU(Step,20) EQU(Step,Last_Step) XIC(Step_Tmr.DN) MOV(30,Step);\nEQU(Step,30) EQU(Step,Last_Step) XIC(Step_Tmr.DN) MOV(10,Step);\nEQU(Step,10) MOV(4000,Step_Tmr.PRE);\nEQU(Step,20) MOV(5000,Step_Tmr.PRE);\nEQU(Step,30) MOV(2000,Step_Tmr.PRE);\nNEQ(Step,0) EQU(Step,Last_Step) TON(Step_Tmr,4000,0);\nMOV(Step,Last_Step);\nEQU(Step,10) OTE(Red_Lamp);\nEQU(Step,20) OTE(Green_Lamp);\nEQU(Step,30) OTE(Yellow_Lamp);`,
+  how: ['Each transition is its own rung: "in step N AND timer done → MOV the next step".', 'Rungs run top to bottom in one scan, so after 10 → 20 the next rung could see step 20 with DN still on and jump again. The EQU(Step,Last_Step) contact blocks a second move in the same scan.', 'The timer is disabled for one scan after every step change, which resets it. The lamps are simple EQU → OTE rungs.']
+},
+'lead-lag': {
+  sol: `GEQ(Wet_Well_Level,70.0) OTL(Lead_Call);\nXIC(Lead_Call) LEQ(Wet_Well_Level,30.0) OTU(Lead_Call) OTE(Swap_Pulse);\nBST XIC(Swap_Pulse) XIO(Lead_Is_Pump2) NXB XIO(Swap_Pulse) XIC(Lead_Is_Pump2) BND OTE(Lead_Is_Pump2);\nGEQ(Wet_Well_Level,85.0) OTL(Lag_Call);\nLEQ(Wet_Well_Level,50.0) OTU(Lag_Call);\nBST XIO(Lead_Is_Pump2) XIC(Lead_Call) NXB XIC(Lead_Is_Pump2) XIC(Lag_Call) BND OTE(Pump1_Run);\nBST XIC(Lead_Is_Pump2) XIC(Lead_Call) NXB XIO(Lead_Is_Pump2) XIC(Lag_Call) BND OTE(Pump2_Run);`,
+  how: ['OTL/OTU pairs make each hysteresis call.', 'The rung that unlatches the lead call also pulses Swap_Pulse for that one scan, and a flip-flop rung toggles the lead.', 'Each pump runs on (it is lead AND lead call) OR (it is lag AND lag call), two branches per pump.'],
+  tags: [{ name: 'Swap_Pulse', type: 'BOOL', dir: 'int', d: 'One-scan pulse (ladder)' }]
+},
+'permissive-chain': {
+  sol: `MOV(0,Not_Ready_Code);\nXIO(Downstream_Ready) MOV(3,Not_Ready_Code);\nXIO(EStop_OK) MOV(2,Not_Ready_Code);\nXIO(Guard_Closed) MOV(1,Not_Ready_Code);\nXIC(Run_Cmd) EQU(Not_Ready_Code,0) OTE(Conveyor_Run);`,
+  how: ['Ladder has no ELSIF, so priority comes from rung order. The last rung to write wins.', 'So the rungs go from lowest priority (3) to highest (1). The guard check runs last and overrides the others.']
+},
+'falling-edge': {
+  sol: `XIC(Door_Prev) XIO(Door_Closed) OTE(Opened_Pulse);\nXIC(Opened_Pulse) ADD(Open_Count,1,Open_Count);\nXIC(Door_Closed) OTE(Door_Prev);`,
+  how: ['"Was closed AND is now open" is the falling edge, as an OTE so it lasts exactly one scan.', 'The last rung copies the door state into Door_Prev for next scan. OSF(Storage,Output) is the one-instruction version.']
+},
+'peak-hold': {
+  sol: `BST XIC(Reset_Peaks) NXB XIO(Initialized) BND BST MOV(Value,Peak_Max) NXB MOV(Value,Peak_Min) NXB OTL(Initialized) BND;\nGRT(Value,Peak_Max) MOV(Value,Peak_Max);\nLES(Value,Peak_Min) MOV(Value,Peak_Min);`,
+  how: ['Rung 0: on reset or the first scan, load both peaks and latch Initialized. Output branches let one rung drive several outputs.', 'Then a compare-and-move rung for each peak.']
+},
+'hoa-mode': {
+  sol: `MOV(0,Mode);\nXIC(Sel_Auto) MOV(2,Mode);\nXIC(Sel_Hand) MOV(1,Mode);\nXIC(Sel_Hand) XIC(Sel_Auto) MOV(99,Mode);\nEQU(Mode,99) OTE(Switch_Fault);\nBST EQU(Mode,1) NXB EQU(Mode,2) XIC(Auto_Call) BND OTE(Pump_Run);`,
+  how: ['Again, rung order sets priority: the fault rung comes last, so it overrides Hand and Auto.', 'The pump rung is a branch: Hand, OR (Auto AND call).']
+},
+'valve-mismatch': {
+  sol: `SUB(Valve_Fbk,Valve_Cmd,Position_Error);\nCMP(ABS(Position_Error) <= 2.0) OTE(In_Tolerance);\nCMP(ABS(Position_Error) > 5.0) OTE(Mismatch);`,
+  how: ['SUB computes the signed error.', 'CMP accepts an expression, so ABS can go inside it. Otherwise you would need an ABS instruction into a temp tag first.']
+},
+'off-delay-fan': {
+  sol: `XIC(Heater_On) TOF(Fan_Tmr,30000,0);\nXIC(Fan_Tmr.DN) OTE(Fan_Run);`,
+  how: ['TOF is the ladder off-delay: DN goes true with the rung and stays true for PRE ms after the rung goes false.', 'At power-up, before the heater has ever run, DN is false, so the fan stays off.']
+},
+'staggered-start': {
+  sol: `BST XIC(Start_PB) NXB XIC(Seq_Active) BND XIO(Stop_PB) OTE(Seq_Active);\nXIC(Seq_Active) TON(Stagger_Tmr,4000,0);\nXIC(Seq_Active) OTE(Motor1);\nXIC(Seq_Active) GEQ(Stagger_Tmr.ACC,2000) OTE(Motor2);\nXIC(Stagger_Tmr.DN) OTE(Motor3);`,
+  how: ['A seal-in rung latches the sequence.', 'One TON: Motor 2 compares its ACC against 2000, and Motor 3 uses DN. Stopping drops the TON rung, which resets ACC for a fresh start.']
+},
+'run-hours': {
+  sol: `XIC(Reset_Counters) BST MOV(0,Run_Seconds) NXB MOV(0,Ms_Accum) NXB MOV(0,Starts) BND;\nXIO(Reset_Counters) XIC(Motor_Running) ADD(Ms_Accum,Scan_Time_ms,Ms_Accum);\nXIO(Reset_Counters) XIC(Motor_Running) BST CPT(Run_Seconds,Run_Seconds + Ms_Accum / 1000) NXB MOD(Ms_Accum,1000,Ms_Accum) BND;\nXIO(Reset_Counters) XIC(Motor_Running) XIO(Run_Prev) ADD(Starts,1,Starts);\nXIC(Motor_Running) OTE(Run_Prev);\nCPT(Run_Hours,Run_Seconds / 3600.0);`,
+  how: ['Ladder has no WHILE loop, so the carry uses integer math: whole seconds = Ms_Accum / 1000 (DINT division truncates), and MOD keeps the remainder.', 'The branches run top to bottom, so the CPT reads Ms_Accum before the MOD changes it.']
+},
+'tank-batch': {
+  sol: `XIC(Stop_PB) MOV(0,Step);\nEQU(Step,30) XIO(Level_Low) MOV(0,Step);\nEQU(Step,20) XIC(Mix_Tmr.DN) MOV(30,Step);\nEQU(Step,10) XIC(Level_High) MOV(20,Step);\nEQU(Step,0) XIC(Start_PB) XIO(Stop_PB) MOV(10,Step);\nEQU(Step,20) TON(Mix_Tmr,3000,0);\nEQU(Step,10) OTE(Inlet_Valve);\nEQU(Step,20) OTE(Mixer);\nEQU(Step,30) OTE(Outlet_Valve);`,
+  how: ['The transition rungs are in reverse order (30, 20, 10, 0). A step that changes can then only be tested again on the next scan, so one scan never jumps two steps.', 'The mix timer runs only in step 20, so leaving the step resets it.']
+},
+'jam-detect': {
+  sol: `XIC(Jam_Reset) OTU(Jam_Fault);\nXIC(Motor_Run_Cmd) XIO(Jam_Fault) OTE(Motor_Out);\nXIC(Shaft_Prox) ONS(Prox_Prev) OTE(Prox_Edge);\nXIC(Motor_Out) XIO(Prox_Edge) TON(Jam_Tmr,2000,0);\nXIC(Jam_Tmr.DN) BST OTL(Jam_Fault) NXB OTU(Motor_Out) BND;`,
+  how: ['The ONS turns each prox pulse into a one-scan edge.', 'The jam TON runs while the motor is on, but each edge opens its rung for one scan, which resets ACC. Two seconds without an edge and DN latches the fault.', 'The last rung also drops Motor_Out in that same scan.'],
+  tags: [{ name: 'Prox_Edge', type: 'BOOL', dir: 'int', d: 'One-scan edge (ladder)' }]
+},
+'lift-position': {
+  sol: `SUB(Target_Pos,Actual_Pos,Pos_Error);\nCMP(ABS(Pos_Error) <= 0.5) OTE(In_Position);\nXIC(Enable) GRT(Pos_Error,0.5) OTE(Want_Up);\nXIC(Enable) LES(Pos_Error,-0.5) OTE(Want_Down);\nXIC(Want_Up) XIO(Upper_Limit) OTE(Move_Up);\nXIC(Want_Down) XIO(Lower_Limit) OTE(Move_Down);\nBST XIC(Move_Up) NXB XIC(Move_Down) BND CMP(ABS(Pos_Error) < 10.0) OTE(Slow_Speed);\nBST XIC(Want_Up) XIC(Upper_Limit) NXB XIC(Want_Down) XIC(Lower_Limit) BND OTE(Limit_Fault);`,
+  how: ['Intent bits first (Want_Up/Want_Down), then interlocks: each move needs its own limit clear.', 'Slow speed is "either move AND close". The fault is "wants to move into an active limit".']
+},
+'totalizer': {
+  sol: `LES(Flow_GPM,0.5) MOV(0.0,Flow_Clipped);\nGEQ(Flow_GPM,0.5) MOV(Flow_GPM,Flow_Clipped);\nXIC(Reset_Total) MOV(0.0,Total_Gal);\nXIO(Reset_Total) CPT(Total_Gal,Total_Gal + Flow_Clipped * Scan_Time_ms / 60000.0);`,
+  how: ['Two complementary compares apply the cutoff.', 'CPT does the integration. The REAL literal 60000.0 keeps the small per-scan amount.']
+},
+'parking-counter': {
+  how: ['CTU and CTD can share one COUNTER tag. CTU counts up on its rung\'s false → true transition (storage bit .CU), and CTD counts down on its own (.CD).', 'The GRT in front of CTD ignores exits when the lot reads empty, so the count never goes negative.', 'DN is true while ACC ≥ PRE, which gives "lot full" for free. MOV copies ACC out for the display.']
+},
+'service-timer': {
+  how: ['RTO is the retentive timer: it keeps ACC when its rung goes false, so the run time adds up across starts and stops.', 'Only RES clears an RTO. DN stays on after the spindle stops, until maintenance resets it.']
+}
+};
+
+const NEW = [
+{
+  id: 'parking-counter', title: 'Parking lot counter (CTU / CTD)', diff: 'Easy', topics: ['Counters', 'Ladder'], langs: ['ld'],
+  desc: `<p>A small lot holds 5 cars. <code>Entry_Eye</code> pulses when a car enters and <code>Exit_Eye</code> pulses when one leaves. Keep the count in the <code>Lot_Count</code> COUNTER, using CTU to count up and CTD to count down.</p>
+<ul><li><code>Cars_Inside</code> shows the count.</li><li><code>Lot_Full</code> is on when 5 or more cars are inside.</li><li>Ignore exits when the lot reads empty, so the count never goes negative.</li><li><code>Reset_PB</code> zeroes the count.</li></ul>`,
+  tags: [
+    { name: 'Entry_Eye', type: 'BOOL', dir: 'in', d: 'Pulses per entering car' },
+    { name: 'Exit_Eye', type: 'BOOL', dir: 'in', d: 'Pulses per leaving car' },
+    { name: 'Reset_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Cars_Inside', type: 'DINT', dir: 'out', d: '' },
+    { name: 'Lot_Full', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Lot_Count', type: 'COUNTER', dir: 'int', d: 'CTU/CTD counter, preset 5' }],
+  ldStarter: `XIC(Entry_Eye) CTU(Lot_Count,5,0);\n`,
+  hints: ['CTU and CTD can use the same COUNTER tag. Each has its own storage bit (.CU and .CD), so they don\'t interfere.', 'Put GRT(Lot_Count.ACC,0) in front of the CTD.'],
+  ld: `XIC(Entry_Eye) CTU(Lot_Count,5,0);\nXIC(Exit_Eye) GRT(Lot_Count.ACC,0) CTD(Lot_Count,5,0);\nXIC(Reset_PB) RES(Lot_Count);\nMOV(Lot_Count.ACC,Cars_Inside);\nXIC(Lot_Count.DN) OTE(Lot_Full);`,
+  tests: (() => { const In = [[1, { Entry_Eye: true }], [1, { Entry_Eye: false }]], Out = [[1, { Exit_Eye: true }], [1, { Exit_Eye: false }]]; return [
+    { name: 'Fill the lot', steps: [[1, {}], ...In, ...In, ...In, ...In, ...In, ...Out] },
+    { name: 'Exit from empty lot, reset', steps: [...Out, ...In, ...In, [1, { Reset_PB: true }], [1, { Reset_PB: false }], ...Out, ...In] },
+    { name: 'Long pulses', hidden: true, steps: [[5, { Entry_Eye: true }], [1, { Entry_Eye: false }], [4, { Entry_Eye: true }], [1, { Entry_Eye: false }], [6, { Exit_Eye: true }], [2, { Exit_Eye: false }]] }]; })()
+},
+{
+  id: 'service-timer', title: 'Retentive service timer (RTO)', diff: 'Medium', topics: ['Timers', 'RTO', 'Ladder'], langs: ['ld'],
+  desc: `<p>A spindle needs service after <b>10 s</b> of total run time. That's shortened for testing; in real life it would be hours. The run time must add up across starts and stops, so use the <code>Runtime_Tmr</code> TIMER with RTO.</p>
+<ul><li><code>Runtime_ms</code> shows the accumulated run time.</li><li><code>Service_Due</code> turns on once it reaches 10 s and stays on, even after the spindle stops.</li><li><code>Service_Reset</code> clears it all.</li></ul><p class="note">Scan time is 500 ms.</p>`,
+  tags: [
+    { name: 'Spindle_On', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Service_Reset', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Runtime_ms', type: 'DINT', dir: 'out', d: 'Accumulated ms' },
+    { name: 'Service_Due', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Runtime_Tmr', type: 'TIMER', dir: 'int', d: 'RTO timer' }],
+  ldStarter: `XIC(Spindle_On) RTO(Runtime_Tmr,10000,0);\n`,
+  hints: ['An RTO keeps ACC when its rung goes false. Only RES clears it.', 'MOV the timer\'s ACC into Runtime_ms, and use DN for the service flag.'],
+  ld: `XIC(Spindle_On) RTO(Runtime_Tmr,10000,0);\nXIC(Service_Reset) RES(Runtime_Tmr);\nMOV(Runtime_Tmr.ACC,Runtime_ms);\nXIC(Runtime_Tmr.DN) OTE(Service_Due);`,
+  tests: [
+    { name: 'Three runs add up', dt: 500, steps: [[2, {}], [8, { Spindle_On: true }], [4, { Spindle_On: false }], [8, { Spindle_On: true }], [4, { Spindle_On: false }], [8, { Spindle_On: true }], [4, { Spindle_On: false }]] },
+    { name: 'Reset after service', dt: 500, steps: [[25, { Spindle_On: true }], [2, { Spindle_On: false }], [1, { Service_Reset: true }], [1, { Service_Reset: false }], [6, { Spindle_On: true }]] },
+    { name: 'Short bursts', hidden: true, dt: 500, steps: [[3, { Spindle_On: true }], [1, { Spindle_On: false }], [3, { Spindle_On: true }], [1, { Spindle_On: false }], [3, { Spindle_On: true }], [1, { Spindle_On: false }], [3, { Spindle_On: true }], [1, { Spindle_On: false }], [3, { Spindle_On: true }], [1, { Spindle_On: false }], [3, { Spindle_On: true }], [1, { Spindle_On: false }]] }]
+}];
+
+for (const p of PROBLEMS) {
+  const L = LADDER[p.id];
+  p.langs = p.langs || ['st'];
+  if (L && L.sol) { p.ld = L.sol; p.ldHow = L.how; if (L.tags) p.ldTags = L.tags; if (!p.langs.includes('ld')) p.langs.push('ld'); }
+}
+for (const p of NEW) { p.ldHow = LADDER[p.id].how; p.starter = ''; p.solution = null; PROBLEMS.push(p); }
+const rank = { Easy: 0, Medium: 1, Hard: 2 };
+PROBLEMS.sort((a, b) => rank[a.diff] - rank[b.diff]);
+})();
+</script>
 <script>
 {
 const E = STEngine, P = PROBLEMS;
@@ -1666,8 +2020,14 @@ let store = { code: {}, solved: {}, tried: {} };
 try { const s = JSON.parse(localStorage.getItem('st-practice-v1') || 'null'); if (s) store = Object.assign(store, s); } catch (e) {}
 const save = () => { try { localStorage.setItem('st-practice-v1', JSON.stringify(store)); } catch (e) {} };
 const expCache = {};
-const expected = (p, i) => expCache[p.id + i] || (expCache[p.id + i] = E.simulate(p.solution, p, p.tests[i]));
+let lang = store.lang || 'st';
+const ref = p => p.solution ? [p.solution, 'st'] : [p.ld, 'ld'];
+const expected = (p, i) => expCache[p.id + i] || (expCache[p.id + i] = E.simulate(ref(p)[0], p, p.tests[i], ref(p)[1]));
 const typeOf = (p, n) => (p.tags.find(t => t.name === n) || {}).type;
+const key = (id, l) => l === 'ld' ? id + '@ld' : id;
+const langOf = p => p.langs.includes(lang) ? lang : p.langs[0];
+const starterOf = (p, l) => l === 'ld' ? (p.ldStarter || '// One rung per line, ending with ;\n// Example: XIC(Input) OTE(Output);\n') : p.starter;
+const tagsOf = (p, l) => l === 'ld' ? E.ldTags(p) : p.tags;
 function fmt(v, type) {
   if (Array.isArray(v)) return '[' + v.map(x => fmt(x, type)).join(', ') + ']';
   if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
@@ -1679,11 +2039,12 @@ const ICON = {
   tried: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Attempted"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--med)" stroke-width="2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="var(--med)"/></svg>',
   none: '<svg width="20" height="20" viewBox="0 0 20 20" aria-label="Not started"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--line)" stroke-width="2"/></svg>'
 };
-const status = id => store.solved[id] ? 'solved' : store.tried[id] ? 'tried' : 'none';
+const solvedAny = id => store.solved[id] || store.solved[id + '@ld'];
+const status = id => solvedAny(id) ? 'solved' : (store.tried[id] || store.tried[id + '@ld']) ? 'tried' : 'none';
 
 // ---------- highlighter ----------
 const KW = new Set('IF THEN ELSIF ELSE END_IF CASE OF END_CASE FOR TO BY DO END_FOR WHILE END_WHILE REPEAT UNTIL END_REPEAT EXIT RETURN AND OR XOR NOT MOD VAR END_VAR ARRAY'.split(' '));
-const TY = new Set('BOOL SINT INT DINT REAL FBD_TIMER FBD_ONESHOT TIMER TONR TOFR OSRI OSFI ABS SQRT SQR MIN MAX LIMIT TRUNC TRN SIN COS TAN LN LOG'.split(' '));
+const TY = new Set('BOOL SINT INT DINT REAL FBD_TIMER FBD_ONESHOT TIMER COUNTER TONR TOFR OSRI OSFI ABS SQRT SQR TRN SIN COS TAN LN LOG'.split(' '));
 const RX = /(\/\/[^\n]*|\(\*[\s\S]*?(?:\*\)|$)|\/\*[\s\S]*?(?:\*\/|$))|(\b\d[\d_]*(?:#[0-9A-Fa-f_]+)?(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_]\w*)/g;
 function hilite(src) {
   let out = '', last = 0;
@@ -1696,21 +2057,109 @@ function hilite(src) {
   });
   return out + esc(src.slice(last));
 }
+function hiliteLD(src) {
+  return src.split('\n').map(line => {
+    const ci = line.indexOf('//'); const code = ci >= 0 ? line.slice(0, ci) : line, com = ci >= 0 ? line.slice(ci) : '';
+    let out = esc(code).replace(/\b(BST|NXB|BND)\b/g, '<span class="b">$1</span>').replace(/\b([A-Za-z]{2,4})(?=\()/g, '<span class="k">$1</span>').replace(/(?<![\w.])(-?\d+(?:\.\d+)?)(?![\w])/g, '<span class="n">$1</span>').replace(/;/g, '<span class="y">;</span>');
+    return out + (com ? `<span class="c">${esc(com)}</span>` : '');
+  }).join('\n');
+}
+const hl2 = (src, l) => l === 'ld' ? hiliteLD(src) : hilite(src);
+
+// ---------- ladder diagram ----------
+const CONTACT = { XIC: 1, XIO: 1, OTE: 1, OTL: 1, OTU: 1 };
+const LBL = { TON: ['Timer', 'Preset', 'Accum'], TOF: ['Timer', 'Preset', 'Accum'], RTO: ['Timer', 'Preset', 'Accum'], CTU: ['Counter', 'Preset', 'Accum'], CTD: ['Counter', 'Preset', 'Accum'], RES: [''], ONS: [''], OSR: ['Storage', 'Output'], OSF: ['Storage', 'Output'], MOV: ['Source', 'Dest'], ADD: ['Source A', 'Source B', 'Dest'], SUB: ['Source A', 'Source B', 'Dest'], MUL: ['Source A', 'Source B', 'Dest'], DIV: ['Source A', 'Source B', 'Dest'], MOD: ['Source A', 'Source B', 'Dest'], EQU: ['A', 'B'], NEQ: ['A', 'B'], GRT: ['A', 'B'], GEQ: ['A', 'B'], LES: ['A', 'B'], LEQ: ['A', 'B'], LIM: ['Low', 'Test', 'High'], CPT: ['Dest', 'Expr'], CMP: ['Expr'], CLR: ['Dest'], ABS: ['Source', 'Dest'] };
+const NAMES = { TON: 'Timer On Delay', TOF: 'Timer Off Delay', RTO: 'Retentive Timer', CTU: 'Count Up', CTD: 'Count Down', MOV: 'Move', ADD: 'Add', SUB: 'Subtract', MUL: 'Multiply', DIV: 'Divide', MOD: 'Modulo', EQU: 'Equal', NEQ: 'Not Equal', GRT: 'Greater Than', GEQ: 'Greater/Equal', LES: 'Less Than', LEQ: 'Less/Equal', LIM: 'Limit Test', CPT: 'Compute', CMP: 'Compare', CLR: 'Clear', ABS: 'Absolute', RES: 'Reset', ONS: 'One Shot', OSR: 'One Shot Rising', OSF: 'One Shot Falling' };
+function drawLadder(rungs, trace, prog) {
+  const CW = 132, WY = 30, PAD = 14, X0 = 40;
+  const short = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
+  const lay = e => {
+    if (e.k === 'br') { const ch = e.branches.map(laySeries); return { e, ch, w: Math.max(60, ...ch.map(c => c.w)) + 2 * PAD, h: ch.reduce((a, c) => a + c.h, 0) }; }
+    return { e, w: CW, h: CONTACT[e.u] ? 62 : Math.max(62, 44 + Math.max(1, e.args.length) * 17) };
+  };
+  const laySeries = list => { const items = list.map(lay); return { items, w: Math.max(40, items.reduce((a, b) => a + b.w, 0)), h: Math.max(62, ...items.map(i => i.h)) }; };
+  const T = id => trace && trace[id] ? trace[id] : null;
+  const col = on => on == null ? 'var(--ink)' : on ? 'var(--ok)' : 'var(--mute)';
+  const sw = on => on ? 3 : 1.6;
+  let svg = '';
+  const line = (x1, y1, x2, y2, on) => { if (x2 !== x1 || y2 !== y1) svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col(on)}" stroke-width="${sw(on)}"/>`; };
+  const text = (x, y, t, cls, anchor) => { svg += `<text x="${x}" y="${y}" class="${cls || ''}" text-anchor="${anchor || 'middle'}">${esc(t)}</text>`; };
+  const live = (e, k) => { if (!prog || !['TON', 'TOF', 'RTO', 'CTU', 'CTD'].includes(e.u) || k !== 2) return null; try { const c = prog.tags.get(e.args[0].s.toUpperCase()); return c && c.m ? String(c.m.ACC.v) : null; } catch (x) { return null; } };
+  const drawEl = (L, x, y, pin) => {
+    const e = L.e, tr = T(e.id), pout = tr ? tr[1] : (pin == null ? null : null), on = tr ? tr[1] : null, inOn = tr ? tr[0] : pin;
+    if (e.k === 'br') {
+      let yy = y; const last = L.ch.length - 1; let yLast = y;
+      L.ch.forEach((c, k) => {
+        line(x, yy + WY, x + PAD, yy + WY, inOn);
+        const o = drawSeries(c, x + PAD, yy, L.w - 2 * PAD, inOn);
+        line(x + L.w - PAD, yy + WY, x + L.w, yy + WY, o);
+        if (k === last) yLast = yy; yy += c.h;
+      });
+      line(x, y + WY, x, yLast + WY, inOn); line(x + L.w, y + WY, x + L.w, yLast + WY, on);
+      return on;
+    }
+    const cx = x + CW / 2, wy = y + WY;
+    if (CONTACT[e.u]) {
+      const tag = short(e.args[0] ? e.args[0].s : '?', 18);
+      line(x, wy, cx - 12, wy, inOn); line(cx + 12, wy, x + CW, wy, e.u.startsWith('OT') ? inOn : on);
+      const c2 = e.u.startsWith('OT') ? col(inOn) : col(on), w2 = e.u.startsWith('OT') ? sw(inOn) : sw(on);
+      if (e.u === 'XIC' || e.u === 'XIO') {
+        svg += `<path d="M${cx - 12} ${wy - 13}v26M${cx + 12} ${wy - 13}v26" stroke="${c2}" stroke-width="${w2 + .6}" fill="none"/>`;
+        if (e.u === 'XIO') svg += `<path d="M${cx - 9} ${wy + 11}L${cx + 9} ${wy - 11}" stroke="${c2}" stroke-width="${w2}"/>`;
+      } else {
+        svg += `<path d="M${cx - 8} ${wy - 13}a16 16 0 0 0 0 26M${cx + 8} ${wy - 13}a16 16 0 0 1 0 26" stroke="${c2}" stroke-width="${w2 + .6}" fill="none"/>`;
+        if (e.u !== 'OTE') text(cx, wy + 4, e.u === 'OTL' ? 'L' : 'U', 'ld-sym');
+      }
+      text(cx, y + 12, tag, 'ld-tag');
+      return e.u.startsWith('OT') ? inOn : on;
+    }
+    const bx = x + 8, bw = CW - 16, labels = LBL[e.u] || e.args.map(() => '');
+    line(x, wy, bx, wy, inOn); line(bx + bw, wy, x + CW, wy, on);
+    svg += `<rect x="${bx}" y="${y + 6}" width="${bw}" height="${L.h - 12}" rx="3" fill="var(--code)" stroke="${col(on == null ? null : (inOn || on))}" stroke-width="${on ? 2.4 : 1.3}"/>`;
+    text(bx + 6, y + 20, e.u, 'ld-mn', 'start'); text(bx + bw - 6, y + 20, short(NAMES[e.u] || '', 15), 'ld-nm', 'end');
+    e.args.forEach((a, k) => { const v = live(e, k); const lab = labels[k] ? labels[k] + ' ' : ''; text(bx + 6, y + 38 + k * 17, short(lab + (v != null ? v : a.s), 21), 'ld-arg', 'start'); });
+    if (prog && ['TON', 'TOF', 'RTO'].includes(e.u)) { try { const c = prog.tags.get(e.args[0].s.toUpperCase()); text(bx + bw - 6, y + 38, (c.m.EN.v ? 'EN ' : '') + (c.m.DN.v ? 'DN' : ''), 'ld-flag', 'end'); } catch (x) {} }
+    if (prog && ['CTU', 'CTD'].includes(e.u)) { try { const c = prog.tags.get(e.args[0].s.toUpperCase()); text(bx + bw - 6, y + 38, c.m.DN.v ? 'DN' : '', 'ld-flag', 'end'); } catch (x) {} }
+    return on;
+  };
+  const drawSeries = (S, x, y, allocW, pin) => {
+    let cx = x, p = pin;
+    for (const it of S.items) { const o = drawEl(it, cx, y, p); cx += it.w; p = trace ? o : null; }
+    line(cx, y + WY, x + allocW, y + WY, p);
+    return p;
+  };
+  const L = rungs.map(r => laySeries(r.elems));
+  const W = Math.max(320, ...L.map(l => l.w)) + 24;
+  let y = 8; const parts = [];
+  L.forEach((l, k) => {
+    svg = '';
+    text(16, y + WY + 4, String(k), 'ld-rn');
+    drawSeries(l, X0 + 12, y, W - 24, trace ? true : null);
+    line(X0, y + 6, X0, y + l.h - 6, trace ? true : null); line(X0 + 12, y + WY, X0, y + WY, trace ? true : null);
+    svg += `<line x1="${X0 + W}" y1="${y + 6}" x2="${X0 + W}" y2="${y + l.h - 6}" stroke="var(--ink)" stroke-width="1.6"/>`;
+    parts.push(svg); y += l.h + 10;
+  });
+  if (!rungs.length) return '<p class="muted" style="margin:8px 0">No rungs yet. Each rung ends with ;</p>';
+  return `<svg class="ldsvg" width="${X0 + W + 12}" height="${y}" viewBox="0 0 ${X0 + W + 12} ${y}" role="img" aria-label="Ladder diagram">${parts.join('')}</svg>`;
+}
 
 // ---------- list view ----------
-let filter = 'All', query = '';
+let filter = 'All', query = '', lfilter = 'any';
 function renderTicks() {
-  const n = P.filter(p => store.solved[p.id]).length;
-  $('#ticks').innerHTML = P.map(p => `<span class="${store.solved[p.id] ? 'on' : ''}" title="${esc(p.title)}"></span>`).join('');
+  const n = P.filter(p => solvedAny(p.id)).length;
+  $('#ticks').innerHTML = P.map(p => `<span class="${solvedAny(p.id) ? 'on' : ''}" title="${esc(p.title)}"></span>`).join('');
   $('#prog').innerHTML = `<span class="lbl">${n} of ${P.length} solved</span>`;
 }
+const badges = p => p.langs.map(l => `<span class="lb ${l}${store.solved[key(p.id, l)] ? ' done' : ''}" title="${l === 'ld' ? 'Ladder' : 'Structured Text'}${store.solved[key(p.id, l)] ? ' – solved' : ''}">${l === 'ld' ? 'LD' : 'ST'}</span>`).join('');
 function renderList() {
   $('#filters').innerHTML = ['All', 'Easy', 'Medium', 'Hard'].map(f => `<button class="chip" aria-pressed="${f === filter}" data-f="${f}">${f}${f === 'All' ? '' : ' · ' + P.filter(p => p.diff === f).length}</button>`).join('');
-  const list = P.map((p, i) => ({ p, i })).filter(({ p }) => (filter === 'All' || p.diff === filter) && (!query || (p.title + ' ' + p.topics.join(' ')).toLowerCase().includes(query))).map(({ p, i }) =>
-    `<tr class="row" data-id="${p.id}"><td class="st">${ICON[status(p.id)]}</td><td><a href="#${p.id}">${i + 1}. ${esc(p.title)}</a></td><td class="topics">${p.topics.join(' · ')}</td><td class="${p.diff}">${p.diff}</td></tr>`);
+  $('#lfilters').innerHTML = [['any', 'Any language'], ['st', 'Structured Text · ' + P.filter(p => p.langs.includes('st')).length], ['ld', 'Ladder · ' + P.filter(p => p.langs.includes('ld')).length]].map(([k, l]) => `<button class="chip" aria-pressed="${k === lfilter}" data-l="${k}">${l}</button>`).join('');
+  const list = P.map((p, i) => ({ p, i })).filter(({ p }) => (filter === 'All' || p.diff === filter) && (lfilter === 'any' || p.langs.includes(lfilter)) && (!query || (p.title + ' ' + p.topics.join(' ')).toLowerCase().includes(query))).map(({ p, i }) =>
+    `<tr class="row" data-id="${p.id}"><td class="st">${ICON[status(p.id)]}</td><td><a href="#${p.id}">${i + 1}. ${esc(p.title)}</a></td><td class="langs">${badges(p)}</td><td class="topics">${p.topics.join(' · ')}</td><td class="${p.diff}">${p.diff}</td></tr>`);
   $('#rows').innerHTML = list.join(''); $('#none').hidden = list.length > 0;
 }
 $('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; renderList(); } });
+$('#lfilters').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (b) { lfilter = b.dataset.l; if (lfilter !== 'any') { lang = lfilter; store.lang = lang; save(); } renderList(); } });
 $('#q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); renderList(); });
 $('#rows').addEventListener('click', e => { const r = e.target.closest('tr[data-id]'); if (r && !e.target.closest('a')) location.hash = r.dataset.id; });
 
@@ -1737,28 +2186,31 @@ function trace(p, test, exp, got, fail) {
 let loadArm = null;
 let cur = null, tab = 'desc', hintsShown = 0, solShown = false, lastRes = null, sel = 0;
 function renderLeft() {
-  const p = cur, i = P.indexOf(p);
+  const p = cur, i = P.indexOf(p), L = langOf(p), K = key(p.id, L);
   const nav = `<div class="navp"><button class="btn sm" data-go="${i - 1}" ${i === 0 ? 'disabled' : ''} aria-label="Previous problem">‹ Prev</button><button class="btn sm" data-go="${i + 1}" ${i === P.length - 1 ? 'disabled' : ''} aria-label="Next problem">Next ›</button></div>`;
   let body = '';
   if (tab === 'desc') {
-    const tt = p.tags.map(t => `<tr><td>${t.name}</td><td><code>${t.dim ? `ARRAY[0..${t.dim - 1}] OF ${t.type}` : t.type}</code></td><td><span class="dir ${t.dir}">${{ in: 'Input', out: 'Output', int: 'Internal' }[t.dir]}</span></td><td class="muted">${esc(t.d || '')}</td></tr>`).join('');
+    const tt = tagsOf(p, L).map(t => `<tr><td>${t.name}</td><td><code>${t.dim ? `ARRAY[0..${t.dim - 1}] OF ${t.type}` : t.type}</code></td><td><span class="dir ${t.dir}">${{ in: 'Input', out: 'Output', int: 'Internal' }[t.dir]}</span></td><td class="muted">${esc(t.d || '')}</td></tr>`).join('');
     const exIdx = p.tests.findIndex(t => !t.hidden);
-    body = `<div class="desc">${p.desc}</div><h3>Tags</h3><div class="scroll"><table class="tt"><tr><th>Name</th><th>Type</th><th>Usage</th><th>Notes</th></tr>${tt}</table></div>
+    const note = L === 'ld' && p.langs.includes('st') ? `<p class="ldnote"><b>Ladder version.</b> Same task and tests. Timer tags are TIMER here, so use TON / TOF / RTO in place of TONR / TOFR.</p>` : '';
+    body = `<div class="desc">${p.desc}</div>${note}<h3>Tags</h3><div class="scroll"><table class="tt"><tr><th>Name</th><th>Type</th><th>Usage</th><th>Notes</th></tr>${tt}</table></div>
       <h3>Example — ${esc(p.tests[exIdx].name)} <span class="muted" style="font-weight:400">(${p.tests[exIdx].dt || 100} ms scan)</span></h3>${trace(p, p.tests[exIdx], expected(p, exIdx), null)}
       <p class="note" style="margin-top:10px">${p.tests.filter(t => !t.hidden).length} example test${p.tests.filter(t => !t.hidden).length > 1 ? 's' : ''} + ${p.tests.filter(t => t.hidden).length} hidden.</p>`;
   } else if (tab === 'hints') {
     body = p.hints.slice(0, hintsShown).map((h, k) => `<div class="hint"><b>Hint ${k + 1}.</b> ${esc(h)}</div>`).join('') +
       (hintsShown < p.hints.length ? `<button class="btn" id="moreHint">Show hint ${hintsShown + 1} of ${p.hints.length}</button>` : '<p class="muted">That\'s every hint.</p>');
   } else {
-    const X = (typeof EXPLAIN !== 'undefined' && EXPLAIN[p.id]) || null;
+    const X = L === 'ld' ? (p.ldHow ? { how: p.ldHow, pitfalls: [] } : null) : ((typeof EXPLAIN !== 'undefined' && EXPLAIN[p.id]) || null);
+    const solSrc = L === 'ld' ? p.ld : p.solution;
+    let diag = ''; if (L === 'ld') { try { diag = `<div class="ldv scroll">${drawLadder(E.parseLadder(solSrc))}</div>`; } catch (x) {} }
     body = solShown ? `${X ? `<h3 style="margin-top:0">How it works</h3><ol class="how">${X.how.map(h => `<li>${h}</li>`).join('')}</ol>` : ''}
-      <h3>Reference solution</h3><pre class="solpre">${hilite(p.solution)}</pre>
+      <h3>Reference solution${L === 'ld' ? ' (ladder)' : ''}</h3>${diag}<pre class="solpre">${hl2(solSrc, L)}</pre>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="loadSol">Load into editor</button><button class="btn sm" id="copySol">Copy</button></div>
       ${X && X.pitfalls.length ? `<h3>Common mistakes</h3><ul class="how">${X.pitfalls.map(h => `<li>${h}</li>`).join('')}</ul>` : ''}
       <p class="note" style="margin-top:14px">This is one way to solve it. Any code that produces the same outputs passes.</p>`
       : `<p>Give it a real try first: even ten minutes of being stuck teaches more than reading the answer. If you're still stuck, check the hints, then come back here.</p><button class="btn" id="showSol">Reveal solution and explanation</button>`;
   }
-  $('#left').innerHTML = `<div class="ph"><span class="num">${i + 1} / ${P.length}</span><span class="${p.diff}">${p.diff}</span>${store.solved[p.id] ? '<span class="solved-badge">Solved</span>' : ''}${nav}<h1>${esc(p.title)}</h1><span class="topics">${p.topics.join(' · ')}</span></div>
+  $('#left').innerHTML = `<div class="ph"><span class="num">${i + 1} / ${P.length}</span><span class="${p.diff}">${p.diff}</span>${store.solved[K] ? `<span class="solved-badge">Solved in ${L === 'ld' ? 'ladder' : 'ST'}</span>` : ''}${nav}<h1>${esc(p.title)}</h1><span class="topics">${p.topics.join(' · ')}</span></div>
     <div class="tabs" role="tablist">${[['desc', 'Description'], ['hints', 'Hints'], ['sol', 'Solution']].map(([k, l]) => `<button class="tab" role="tab" aria-selected="${tab === k}" data-tab="${k}">${l}</button>`).join('')}</div>${body}`;
 }
 $('#left').addEventListener('click', e => {
@@ -1769,16 +2221,17 @@ $('#left').addEventListener('click', e => {
   else if (t.id === 'showSol') { solShown = true; renderLeft(); }
   else if (t.id === 'loadSol') {
     if (!loadArm) { t.textContent = 'Replace your code? Click again'; loadArm = setTimeout(() => { t.textContent = 'Load into editor'; loadArm = null; }, 3000); return; }
-    clearTimeout(loadArm); loadArm = null; ta.value = cur.solution; store.code[cur.id] = ta.value; save(); errLine = 0; paint(); t.textContent = 'Loaded. Press Run';
+    const L = langOf(cur); clearTimeout(loadArm); loadArm = null; ta.value = L === 'ld' ? cur.ld : cur.solution; store.code[key(cur.id, L)] = ta.value; save(); errLine = 0; paint(); t.textContent = 'Loaded. Press Run';
   }
-  else if (t.id === 'copySol') { navigator.clipboard.writeText(cur.solution).then(() => { t.textContent = 'Copied'; }, () => { t.textContent = 'Copy blocked — select the text instead'; }); }
+  else if (t.id === 'copySol') { navigator.clipboard.writeText(langOf(cur) === 'ld' ? cur.ld : cur.solution).then(() => { t.textContent = 'Copied'; }, () => { t.textContent = 'Copy blocked — select the text instead'; }); }
 });
 
 // ---------- editor ----------
 const ta = $('#src'), hl = $('#hl'), gut = $('#gut');
 let errLine = 0;
 function paint() {
-  hl.innerHTML = hilite(ta.value) + '\n ';
+  hl.innerHTML = hl2(ta.value, cur ? langOf(cur) : 'st') + '\n ';
+  liveDiagram();
   const n = ta.value.split('\n').length;
   gut.innerHTML = Array.from({ length: n }, (_, k) => `<div class="${k + 1 === errLine ? 'err' : ''}">${k + 1}</div>`).join('');
   sync();
@@ -1786,14 +2239,36 @@ function paint() {
 function sync() { hl.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft; gut.scrollTop = ta.scrollTop; }
 function insert(s) { if (!document.execCommand || !document.execCommand('insertText', false, s)) { ta.setRangeText(s, ta.selectionStart, ta.selectionEnd, 'end'); paint(); } }
 let escaped = false;
-ta.addEventListener('input', () => { if (cur) { store.code[cur.id] = ta.value; save(); } paint(); });
+ta.addEventListener('input', () => { if (cur) { store.code[key(cur.id, langOf(cur))] = ta.value; save(); } paint(); });
+let ldTimer = null;
+function liveDiagram() {
+  const box = $('#ldLive'); if (!cur || langOf(cur) !== 'ld') { box.hidden = true; return; }
+  box.hidden = false; clearTimeout(ldTimer);
+  ldTimer = setTimeout(() => {
+    try { $('#ldDraw').innerHTML = drawLadder(E.parseLadder(ta.value)); $('#ldDraw').classList.remove('stale'); $('#ldErr').textContent = ''; }
+    catch (x) { $('#ldDraw').classList.add('stale'); $('#ldErr').textContent = `Line ${x.line}: ${x.message}`; }
+  }, 120);
+}
+$('#palette').addEventListener('click', e => {
+  const b = e.target.closest('[data-ins]'); if (!b) return;
+  const t = b.dataset.ins; ta.focus();
+  if (t === 'RUNG') { const v = ta.value, at = ta.selectionStart, endsLine = v.slice(0, at).trimEnd(); insert((endsLine && !endsLine.endsWith(';') ? ';' : '') + '\n'); return; }
+  if (t === 'BR') { insert('BST  NXB  BND '); const p = ta.selectionStart - 'NXB  BND '.length - 1; ta.setSelectionRange(p, p); return; }
+  const n = (E.LD[t] || []).length;
+  insert(t + '(' + ','.repeat(Math.max(0, n - 1)) + ') ');
+  const p = ta.selectionStart - (n ? n + 1 : 2); ta.setSelectionRange(p, p);
+});
+$('#langSw').addEventListener('click', e => {
+  const b = e.target.closest('[data-lang]'); if (!b || b.disabled) return;
+  lang = b.dataset.lang; store.lang = lang; save();
+  const p = cur; cur = null; route(); });
 ta.addEventListener('scroll', sync);
 ta.addEventListener('keydown', e => {
   if (e.key === 'Escape') { escaped = true; return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(e.shiftKey); return; }
   if (e.key === 'Tab' && !escaped) { e.preventDefault(); insert('  '); return; }
   escaped = false;
-  if (e.key === 'Enter') { e.preventDefault(); const s = ta.value.slice(0, ta.selectionStart), line = s.slice(s.lastIndexOf('\n') + 1); let ind = line.match(/^\s*/)[0]; if (/\b(THEN|DO|OF|ELSE|REPEAT|VAR)\s*$/i.test(line) || /^\s*-?\d+(\.\.\d+)?\s*:\s*$/.test(line)) ind += '  '; insert('\n' + ind); }
+  if (e.key === 'Enter') { e.preventDefault(); const s = ta.value.slice(0, ta.selectionStart), line = s.slice(s.lastIndexOf('\n') + 1); let ind = line.match(/^\s*/)[0]; if (langOf(cur) === 'st' && (/\b(THEN|DO|OF|ELSE|REPEAT|VAR)\s*$/i.test(line) || /^\s*-?\d+(\.\.\d+)?\s*:\s*$/.test(line))) ind += '  '; insert('\n' + ind); }
 });
 function gotoLine(l) {
   const lines = ta.value.split('\n'); let off = 0; for (let k = 0; k < l - 1 && k < lines.length; k++) off += lines[k].length + 1;
@@ -1804,18 +2279,18 @@ $('#resetBtn').addEventListener('click', e => {
   const b = e.currentTarget;
   if (!resetArm) { b.textContent = 'Click again to reset'; resetArm = setTimeout(() => { b.textContent = 'Reset code'; resetArm = null; }, 3000); return; }
   clearTimeout(resetArm); resetArm = null; b.textContent = 'Reset code';
-  ta.value = cur.starter; store.code[cur.id] = ta.value; save(); errLine = 0; paint();
+  const L = langOf(cur); ta.value = starterOf(cur, L); store.code[key(cur.id, L)] = ta.value; save(); errLine = 0; paint();
 });
 
 // ---------- running ----------
 function run(all) {
-  const p = cur, src = ta.value;
-  store.code[p.id] = src; if (!store.solved[p.id]) store.tried[p.id] = true;
+  const p = cur, src = ta.value, L = langOf(p), K = key(p.id, L);
+  store.code[K] = src; if (!store.solved[K]) store.tried[K] = true;
   const res = [], idx = p.tests.map((_, i) => i).filter(i => all || !p.tests[i].hidden);
   let compile = null;
   for (const i of idx) {
     const t = p.tests[i], exp = expected(p, i); let got, err = null, prog = null;
-    try { got = E.simulate(src, p, t); prog = got.prog; }
+    try { got = E.simulate(src, p, t, L); prog = got.prog; }
     catch (x) {
       const e = x instanceof E.STError ? x : new E.STError('Simulator error: ' + x.message, 0, 'Internal error');
       if (e.kind !== 'Runtime fault') { compile = e; break; }
@@ -1826,7 +2301,7 @@ function run(all) {
   }
   errLine = compile ? compile.line : (res.find(r => r.err) || {}).err?.line || 0;
   const ok = !compile && res.every(r => r.pass);
-  if (all && ok) { store.solved[p.id] = true; delete store.tried[p.id]; }
+  if (all && ok) { store.solved[K] = true; delete store.tried[K]; }
   save(); paint(); renderTicks();
   lastRes = { all, compile, res, ok }; sel = Math.max(0, res.findIndex(r => !r.pass));
   renderConsole(); if (all && ok) renderLeft();
@@ -1853,7 +2328,7 @@ function renderConsole() {
   const sub = R.ok ? (R.all ? 'All tests passed, hidden ones included. Problem solved.' : 'Now submit to run the hidden tests.') : `${passed} / ${R.res.length} tests passed`;
   const r = R.res[sel];
   const detail = `${r.err ? `<div class="errbox"><b>Line ${r.err.line} · at t = ${r.err.at} ms</b><p>${esc(r.err.message)}</p><button class="btn sm" id="goLine">Go to line ${r.err.line}</button></div>` : ''}
-    <p class="muted" style="margin:0 0 8px;font-size:14px">${esc(r.t.name)}${r.t.hidden ? ' (hidden test)' : ''} · ${r.t.dt || 100} ms scan</p>${trace(cur, r.t, r.exp, r.got || [], !!r.err)}${monitor(r.prog)}`;
+    <p class="muted" style="margin:0 0 8px;font-size:14px">${esc(r.t.name)}${r.t.hidden ? ' (hidden test)' : ''} · ${r.t.dt || 100} ms scan</p>${trace(cur, r.t, r.exp, r.got || [], !!r.err)}${r.prog && r.prog.rungs ? `<h3>Power flow after the last scan</h3><p class="note" style="margin:0 0 8px">Green means energized. Timer and counter boxes show their live accumulator.</p><div class="ldv scroll">${drawLadder(r.prog.rungs, r.prog.trace, r.prog)}</div>` : ''}${monitor(r.prog)}`;
   el.innerHTML = `<div class="verdict ${R.ok ? 'pass' : 'fail'}"><b>${title}</b><span class="muted">${sub}</span>${R.ok ? '' : '<button class="linkbtn" id="stuck">Stuck? See the solution</button>'}</div>
     <div class="tchips" role="group" aria-label="Tests">${R.res.map((x, k) => `<button class="tchip ${x.pass ? '' : 'f'}" aria-pressed="${k === sel}" data-sel="${k}"><i></i>${x.t.hidden ? 'Hidden: ' : ''}${esc(x.t.name)}</button>`).join('')}</div>${detail}`;
 }
@@ -1871,7 +2346,11 @@ function route() {
   renderTicks();
   if (!p) { $('#probView').hidden = true; $('#listView').hidden = false; cur = null; renderList(); document.title = 'Structured Text Practice · Darshan Shah'; return; }
   $('#listView').hidden = true; $('#probView').hidden = false;
-  if (cur !== p) { cur = p; tab = 'desc'; hintsShown = 0; solShown = false; lastRes = null; errLine = 0; ta.value = store.code[p.id] ?? p.starter; ta.scrollTop = 0; }
+  if (cur !== p) { cur = p; tab = 'desc'; hintsShown = 0; solShown = false; lastRes = null; errLine = 0; const L = langOf(p); ta.value = store.code[key(p.id, L)] ?? starterOf(p, L); ta.scrollTop = 0; }
+  const L = langOf(p);
+  $('#langSw').innerHTML = [['st', 'Structured Text'], ['ld', 'Ladder']].map(([k, l]) => `<button class="seg" data-lang="${k}" aria-pressed="${L === k}" ${p.langs.includes(k) ? '' : `disabled title="${k === 'ld' ? 'No ladder version: this one needs loops or arrays, which suit ST' : 'Ladder-only problem'}"`}>${l}</button>`).join('');
+  $('#palette').hidden = L !== 'ld';
+  ta.setAttribute('aria-label', L === 'ld' ? 'Ladder rung text editor' : 'Structured Text editor');
   document.title = p.title + ' · ST Practice';
   renderLeft(); renderConsole(); paint(); window.scrollTo(0, 0);
 }
