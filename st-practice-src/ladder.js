@@ -83,6 +83,10 @@ const LADDER = {
   sol: `LES(Flow_GPM,0.5) MOV(0.0,Flow_Clipped);\nGEQ(Flow_GPM,0.5) MOV(Flow_GPM,Flow_Clipped);\nXIC(Reset_Total) MOV(0.0,Total_Gal);\nXIO(Reset_Total) CPT(Total_Gal,Total_Gal + Flow_Clipped * Scan_Time_ms / 60000.0);`,
   how: ['Two complementary compares apply the cutoff.', 'CPT does the integration. The REAL literal 60000.0 keeps the small per-scan amount.']
 },
+'pump-dry-run': {
+  sol: `XIC(Reset_PB) GEQ(Suction_PSI,8.0) OTU(Dry_Run_Trip);\nXIC(Run_Cmd) XIO(Dry_Run_Trip) LES(Suction_PSI,5.0) TON(Low_Tmr,3000,0);\nXIC(Low_Tmr.DN) BST OTL(Dry_Run_Trip) NXB ADD(Trip_Count,1,Trip_Count) BND;\nXIC(Run_Cmd) XIO(Dry_Run_Trip) OTE(Pump_Run);`,
+  how: ['Rung 0 is the reset: Reset_PB AND suction at 8 psi or more unlatches the trip.', 'Rung 1: the TON only times while every series condition is true. Any break resets ACC, so a short dip starts over.', 'Rung 2 uses output branches to latch the trip and count it in the same scan. The trip contact in rung 1 then drops the timer, so DN lasts one scan and the ADD runs once.', 'Rung 3 is the starter output, written last so a trip stops the pump straight away.']
+},
 'parking-counter': {
   how: ['CTU and CTD can share one COUNTER tag. CTU counts up on its rung\'s false → true transition (storage bit .CU), and CTD counts down on its own (.CD).', 'The GRT in front of CTD ignores exits when the lot reads empty, so the count never goes negative.', 'DN is true while ACC ≥ PRE, which gives "lot full" for free. MOV copies ACC out for the display.']
 },

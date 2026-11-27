@@ -158,6 +158,14 @@ const EXPLAIN = {
 'shift-register': {
   how: ['On each encoder rising edge, shift the whole track one place downstream, Track[i] := Track[i−1], looping from 11 down to 1.', 'Then load the camera result into Track[0]. The gate reads Track[8], 8 pitches later.', 'Count rejects when a TRUE lands in position 8 during a shift.'],
   pitfalls: ['Looping upwards (1 TO 11). Track[1] gets Track[0], then Track[2] gets the new Track[1], and so on, so one reject smears down the whole array in one shift.']
+},
+'pump-dry-run': {
+  how: ['The TONR enable is the whole condition: pump commanded, not tripped, and suction below 5 psi. When any part goes false the TONR resets, so only one unbroken 3 s dip trips.', 'When DN comes on, the trip latches and the count goes up. Next scan the trip removes the enable, the timer resets, and DN drops, so the count rises only once.', 'The reset checks a higher limit (8 psi) than the trip (5 psi). That gap keeps a pump with marginal suction from being reset straight into another trip.', 'Pump_Run is written last, from Run_Cmd and the trip bit, so a trip stops the pump in the same scan.'],
+  pitfalls: ['Timing low suction even when the pump is stopped, which trips a pump that was never running.', 'Resetting on Reset_PB alone, or with the 5 psi limit, so a reset at 6 psi is accepted.', 'Using a retentive timer, so two short dips add up to a trip.']
+},
+'modbus-crc16': {
+  how: ['Start at 16#FFFF and XOR each byte into the low 8 bits of the CRC.', 'Then shift right 8 times. Each time a 1 falls out of bit 0, XOR in 16#A001, the bit-reversed form of the 16#8005 polynomial. Testing CRC.0 before the shift is how you know a 1 is about to fall out.', 'Dividing by 2 is the shift. Subtracting 1 first when bit 0 is set makes every division exact, so there is no rounding question.', 'Split the result with AND 16#FF and / 256, and compare low byte with the first received byte.'],
+  pitfalls: ['Looping over all 16 bytes instead of 0 TO Msg_Len − 1, which folds the leftover bytes into the CRC.', 'Swapping the bytes: Modbus sends the low byte first, so CRC_Lo must match Rx_CRC_Lo.', 'Starting the CRC at 0 instead of 16#FFFF, or forgetting to clear the outputs when the length is bad.']
 }
 };
 if (typeof module !== 'undefined') module.exports = EXPLAIN;

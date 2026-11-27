@@ -1,6 +1,6 @@
 // Checks every problem before it ships:  node st-practice-src/test.js
 const fs = require('fs'), path = require('path');
-const code = ['engine.js', 'problems.js', 'problems2.js', 'explain.js', 'ladder.js'].map(f => fs.readFileSync(path.join(__dirname, f), 'utf8')).join('\n') + ';\nreturn {E: STEngine, P: PROBLEMS, X: EXPLAIN};';
+const code = ['engine.js', 'problems.js', 'problems2.js', 'problems3.js', 'explain.js', 'ladder.js'].map(f => fs.readFileSync(path.join(__dirname, f), 'utf8')).join('\n') + ';\nreturn {E: STEngine, P: PROBLEMS, X: EXPLAIN};';
 const { E, P, X } = new Function('module', code)(undefined);
 // ---- checks
 let errors = [];
