@@ -55,6 +55,77 @@ const NEW = [
   tests: [
     { name: 'Read-registers request', steps: [[1, { Msg: [1, 3, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], Msg_Len: 6, Rx_CRC_Lo: 197, Rx_CRC_Hi: 205 }], [1, { Rx_CRC_Lo: 205, Rx_CRC_Hi: 197 }]] },
     { name: 'Leftover bytes, full frame, bad length', hidden: true, steps: [[1, { Msg: [1, 3, 0, 0, 0, 1, 99, 99, 99, 99, 255, 255, 255, 255, 255, 255], Msg_Len: 6, Rx_CRC_Lo: 132, Rx_CRC_Hi: 10 }], [1, { Msg: [17, 16, 0, 1, 0, 2, 4, 0, 10, 1, 2, 255, 128, 127, 1, 254], Msg_Len: 16 }], [1, { Msg_Len: 0 }], [1, { Msg_Len: 17 }], [1, { Msg: [255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], Msg_Len: 1 }]] }]
+},
+// ---------------- 2026-11-27 ----------------
+{
+  id: 'alarm-ack', title: 'Alarm acknowledge states (ISA-18.2)', diff: 'Medium', topics: ['Alarms', 'Edge detection', 'Timers'],
+  desc: `<p>A high-level switch on a quench tank drives an alarm on the HMI. Build the alarm logic with proper acknowledge handling.</p>
+<ul>
+<li><code>Alarm_Active</code> turns on once <code>Alarm_Cond</code> has been TRUE for <b>2 s without a break</b>, and turns off as soon as <code>Alarm_Cond</code> goes FALSE. A blip shorter than 2 s never alarms, and the next one times from zero.</li>
+<li>Each time <code>Alarm_Active</code> turns on, set <code>Unacked</code>.</li>
+<li>A <b>press</b> of <code>Ack_PB</code> (its rising edge) clears <code>Unacked</code>. Holding the button in does not acknowledge an alarm that comes in later; the operator has to press it again.</li>
+<li>If the alarm clears before anyone acknowledges it, <code>Unacked</code> stays on until it is acknowledged.</li>
+<li><code>Horn</code> = <code>Alarm_Active</code> AND <code>Unacked</code>.</li>
+<li><code>Alarm_State</code> for the HMI: 0 = normal, 1 = active and unacknowledged, 2 = active and acknowledged, 3 = cleared but still unacknowledged.</li>
+</ul>
+<p class="note">Scan time is 100 ms.</p>`,
+  tags: [
+    { name: 'Alarm_Cond', type: 'BOOL', dir: 'in', d: 'High-level switch' },
+    { name: 'Ack_PB', type: 'BOOL', dir: 'in', d: 'Operator acknowledge' },
+    { name: 'Alarm_Active', type: 'BOOL', dir: 'out', d: 'After the 2 s delay' },
+    { name: 'Unacked', type: 'BOOL', dir: 'out', d: 'Waiting for acknowledge' },
+    { name: 'Horn', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Alarm_State', type: 'DINT', dir: 'out', d: '0 / 1 / 2 / 3' },
+    { name: 'Delay_Tmr', type: 'FBD_TIMER', dir: 'int', d: 'TONR, 2 s' },
+    { name: 'Active_Prev', type: 'BOOL', dir: 'int', d: 'Edge memory' },
+    { name: 'Ack_Prev', type: 'BOOL', dir: 'int', d: 'Edge memory' }],
+  starter: `Delay_Tmr.PRE := 2000;\nDelay_Tmr.TimerEnable := Alarm_Cond;\nTONR(Delay_Tmr);\nAlarm_Active := Delay_Tmr.DN;\n`,
+  hints: ['Unacked is a latch: set it on the rising edge of Alarm_Active, clear it on the rising edge of Ack_PB. Keep a _Prev bit for each edge.', 'Build Alarm_State last with IF / ELSIF from Alarm_Active and Unacked. Four combinations, four states.'],
+  solution: `Delay_Tmr.PRE := 2000;\nDelay_Tmr.TimerEnable := Alarm_Cond;\nTONR(Delay_Tmr);\nAlarm_Active := Delay_Tmr.DN;\n\n// new alarm: needs acknowledging\nIF Alarm_Active AND NOT Active_Prev THEN\n  Unacked := 1;\nEND_IF;\nActive_Prev := Alarm_Active;\n\n// acknowledge on the press, not the hold\nIF Ack_PB AND NOT Ack_Prev THEN\n  Unacked := 0;\nEND_IF;\nAck_Prev := Ack_PB;\n\nHorn := Alarm_Active AND Unacked;\n\nIF Alarm_Active AND Unacked THEN\n  Alarm_State := 1;\nELSIF Alarm_Active THEN\n  Alarm_State := 2;\nELSIF Unacked THEN\n  Alarm_State := 3;\nELSE\n  Alarm_State := 0;\nEND_IF;\n`,
+  tests: [
+    { name: 'Alarm, acknowledge, clear', dt: 100, steps: [[3, {}], [10, { Alarm_Cond: true }], [15, {}], [1, { Ack_PB: true }], [5, { Ack_PB: false }], [5, { Alarm_Cond: false }]] },
+    { name: 'Clears before acknowledge', dt: 100, steps: [[25, { Alarm_Cond: true }], [5, { Alarm_Cond: false }], [1, { Ack_PB: true }], [5, { Ack_PB: false }]] },
+    { name: 'Blips, held ack, re-alarm', hidden: true, dt: 100, steps: [[10, { Alarm_Cond: true }], [4, { Alarm_Cond: false }], [15, { Alarm_Cond: true }], [5, { Alarm_Cond: false }], [1, { Ack_PB: true }], [25, { Alarm_Cond: true }], [5, {}], [1, { Ack_PB: false }], [1, { Ack_PB: true }], [5, { Ack_PB: false }], [5, { Alarm_Cond: false }], [25, { Alarm_Cond: true }], [5, { Alarm_Cond: false }], [5, {}]] }]
+},
+{
+  id: 'burner-lightoff', title: 'Burner light-off sequence with lockout', diff: 'Hard', topics: ['CASE', 'Sequencing', 'Interlocks', 'Timers'],
+  desc: `<p>A gas burner on a heat-treat furnace lights off in steps. Write the burner management sequence as a <code>CASE</code> on <code>Step</code>.</p>
+<div class="scroll"><table class="tt"><tr><th>Step</th><th>Name</th><th>Outputs on</th><th>Leaves when</th></tr>
+<tr><td>0</td><td>Idle</td><td>none</td><td>a <b>press</b> of <code>Start_PB</code> (rising edge) with no flame seen → 10. Holding Start in must not restart the burner.</td></tr>
+<tr><td>10</td><td>Purge</td><td>Blower</td><td><code>Flame_Detected</code> (a flame before ignition is a fault) → 99. Otherwise after <b>5 s of purge with <code>Air_Flow_OK</code></b> → 20. If air flow drops, the purge starts again from zero.</td></tr>
+<tr><td>20</td><td>Pilot trial</td><td>Blower, Igniter, Pilot</td><td>air flow lost → 99. After <b>3 s</b>: flame seen → 30, no flame → 99.</td></tr>
+<tr><td>30</td><td>Run</td><td>Blower, Pilot, Main</td><td>flame lost or air flow lost → 99.</td></tr>
+<tr><td>99</td><td>Lockout</td><td>Blower, <code>Lockout</code></td><td><code>Reset_PB</code> while <b>no flame is seen</b> → 0. A flame signal during reset means a stuck scanner, so the reset is refused.</td></tr></table></div>
+<ul>
+<li><code>Stop_PB</code> sends any step back to 0, <b>except lockout</b>. Only a reset clears a lockout.</li>
+<li>Each step's timer starts from zero when the step is entered.</li>
+<li>Outputs: <code>Blower_On</code>, <code>Igniter_On</code>, <code>Pilot_Valve</code>, <code>Main_Valve</code>, <code>Lockout</code>, driven from <code>Step</code> as in the table.</li>
+</ul>
+<p class="note">Scan time is 250 ms.</p>`,
+  tags: [
+    { name: 'Start_PB', type: 'BOOL', dir: 'in', d: '' },
+    { name: 'Stop_PB', type: 'BOOL', dir: 'in', d: 'TRUE = stop' },
+    { name: 'Air_Flow_OK', type: 'BOOL', dir: 'in', d: 'Combustion air switch' },
+    { name: 'Flame_Detected', type: 'BOOL', dir: 'in', d: 'Flame scanner' },
+    { name: 'Reset_PB', type: 'BOOL', dir: 'in', d: 'Lockout reset' },
+    { name: 'Step', type: 'DINT', dir: 'out', d: '0 / 10 / 20 / 30 / 99' },
+    { name: 'Blower_On', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Igniter_On', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Pilot_Valve', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Main_Valve', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Lockout', type: 'BOOL', dir: 'out', d: '' },
+    { name: 'Step_Tmr', type: 'FBD_TIMER', dir: 'int', d: 'TONR, step timer' },
+    { name: 'Last_Step', type: 'DINT', dir: 'int', d: 'Step on the last scan' },
+    { name: 'Start_Prev', type: 'BOOL', dir: 'int', d: 'Edge memory' },
+    { name: 'Start_Edge', type: 'BOOL', dir: 'int', d: 'One-scan pulse' }],
+  starter: `Start_Edge := Start_PB AND NOT Start_Prev;\nStart_Prev := Start_PB;\n\nCASE Step OF\n  0:\n    // idle\n  10:\n    // purge\nEND_CASE;\n`,
+  hints: ['Run the step timer only when the step did not change since last scan (Step = Last_Step). That drops the enable for one scan on every change, which resets the TONR. In purge, also AND in Air_Flow_OK.', 'In step 20 the timer decides, and the flame picks where to go: IF Step_Tmr.DN THEN IF Flame_Detected THEN 30 ELSE 99. Put the Stop check after the CASE with Step &lt;&gt; 99.'],
+  solution: `Start_Edge := Start_PB AND NOT Start_Prev;\nStart_Prev := Start_PB;\n\n// step timer: restarts on every step change\nIF Step = 10 THEN\n  Step_Tmr.PRE := 5000;\nELSE\n  Step_Tmr.PRE := 3000;\nEND_IF;\nStep_Tmr.TimerEnable := (Step = Last_Step) AND ((Step = 10 AND Air_Flow_OK) OR Step = 20);\nTONR(Step_Tmr);\nLast_Step := Step;\n\nCASE Step OF\n  0: // idle\n    IF Start_Edge AND NOT Flame_Detected THEN Step := 10; END_IF;\n  10: // purge\n    IF Flame_Detected THEN\n      Step := 99;\n    ELSIF Step_Tmr.DN THEN\n      Step := 20;\n    END_IF;\n  20: // pilot trial for ignition\n    IF NOT Air_Flow_OK THEN\n      Step := 99;\n    ELSIF Step_Tmr.DN THEN\n      IF Flame_Detected THEN Step := 30; ELSE Step := 99; END_IF;\n    END_IF;\n  30: // run\n    IF NOT Flame_Detected OR NOT Air_Flow_OK THEN Step := 99; END_IF;\n  99: // lockout\n    IF Reset_PB AND NOT Flame_Detected THEN Step := 0; END_IF;\nEND_CASE;\n\nIF Stop_PB AND Step <> 99 THEN\n  Step := 0;\nEND_IF;\n\nBlower_On   := Step = 10 OR Step = 20 OR Step = 30 OR Step = 99;\nIgniter_On  := Step = 20;\nPilot_Valve := Step = 20 OR Step = 30;\nMain_Valve  := Step = 30;\nLockout     := Step = 99;\n`,
+  tests: [
+    { name: 'Normal light-off and stop', dt: 250, steps: [[2, { Air_Flow_OK: true }], [1, { Start_PB: true }], [10, { Start_PB: false }], [16, {}], [1, { Flame_Detected: true }], [13, {}], [10, {}], [1, { Stop_PB: true }], [4, { Stop_PB: false, Flame_Detected: false }]] },
+    { name: 'No flame on trial, then reset', dt: 250, steps: [[2, { Air_Flow_OK: true }], [1, { Start_PB: true }], [26, { Start_PB: false }], [20, {}], [4, { Reset_PB: true }], [4, { Reset_PB: false }]] },
+    { name: 'Air loss in purge, flame failure, stuck scanner, held Start', hidden: true, dt: 250, steps: [[2, { Air_Flow_OK: true }], [1, { Start_PB: true }], [15, {}], [4, { Air_Flow_OK: false }], [14, { Air_Flow_OK: true }], [14, {}], [1, { Flame_Detected: true }], [20, {}], [5, { Flame_Detected: false }], [4, { Stop_PB: true }], [4, { Stop_PB: false, Flame_Detected: true, Reset_PB: true }], [4, { Flame_Detected: false }], [4, { Reset_PB: false }], [8, {}], [1, { Start_PB: false }], [1, { Start_PB: true }], [5, { Flame_Detected: true }], [4, { Start_PB: false }]] }]
 }];
+
 PROBLEMS.push(...NEW);
 })();
