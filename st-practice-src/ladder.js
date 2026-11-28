@@ -92,6 +92,14 @@ const LADDER = {
 },
 'service-timer': {
   how: ['RTO is the retentive timer: it keeps ACC when its rung goes false, so the run time adds up across starts and stops.', 'Only RES clears an RTO. DN stays on after the spindle stops, until maintenance resets it.']
+},
+'alarm-ack': {
+  sol: `XIC(Alarm_Cond) TON(Delay_Tmr,2000,0);\nXIC(Delay_Tmr.DN) OTE(Alarm_Active);\nXIC(Alarm_Active) ONS(Active_Prev) OTL(Unacked);\nXIC(Ack_PB) ONS(Ack_Prev) OTU(Unacked);\nXIC(Alarm_Active) XIC(Unacked) OTE(Horn);\nMOV(0,Alarm_State);\nXIO(Alarm_Active) XIC(Unacked) MOV(3,Alarm_State);\nXIC(Alarm_Active) XIO(Unacked) MOV(2,Alarm_State);\nXIC(Alarm_Active) XIC(Unacked) MOV(1,Alarm_State);`,
+  how: ['Rungs 0–1: the TON is the 2 s delay-on, and its DN drives Alarm_Active.', 'Rungs 2–3: an ONS in front of OTL and another in front of OTU make an edge-triggered set/reset latch. Each ONS has its own storage bit.', 'The state rungs write a default of 0, then overwrite it. Each MOV rung checks both bits, so exactly one of them fires.']
+},
+'burner-lightoff': {
+  sol: `XIC(Start_PB) ONS(Start_Prev) OTE(Start_Edge);\nEQU(Step,10) MOV(5000,Step_Tmr.PRE);\nNEQ(Step,10) MOV(3000,Step_Tmr.PRE);\nEQU(Step,Last_Step) BST EQU(Step,10) XIC(Air_Flow_OK) NXB EQU(Step,20) BND TON(Step_Tmr,5000,0);\nMOV(Step,Last_Step);\nEQU(Step,0) XIC(Start_Edge) XIO(Flame_Detected) MOV(10,Step);\nEQU(Step,10) EQU(Step,Last_Step) XIC(Flame_Detected) MOV(99,Step);\nEQU(Step,10) EQU(Step,Last_Step) XIC(Step_Tmr.DN) MOV(20,Step);\nEQU(Step,20) EQU(Step,Last_Step) XIO(Air_Flow_OK) MOV(99,Step);\nEQU(Step,20) EQU(Step,Last_Step) XIC(Step_Tmr.DN) XIC(Flame_Detected) MOV(30,Step);\nEQU(Step,20) EQU(Step,Last_Step) XIC(Step_Tmr.DN) XIO(Flame_Detected) MOV(99,Step);\nEQU(Step,30) EQU(Step,Last_Step) BST XIO(Flame_Detected) NXB XIO(Air_Flow_OK) BND MOV(99,Step);\nEQU(Step,99) EQU(Step,Last_Step) XIC(Reset_PB) XIO(Flame_Detected) MOV(0,Step);\nXIC(Stop_PB) NEQ(Step,99) MOV(0,Step);\nBST EQU(Step,10) NXB EQU(Step,20) NXB EQU(Step,30) NXB EQU(Step,99) BND OTE(Blower_On);\nEQU(Step,20) OTE(Igniter_On);\nBST EQU(Step,20) NXB EQU(Step,30) BND OTE(Pilot_Valve);\nEQU(Step,30) OTE(Main_Valve);\nEQU(Step,99) OTE(Lockout);`,
+  how: ['The step timer rung is gated by EQU(Step,Last_Step), and Last_Step is copied on the next rung, so the TON is off for one scan after every step change. That resets it, as in the ST version.', 'Each transition is its own rung. Rungs run top to bottom in one scan, so every transition also checks EQU(Step,Last_Step): once one rung has moved the step, no later rung can move it again that scan. Fault rungs come before timer rungs so they win.', 'The Stop rung sits after all transitions with NEQ(Step,99), so it can never clear a lockout. The output rungs decode Step with parallel EQU branches.']
 }
 };
 
